@@ -650,42 +650,104 @@ function vTaqvim(){const now=new Date(),h=hij(now),off=store.get('hjoff',0),base
 
 // ---------- 5. Оят расмлари ----------
 const AYP=['1:5','2:152','2:186','2:201','2:286','3:8','3:173','13:28','17:24','20:25','20:114','25:74','29:69','39:53','65:3','94:5','94:6','112:1'];
-const AYT={lapis:['#0f2a4a','#1d4e89','#ffffff','#d4af37'],green:['#0b3d2e','#16654c','#ffffff','#d4af37'],cream:['#fbf6ea','#ecdcb4','#2a2418','#8a6d1f'],night:['#14121f','#2e2550','#ffffff','#c8a24a']};
+const AYT={
+ night:{i:'🌙',pv:'linear-gradient(180deg,#0b1030,#2b2a6b 70%,#0a0d22)',ink:'#ffffff',gold:'#e8c76a'},
+ dunes:{i:'🏜',pv:'linear-gradient(180deg,#2a1b4d,#c8553d 55%,#f2a65a)',ink:'#ffffff',gold:'#ffe1a0'},
+ girih:{i:'✴',pv:'radial-gradient(circle,#1f6b52,#0a2e24)',ink:'#ffffff',gold:'#d9b45a'},
+ paper:{i:'📜',pv:'radial-gradient(circle,#fbf3dc,#e6d3a3)',ink:'#2b2116',gold:'#9a7420'},
+ sea:{i:'🌊',pv:'linear-gradient(180deg,#ffd9a8,#f39b7f 40%,#2f5d8a 60%,#123456)',ink:'#ffffff',gold:'#fff0c8'},
+ mihrab:{i:'🕌',pv:'linear-gradient(135deg,#0f2a4a,#1d4e89)',ink:'#ffffff',gold:'#d4af37'},
+ photo:{i:'📷',pv:'linear-gradient(135deg,#555,#999)',ink:'#ffffff',gold:'#f3d27a'}};
+let AYIMG=null;
+function ayRnd(seed){let x=seed>>>0||1;return ()=>{x^=x<<13;x>>>=0;x^=x>>17;x^=x<<5;x>>>=0;return x/4294967296}}
+function aySky(c,W,H,stops){const g=c.createLinearGradient(0,0,0,H);stops.forEach(([p,col])=>g.addColorStop(p,col));c.fillStyle=g;c.fillRect(0,0,W,H)}
+function ayMosque(c,W,base,col,sc){c.fillStyle=col;const cx=W/2,u=sc;c.beginPath();
+ // асосий гумбаз ва бино
+ c.fillRect(cx-170*u,base-120*u,340*u,120*u);c.moveTo(cx-130*u,base-120*u);c.bezierCurveTo(cx-130*u,base-260*u,cx-20*u,base-300*u,cx,base-330*u);c.bezierCurveTo(cx+20*u,base-300*u,cx+130*u,base-260*u,cx+130*u,base-120*u);c.fill();
+ c.fillRect(cx-2*u,base-370*u,4*u,45*u);c.beginPath();c.arc(cx,base-372*u,7*u,0,7);c.fill();
+ // кичик гумбазлар
+ [[-250,70],[250,70]].forEach(([dx,r])=>{c.fillRect(cx+dx*u-r*u,base-90*u,2*r*u,90*u);c.beginPath();c.arc(cx+dx*u,base-90*u,r*u,Math.PI,0);c.fill()});
+ // миноралар
+ [[-360],[360]].forEach(([dx])=>{const x=cx+dx*u;c.fillRect(x-16*u,base-420*u,32*u,420*u);c.fillRect(x-24*u,base-330*u,48*u,14*u);c.beginPath();c.moveTo(x-18*u,base-420*u);c.lineTo(x,base-480*u);c.lineTo(x+18*u,base-420*u);c.fill()});
+ c.fillRect(0,base-8*u,W,8*u+600)}
+function ayStar8(c,x,y,r){c.beginPath();for(let k=0;k<16;k++){const a=Math.PI/8*k,rr=k%2?r*.62:r;c.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}c.closePath()}
+function ayBg(c,W,H,k,rnd){
+ if(k==='night'){aySky(c,W,H,[[0,'#070b24'],[.55,'#1f2160'],[.85,'#3b2f6e'],[1,'#0a0d22']]);
+  for(let i=0;i<260;i++){const x=rnd()*W,y=rnd()*H*.75,r=rnd()*2.2+.3;c.globalAlpha=.3+rnd()*.7;c.fillStyle='#fff';c.beginPath();c.arc(x,y,r,0,7);c.fill()}c.globalAlpha=1;
+  const mx=W*.8,my=H*.12,mr=60;const gl=c.createRadialGradient(mx,my,10,mx,my,220);gl.addColorStop(0,'rgba(255,240,200,.35)');gl.addColorStop(1,'rgba(255,240,200,0)');c.fillStyle=gl;c.fillRect(0,0,W,H*.5);
+  c.fillStyle='#f6e7b0';c.beginPath();c.arc(mx,my,mr,Math.PI*.3,Math.PI*1.7,false);c.arc(mx+30,my-12,mr*.88,Math.PI*1.62,Math.PI*.38,true);c.closePath();c.fill();
+  ayMosque(c,W,H-40,'#05071a',W/1080*1.05);return}
+ if(k==='dunes'){aySky(c,W,H,[[0,'#24184a'],[.35,'#7a2f5c'],[.6,'#e0663f'],[.78,'#f7b267'],[1,'#f7b267']]);
+  const sy=H*.66,g=c.createRadialGradient(W/2,sy,10,W/2,sy,W*.6);g.addColorStop(0,'rgba(255,230,160,.9)');g.addColorStop(.15,'rgba(255,200,120,.5)');g.addColorStop(1,'rgba(255,200,120,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
+  c.fillStyle='#ffe7a8';c.beginPath();c.arc(W/2,sy,70,0,7);c.fill();
+  [['#b5452f',.70,60],['#8a2f2a',.78,80],['#5a1f2a',.88,70],['#2c1020',.96,50]].forEach(([col,yy,amp],i)=>{c.fillStyle=col;c.beginPath();c.moveTo(0,H);const y0=H*yy;for(let x=0;x<=W;x+=20)c.lineTo(x,y0-Math.sin(x/W*Math.PI*(1.3+i*.4)+i)*amp);c.lineTo(W,H);c.fill()});
+  // туялар карвони
+  c.fillStyle='#2c1020';const cy=H*.84;[[.62,1],[.69,.9],[.75,.8]].forEach(([fx,s])=>{const x=W*fx,u=s*1.1;c.beginPath();c.ellipse(x,cy-38*u,34*u,16*u,0,0,7);c.fill();c.beginPath();c.ellipse(x-6*u,cy-54*u,14*u,12*u,0,0,7);c.fill();c.fillRect(x+26*u,cy-80*u,7*u,42*u);c.beginPath();c.ellipse(x+36*u,cy-80*u,10*u,6*u,0,0,7);c.fill();[-24,-12,14,24].forEach(d=>c.fillRect(x+d*u,cy-30*u,5*u,34*u))});return}
+ if(k==='girih'){const g=c.createRadialGradient(W/2,H/2,50,W/2,H/2,Math.max(W,H)*.75);g.addColorStop(0,'#1d6a51');g.addColorStop(1,'#06251c');c.fillStyle=g;c.fillRect(0,0,W,H);
+  c.strokeStyle='rgba(217,180,90,.28)';c.lineWidth=2;const S=135;for(let y=0;y<H+S;y+=S)for(let x=0;x<W+S;x+=S){ayStar8(c,x,y,S*.42);c.stroke();c.save();c.translate(x+S/2,y+S/2);c.rotate(Math.PI/4);c.strokeRect(-S*.2,-S*.2,S*.4,S*.4);c.restore();c.beginPath();c.moveTo(x+S*.42,y);c.lineTo(x+S-S*.42,y);c.moveTo(x,y+S*.42);c.lineTo(x,y+S-S*.42);c.stroke()}
+  const v=c.createRadialGradient(W/2,H/2,W*.25,W/2,H/2,W*.75);v.addColorStop(0,'rgba(6,37,28,.85)');v.addColorStop(1,'rgba(6,37,28,0)');c.fillStyle=v;c.fillRect(0,0,W,H);return}
+ if(k==='paper'){c.fillStyle='#f4e8c8';c.fillRect(0,0,W,H);const im=c.getImageData(0,0,W,H),d=im.data;for(let i=0;i<d.length;i+=4){const n=(rnd()-.5)*22;d[i]+=n;d[i+1]+=n;d[i+2]+=n*.8}c.putImageData(im,0,0);
+  const v=c.createRadialGradient(W/2,H/2,W*.3,W/2,H/2,Math.max(W,H)*.75);v.addColorStop(0,'rgba(120,80,20,0)');v.addColorStop(1,'rgba(120,80,20,.45)');c.fillStyle=v;c.fillRect(0,0,W,H);
+  // безакли ҳошия
+  c.strokeStyle='#9a7420';c.lineWidth=5;c.strokeRect(50,50,W-100,H-100);c.lineWidth=2;c.strokeRect(70,70,W-140,H-140);
+  c.fillStyle='rgba(154,116,32,.85)';for(let x=95;x<W-80;x+=50){ayStar8(c,x,60,9);c.fill();ayStar8(c,x,H-60,9);c.fill()}for(let y=95;y<H-80;y+=50){ayStar8(c,60,y,9);c.fill();ayStar8(c,W-60,y,9);c.fill()}
+  [[110,110],[W-110,110],[110,H-110],[W-110,H-110]].forEach(([x,y])=>{c.fillStyle='#9a7420';ayStar8(c,x,y,26);c.fill();c.fillStyle='#f4e8c8';ayStar8(c,x,y,12);c.fill()});return}
+ if(k==='sea'){aySky(c,W,H,[[0,'#3a4f8f'],[.3,'#f39b7f'],[.5,'#ffd9a8'],[.52,'#5a7fa8'],[1,'#0f2d4f']]);const hz=H*.52;
+  c.fillStyle='#fff3d0';c.beginPath();c.arc(W*.5,hz,58,Math.PI,0);c.fill();
+  c.fillStyle='rgba(60,50,90,.55)';c.beginPath();c.moveTo(0,hz);[[.12,-120],[.25,-60],[.38,-150],[.5,-40]].forEach(([fx,dy])=>c.lineTo(W*fx,hz+dy));c.lineTo(W*.5,hz);c.fill();
+  c.fillStyle='rgba(40,40,80,.6)';c.beginPath();c.moveTo(W*.55,hz);[[.68,-90],[.8,-170],[.92,-70],[1,-110]].forEach(([fx,dy])=>c.lineTo(W*fx,hz+dy));c.lineTo(W,hz);c.fill();
+  for(let i=0;i<70;i++){const y=hz+8+Math.pow(rnd(),1.6)*(H*.86-hz),w=20+rnd()*120*(y-hz)/(H-hz)+10,x=W*.5+(rnd()-.5)*(80+(y-hz)*.9);c.globalAlpha=.25+rnd()*.4;c.fillStyle='#ffe9c0';c.fillRect(x-w/2,y,w,2+rnd()*2)}c.globalAlpha=1;
+  for(let i=0;i<5;i++){const bx=W*(.2+i*.13),by=H*(.18+rnd()*.12),s=8+rnd()*8;c.strokeStyle='rgba(30,30,50,.7)';c.lineWidth=3;c.beginPath();c.moveTo(bx-s,by);c.quadraticCurveTo(bx-s/2,by-s*.6,bx,by);c.quadraticCurveTo(bx+s/2,by-s*.6,bx+s,by);c.stroke()}return}
+ if(k==='photo'&&AYIMG){const iw=AYIMG.width,ih=AYIMG.height,sc=Math.max(W/iw,H/ih);c.drawImage(AYIMG,(W-iw*sc)/2,(H-ih*sc)/2,iw*sc,ih*sc);const o=c.createLinearGradient(0,0,0,H);o.addColorStop(0,'rgba(0,0,0,.35)');o.addColorStop(.5,'rgba(0,0,0,.55)');o.addColorStop(1,'rgba(0,0,0,.7)');c.fillStyle=o;c.fillRect(0,0,W,H);return}
+ // mihrab (ёки расм танланмаган бўлса)
+ const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0f2a4a');g.addColorStop(1,'#1d4e89');c.fillStyle=g;c.fillRect(0,0,W,H);
+ c.save();c.globalAlpha=.08;c.strokeStyle='#d4af37';c.lineWidth=2;for(let y=0;y<H+120;y+=120)for(let x=0;x<W+120;x+=120){ayStar8(c,x,y,44);c.stroke()}c.restore()}
+function ayArch(c,x0,y0,w,h,col,lw){const cx=x0+w/2,r=w/2;c.beginPath();c.moveTo(x0,y0+h);c.lineTo(x0,y0+r*1.1);c.bezierCurveTo(x0,y0+r*.35,cx-r*.35,y0+r*.15,cx,y0);c.bezierCurveTo(cx+r*.35,y0+r*.15,x0+w,y0+r*.35,x0+w,y0+r*1.1);c.lineTo(x0+w,y0+h);c.closePath();if(lw){c.strokeStyle=col;c.lineWidth=lw;c.stroke()}else{c.fillStyle=col;c.fill()}}
 function vOyat(){if(!Q)return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🖼 ${t('ay_title')}</h2><p class="small">${t('loading')}</p>`;
- const [s,a]=store.get('ayref','94:5').split(':').map(Number),th=store.get('ayth','lapis'),sz=store.get('aysz','sq'),N=Q[s-1].v.length;
+ const [s,a]=store.get('ayref','94:5').split(':').map(Number),th=AYT[store.get('ayth','night')]?store.get('ayth','night'):'night',sz=store.get('aysz','sq'),N=Q[s-1].v.length,tr=store.get('aytr',true);
  return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🖼 ${t('ay_title')}</h2>
  <div class="card"><div class="row" style="gap:8px;flex-wrap:wrap">
  <label style="flex:2;min-width:150px" class="small">${t('ay_sura')}<select id="aySura" class="inp" style="width:100%">${Q.map((q,i)=>`<option value="${i+1}"${i+1===s?' selected':''}>${i+1}. ${esc(q.tr)} ${q.ar}</option>`).join('')}</select></label>
  <label style="flex:1;min-width:80px" class="small">${t('ay_ayah')}<select id="ayNum" class="inp" style="width:100%">${Array.from({length:N},(_,i)=>`<option${i+1===a?' selected':''}>${i+1}</option>`).join('')}</select></label></div>
- <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px"><span class="small">${t('ay_theme')}:</span>${Object.keys(AYT).map(k=>`<button class="btn aysw${k===th?' p':''}" data-ayth="${k}" style="background:linear-gradient(135deg,${AYT[k][0]},${AYT[k][1]});color:${AYT[k][2]};min-width:44px">${k===th?'✓':'&nbsp;'}</button>`).join('')}
- <span class="small" style="margin-left:8px">${t('ay_size')}:</span><button class="btn${sz==='sq'?' p':''}" data-aysz="sq">${t('ay_sq')}</button><button class="btn${sz==='st'?' p':''}" data-aysz="st">${t('ay_story')}</button></div></div>
+ <div class="small" style="margin-top:10px">${t('ay_theme')}:</div><div class="aythm">${Object.keys(AYT).map(k=>`<button class="ayt${k===th?' on':''}" data-ayth="${k}" style="background:${AYT[k].pv}"><span>${AYT[k].i}</span><small>${t('ayt_'+k)}</small></button>`).join('')}</div>
+ ${th==='photo'?`<label class="btn" style="margin-top:8px;display:inline-block">🖼 ${t('ay_photo')}<input type="file" id="ayFile" accept="image/*" hidden></label>${AYIMG?'':` <span class="small">${t('ay_photo_h')}</span>`}`:''}
+ <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:10px"><span class="small">${t('ay_size')}:</span><button class="btn${sz==='sq'?' p':''}" data-aysz="sq">${t('ay_sq')}</button><button class="btn${sz==='st'?' p':''}" data-aysz="st">${t('ay_story')}</button>
+ <label class="row small" style="margin-left:8px"><input type="checkbox" id="ayTr"${tr?' checked':''}> ${t('ay_withtr')}</label></div></div>
  <div class="small" id="ayMsg"></div>
- <canvas id="aycv" style="width:100%;max-width:${sz==='st'?360:520}px;display:block;margin:8px auto;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.18)"></canvas>
+ <canvas id="aycv" style="width:100%;max-width:${sz==='st'?360:520}px;display:block;margin:8px auto;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)"></canvas>
  <div class="links" style="justify-content:center"><button class="btn p" id="ayDl">${t('ay_save')}</button><button class="btn" id="ayShare">${t('ay_share')}</button><button class="btn" data-ayk="${s}:${a}">${t('ay_listen')}</button></div>
  <h3>${t('ay_pick')}</h3><div class="links">${AYP.map(r=>{const [x]=r.split(':');return `<button class="btn${r===s+':'+a?' p':''}" data-ayp="${r}">${esc(Q[x-1].tr)} ${r}</button>`}).join('')}</div>`}
 const arNum=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
-async function ayDraw(){const cv=$('#aycv');if(!cv||!Q)return;const [s,a]=store.get('ayref','94:5').split(':').map(Number),th=AYT[store.get('ayth','lapis')]||AYT.lapis,st=store.get('aysz','sq')==='st';
+function ayWrap(c,text,maxW){const words=text.split(/\s+/),lines=[];let cur='';for(const w of words){const tt=cur?cur+' '+w:w;if(c.measureText(tt).width>maxW&&cur){lines.push(cur);cur=w}else cur=tt}if(cur)lines.push(cur);return lines}
+let AYN=0;
+async function ayDraw(){const cv=$('#aycv');if(!cv||!Q)return;const my=++AYN;const [s,a]=store.get('ayref','94:5').split(':').map(Number),k0=store.get('ayth','night'),k=AYT[k0]?k0:'night',th=AYT[k],st=store.get('aysz','sq')==='st',wtr=store.get('aytr',true);
  const W=1080,H=st?1920:1080;cv.width=W;cv.height=H;const c=cv.getContext("2d");if(!c)return;
  try{await Promise.all([document.fonts.load('60px "Amiri Quran"'),document.fonts.load('40px "Amiri"'),document.fonts.load('600 30px "Noto Sans"')])}catch(e){}
- if(!$('#aycv'))return;
- const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,th[0]);g.addColorStop(1,th[1]);c.fillStyle=g;c.fillRect(0,0,W,H);
- // нақш: нозик юлдузлар
- c.save();c.globalAlpha=.07;c.strokeStyle=th[3];c.lineWidth=2;for(let y=60;y<H;y+=120)for(let x=60+(y/120%2)*60;x<W;x+=120){c.save();c.translate(x,y);for(let r=0;r<2;r++){c.rotate(Math.PI/4*r);c.strokeRect(-18,-18,36,36)}c.restore()}c.restore();
- // ҳошия
- c.strokeStyle=th[3];c.lineWidth=6;c.strokeRect(40,40,W-80,H-80);c.lineWidth=2;c.strokeRect(56,56,W-112,H-112);
- const star=(x,y,r)=>{c.save();c.translate(x,y);c.fillStyle=th[3];for(let k=0;k<2;k++){c.rotate(Math.PI/4);c.fillRect(-r,-r,2*r,2*r)}c.restore()};
- [[56,56],[W-56,56],[56,H-56],[W-56,H-56]].forEach(([x,y])=>star(x,y,16));
- // матн
- const txt=Q[s-1].v[a-1].trim(),words=txt.split(/\s+/),maxW=W-220,top=st?300:170,bot=H-(st?380:250);
- c.direction='rtl';c.textAlign='center';c.fillStyle=th[2];
- let fs=st?120:110,lines;const wrap=()=>{lines=[];let cur='';for(const w of words){const tt=cur?cur+' '+w:w;if(c.measureText(tt).width>maxW&&cur){lines.push(cur);cur=w}else cur=tt}if(cur)lines.push(cur)};
- for(;fs>=30;fs-=4){c.font=`${fs}px "Amiri Quran","Amiri",serif`;wrap();if(lines.length*fs*1.9<=bot-top)break}
- const lh=fs*1.9,y0=top+(bot-top-lines.length*lh)/2+lh*.7;lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));
- const msg=$('#ayMsg');if(msg)msg.textContent=lines.length*lh>bot-top+4?t('ay_long'):'';
- // имзо
- c.direction='ltr';c.fillStyle=th[3];c.font=`52px "Amiri",serif`;c.fillText(`${Q[s-1].ar} · ${arNum(a)}`,W/2,H-(st?250:150));
- c.globalAlpha=.85;c.fillStyle=th[2];c.font=`600 30px "Noto Sans",sans-serif`;c.fillText(`${Q[s-1].tr} ${s}:${a}`,W/2,H-(st?190:100));
- c.globalAlpha=.55;c.font=`24px "Noto Sans",sans-serif`;c.fillText(t('app'),W/2,H-(st?140:72));c.globalAlpha=1}
+ let trT='',trA='';if(wtr){const l=trL()==='ar'?'uz':trL();try{const d=await trGet(TRK[l][0],s);trT=(d[a]&&d[a].t||'').replace(/\s*\[\d+\]/g,'').replace(/^\d+[.)]\s*/,'').trim();trA=tx(TRK[l][1])}catch(e){}}
+ if(my!==AYN||!$('#aycv'))return;
+ ayBg(c,W,H,k,ayRnd(s*1000+a));
+ const ink=th.ink,gold=th.gold,scene=k==='night'||k==='dunes'||k==='sea';
+ // матн майдони
+ const top=st?260:120,bottom=scene?(st?H*.62:H*.6):H-(st?330:200),pad=st?110:120,maxW=W-pad*2;
+ // ойна/равоқ
+ if(k==='mihrab'||k==='girih'||k==='photo'){const aw=W-120,ax=60,ay=top-60,ah=H-(st?90:50)-ay;c.save();ayArch(c,ax,ay,aw,ah,k==='photo'?'rgba(0,0,0,.25)':'rgba(255,255,255,.05)');ayArch(c,ax,ay,aw,ah,gold,5);ayArch(c,ax+16,ay+22,aw-32,ah-22,gold,1.5);c.restore()}
+ const avail=bottom-top;let tl=[],tf=0,tlh=0;c.direction='ltr';c.textAlign='center';
+ if(trT){tf=st?40:34;for(;tf>=22;tf-=2){c.font=`italic ${tf}px "Noto Sans",sans-serif`;tl=ayWrap(c,'«'+trT+'»',maxW+20);if(tl.length<=(st?6:4))break}tlh=tf*1.38;const mx=st?7:4;if(tl.length>mx){tl=tl.slice(0,mx);tl[mx-1]=tl[mx-1].replace(/\s*\S*$/,'')+' …»'}}
+ const trBlock=tl.length?60+tl.length*tlh:0;
+ c.direction='rtl';let fs=st?118:104,lines;
+ for(;fs>=30;fs-=4){c.font=`${fs}px "Amiri Quran","Amiri",serif`;lines=ayWrap(c,Q[s-1].v[a-1].trim(),maxW);if(lines.length*fs*1.85+trBlock<=avail)break}
+ const lh=fs*1.85,grp=lines.length*lh+trBlock,g0=top+Math.max(0,(avail-grp)/2),y0=g0+lh*.68;let long=grp>avail+4;
+ if(scene||k==='photo'){const pg=c.createLinearGradient(0,g0-70,0,g0+grp+70);pg.addColorStop(0,'rgba(0,0,0,0)');pg.addColorStop(.25,'rgba(0,0,0,.22)');pg.addColorStop(.75,'rgba(0,0,0,.22)');pg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=pg;c.fillRect(0,g0-70,W,grp+140)}
+ c.save();if(k!=='paper'){c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=18;c.shadowOffsetY=3}c.fillStyle=ink;c.font=`${fs}px "Amiri Quran","Amiri",serif`;lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));c.restore();
+ if(tl.length){const dy=g0+lines.length*lh+22;c.save();c.strokeStyle=gold;c.globalAlpha=.85;c.lineWidth=2;c.beginPath();c.moveTo(W/2-200,dy);c.lineTo(W/2-22,dy);c.moveTo(W/2+22,dy);c.lineTo(W/2+200,dy);c.stroke();c.fillStyle=gold;ayStar8(c,W/2,dy,12);c.fill();c.restore();
+  c.direction='ltr';c.save();if(k!=='paper'){c.shadowColor='rgba(0,0,0,.7)';c.shadowBlur=10}c.fillStyle=ink;c.globalAlpha=.95;c.font=`italic ${tf}px "Noto Sans",sans-serif`;tl.forEach((l,i)=>c.fillText(l,W/2,dy+30+tf+i*tlh));c.restore()}
+ const msg=$('#ayMsg');if(msg)msg.textContent=long?t('ay_long'):'';
+ // имзо (картуш)
+ const fy=scene?(k==='night'?H-(st?190:130):k==='sea'?H-(st?200:120):H-(st?170:95)):H-(st?230:135);
+ c.direction='ltr';c.save();if(k!=='paper'){c.shadowColor='rgba(0,0,0,.7)';c.shadowBlur=12}
+ c.fillStyle=gold;c.font=`48px "Amiri",serif`;c.fillText(`﴿ ${Q[s-1].ar} · ${arNum(a)} ﴾`,W/2,fy);
+ c.fillStyle=ink;c.globalAlpha=.88;c.font=`600 28px "Noto Sans",sans-serif`;c.fillText(`${Q[s-1].tr} ${s}:${a}${trA?' · '+trA:''}`,W/2,fy+44);
+ c.globalAlpha=.6;c.font=`22px "Noto Sans",sans-serif`;c.fillText(t('app')+(trT?' · QuranEnc.com':''),W/2,fy+78);c.restore()}
 function aySave(share){const cv=$('#aycv');if(!cv)return;const nm=`oyat-${store.get('ayref','94:5').replace(':','-')}.png`;
  cv.toBlob(b=>{if(!b)return;const f=new File([b],nm,{type:'image/png'});
   if(share&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:t('ay_title')}).catch(()=>{});return}
@@ -729,6 +791,8 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg
  if(d.fqc!==undefined){store.set('fqc',d.fqc);document.querySelectorAll('[data-fqc]').forEach(b=>b.classList.toggle('p',b===tg));fqFilter(($('#fqSearch')||{}).value||'');return}});
 document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='ptCity'){store.set('pcity',{i:+e.target.value});render();return}
+ if(id==='ayTr'){store.set('aytr',e.target.checked);ayDraw();return}
+ if(id==='ayFile'){const f=e.target.files&&e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{AYIMG=im;render()};im.src=URL.createObjectURL(f);return}
  if(id==='aySura'){store.set('ayref',e.target.value+':1');render();return}
  if(id==='ayNum'){store.set('ayref',store.get('ayref','94:5').split(':')[0]+':'+e.target.value);render();return}});
 document.addEventListener('input',e=>{if(e.target.id==='fqSearch'){store.set('fqq',e.target.value);fqFilter(e.target.value)}});
@@ -936,7 +1000,7 @@ async function wbwShow(s,a,wi){const tok=(Q&&Q[s-1].v[a-1]||'').split(' ');const
  catch(e){wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('wbw_fail')}</div>`)}}
 document.addEventListener('click',e=>{if(e.target.closest('#wbwX')){const p=$('#wbwPop');if(p)p.classList.remove('on');return}
  const b=e.target.closest('[data-ww2]');if(b){const [s,a,w]=b.dataset.ww2.split(':').map(Number);if(!playWords(s,a,[w]))playList([[s,a]],0);return}
- const w=e.target.closest('.ayah .w,.pline .w');if(w&&wbwOn()&&!store.get('hide',false)&&!w.closest('.tajc')){wbwShow(+w.dataset.s,+w.dataset.a2,+w.dataset.w)}});
+ const w=e.target.closest('.ayah .w,.pline .w');if(w&&wbwOn()&&!store.get('hide',false)){wbwShow(+w.dataset.s,+w.dataset.a2,+w.dataset.w)}});
 document.addEventListener('change',e=>{if(e.target.id==='wbwOn'){store.set('wbwOn',e.target.checked);const p=$('#wbwPop');if(p)p.classList.remove('on');render()}});
 
 // Арабча сўз маъноси: «ас-Сирож фи баёни ғарибил Қуръон» (QuranEnc, arabic_seraj) — қийин сўзлар изоҳи
@@ -993,17 +1057,17 @@ const bm=()=>store.get('bm',{});
 function vMushaf2(){if(!Q)return `<p class="small">${t('loading')}</p>`;const s=store.get('sura',1),S_=Q[s-1],hide=store.get('hide',false),v=mview(),last=store.get('lastr','');
  const top=`<div class="mstop"><button class="btn mssura" id="msSura">${s}. ${esc(S_.tr)} ▾</button>
   <div class="seg"><button class="${v==='ayat'?'on':''}" data-mv="ayat">${t('ms_ayat')}</button><button class="${v==='page'?'on':''}" data-mv="page">${t('ms_page')}</button></div>
-  <button class="btn" id="msSet" aria-label="settings">⚙</button></div>
- <div class="small" id="msRd">${rdLine()}</div>
+  <button class="btn${tajOn()?' p':''}" id="msTaj" aria-label="tajweed" title="${t('ms_tajc')}">🎨</button><button class="btn" id="msSet" aria-label="settings">⚙</button></div>
+ <div class="small" id="msRd">${rdLine()}</div>${tajOn()&&!store.get('hide',false)?`<details class="tjd"><summary class="small">🎨 ${t('ms_tajc')} — ${t('tj_legend')}</summary>${tajLegend()}</details>`:''}
  ${last&&last.split(':')[0]!=String(s)?`<button class="btn mscont" data-go="${last}">↪ ${t('ms_cont',{r:esc(Q[+last.split(':')[0]-1].tr)+' '+last})}</button>`:''}
  <div id="msSetP" class="card hidden">${msSettings()}</div>`;
- if(v==='page')return top+`<div id="msPage" class="mpage"><p class="small">${t('loading')}</p></div>`;
+ if(v==='page')return top+`<div id="msPage" class="mpage${tajOn()?' tajc':''}"><p class="small">${t('loading')}</p></div>`;
  const mm=mmode(),bmk=bm(),bis=s!==1&&s!==9?`<div class="ar bism">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>`:'';
  if(mm==='book')return top+`<div class="card"><h3 style="margin-top:0">${s}. ${esc(S_.tr)} <span class="ar">${S_.ar}</span></h3><div id="msBook" class="msbook">${t('loading')}</div></div>${trCredit()}`;
  return top+`<div class="surahead"><div class="ar">${S_.ar}</div><div class="small">${esc(S_.tr)} · ${t(S_.tp==='medinan'?'ms_madani':'ms_makki')} · ${t('ms_n_ayat',{n:S_.v.length})}</div></div>${bis}
  ${hide?`<div class="links"><button class="btn p" id="hzRec">🎙 ${t('hz_rec')}</button><button class="btn" id="hzReset">↺ ${t('hz_reset')}</button></div><div class="small" id="hzSt">${t('hz_note')}</div>`:''}
- <div class="msayat${hide?' hz':''}${store.get('tajc',false)?' tajc':''}">${S_.v.map((tt,i)=>{const k=s+':'+(i+1),b=bmk[k];
-  return `<div class="ayah" data-a="${k}"><div class="ar" data-k="${k}">${tt.split(' ').map((w,wi)=>`<span class="w" data-w="${wi}" data-s="${s}" data-a2="${i+1}">${esc(w)}</span>`).join(' ')} <button class="amark${b?' bm-'+b:''}" data-am="${k}" aria-label="${t('ayah_n',{n:i+1})}">${i+1}</button></div>${trOn()&&!hide&&mm==='tr'?`<div class="trn" data-tr="${i+1}"></div>`:''}</div>`}).join('')}</div>
+ <div class="msayat${hide?' hz':''}${tajOn()?' tajc':''}">${S_.v.map((tt,i)=>{const k=s+':'+(i+1),b=bmk[k];
+  return `<div class="ayah" data-a="${k}"><div class="ar" data-k="${k}">${(()=>{const ws=tt.split(' '),hs=tajOn()&&!hide?tjWords(ws,true):ws.map(esc);return ws.map((w,wi)=>`<span class="w" data-w="${wi}" data-s="${s}" data-a2="${i+1}">${hs[wi]}</span>`).join(' ')})()} <button class="amark${b?' bm-'+b:''}" data-am="${k}" aria-label="${t('ayah_n',{n:i+1})}">${i+1}</button></div>${trOn()&&!hide&&mm==='tr'?`<div class="trn" data-tr="${i+1}"></div>`:''}</div>`}).join('')}</div>
  ${trOn()&&!hide&&mm==='tr'?trCredit():''}
  <div class="row" style="justify-content:space-between;margin-top:14px">${s>1?`<button class="btn" data-gos="${s-1}">← ${esc(Q[s-2].tr)}</button>`:'<span></span>'}${s<114?`<button class="btn" data-gos="${s+1}">${esc(Q[s].tr)} →</button>`:'<span></span>'}</div>`}
 function msSettings(){const f=prof.font||0,th=prof.theme||'auto',mm=mmode(),g=store.get('mgoal',10);
@@ -1011,24 +1075,53 @@ function msSettings(){const f=prof.font||0,th=prof.theme||'auto',mm=mmode(),g=st
  <div><span class="small">${t('ms_theme')}</span><div class="seg">${['auto','light','sepia','dark'].map(x=>`<button class="${th===x?'on':''}" data-th="${x}">${t('th_'+x)}</button>`).join('')}</div></div>
  <div><span class="small">${t('ms_mode')}</span><div class="seg">${['ar','tr','book'].map(x=>`<button class="${mm===x?'on':''}" data-mm="${x}">${t('mm_'+x)}</button>`).join('')}</div></div>
  ${mm!=='ar'?`<div><span class="small">${t('tr_on')}</span> <select id="trL2" class="inp" style="width:auto">${['uz','ru','tg','en','ar'].map(k=>`<option value="${k}"${k===trL()?' selected':''}>${t('tr_'+k)}</option>`).join('')}</select></div>`:''}
- <label class="row"><input type="checkbox" id="tajcOn"${store.get('tajc',false)?' checked':''}> 🎨 ${t('ms_tajc')}</label>
+ <label class="row"><input type="checkbox" id="tajcOn"${tajOn()?' checked':''}> 🎨 ${t('ms_tajc')}</label>
  <label class="row"><input type="checkbox" id="wbwOn"${wbwOn()?' checked':''}> 🔤 ${t('wbw_on')}</label>
  <label class="row"><input type="checkbox" id="hide"${store.get('hide',false)?' checked':''}> 🙈 ${t('hide_mode')}</label>
  <div><span class="small">${t('ms_goal')}</span> <select id="mgoal" class="inp" style="width:auto">${[5,10,20,50,100].map(x=>`<option${x===g?' selected':''}>${x}</option>`).join('')}</select></div></div>
- ${store.get('tajc',false)?tajLegend():''}`}
+ ${tajOn()?tajLegend():''}`}
 const TJC=[['ham_wasl','tc_wasl'],['laam_shamsiyah','tc_shams'],['slnt','tc_slnt'],['madda_normal','tc_mnorm'],['madda_permissible','tc_mperm'],['madda_obligatory','tc_mobl'],['madda_necessary','tc_mnec'],['qalaqah','tc_qal'],['ghunnah','tc_ghun'],['ikhafa','tc_ikh'],['ikhafa_shafawi','tc_ikhs'],['iqlab','tc_iql'],['idgham_ghunnah','tc_idg'],['idgham_wo_ghunnah','tc_idgw'],['idgham_shafawi','tc_idgs'],['idgham_mutajanisayn','tc_mutaj'],['idgham_mutaqaribayn','tc_mutaq']];
 function tajLegend(){return `<div class="tjleg">${TJC.map(([c,k])=>`<span><tajweed class="${c}">●</tajweed> ${t(k)}</span>`).join('')}</div><div class="small" style="opacity:.7">${t('tc_src')}</div>`}
 // Quran.com маълумотлари: оятлар (таржима ранглари, сўзлар), саҳифа
 async function qcom(url){const ca='caches' in window?await caches.open('qu-audio').catch(()=>null):null;let j=null;
  try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();if(ca)ca.put(url,new Response(JSON.stringify(j))).catch(()=>{})}}catch(e){}
  if(!j&&ca){const m=await ca.match(url).catch(()=>null);if(m)j=await m.json()}if(!j)throw new Error('qcom');return j}
-const TJV={};
+// ---------- Маҳаллий тажвид ранглари (Ҳафс, усмоний ёзув) ----------
+const TJ_H=/[ً-ٰٟۖ-ࣰۭ-ࣳ]/,TJ_TAN=/[ً-ࣰٍ-ࣲٖٗٞ]/,TJ_SUK=/[ْۡ]/,TJ_SH='ّ',TJ_HAR=/[ً-ࣰِ-ࣲٖٗٞ]/;
+const TJ_HAMZA='ءأإؤئ',TJ_IZ='ءأإؤئهعحغخ',TJ_IDG='ينمو',TJ_IKH='تثجدذزسشصضطظفقك',TJ_QAL='قطبجد';
+const TJ_ALEF='ا',TJ_WASL='ٱ',TJ_LAM='ل',TJ_NOON='ن',TJ_MEEM='م',TJ_BA='ب',TJ_RA='ر',TJ_WAW='و';
+function tjTok(w){const out=[];for(const ch of w){if(TJ_H.test(ch)&&out.length)out[out.length-1].m+=ch;else out.push({b:ch,m:''})}return out}
+function tjWords(words,endAyah){const W=words.map(tjTok),cls=W.map(t=>t.map(()=>''));
+ const nxt=(wi,li)=>{let i=wi,j=li+1;for(;;){if(!W[i])return null;if(j<W[i].length){const x=W[i][j];if((x.b===TJ_ALEF||x.b==='ى')&&!x.m){j++;continue}if(!/[ء-يٱۥۦ]/.test(x.b)){j++;continue}return {x,cross:i!==wi,i,j}}i++;j=0}};
+ const set=(i,j,c)=>{if(!cls[i][j])cls[i][j]=c};
+ W.forEach((t,wi)=>t.forEach((x,li)=>{const b=x.b,m=x.m,last=endAyah&&wi===W.length-1&&li===t.length-1;
+  if(b===TJ_WASL){set(wi,li,'ham_wasl');const l=t[li+1],n2=t[li+2];if(l&&l.b===TJ_LAM&&!l.m&&n2&&n2.m.includes(TJ_SH))cls[wi][li+1]='laam_shamsiyah';return}
+  if(m.includes('ۢ')||m.includes('ۭ')){set(wi,li,'iqlab');return}
+  if(m.includes('۟')){set(wi,li,'slnt');return}
+  if(b===TJ_ALEF&&!m&&li===t.length-1&&li>0&&t[li-1].b===TJ_WAW){set(wi,li,'slnt');return}
+  if(m.includes('ٓ')){const n=nxt(wi,li);let c='madda_necessary';if(n){c='madda_obligatory';if(TJ_HAMZA.includes(n.x.b)||n.x.m.includes('ٔ'))c=n.cross?'madda_permissible':'madda_obligatory';else if(n.x.m.includes(TJ_SH)||TJ_SUK.test(n.x.m)||!TJ_HAR.test(n.x.m))c='madda_necessary'}set(wi,li,c);return}
+  if((b===TJ_NOON||b===TJ_MEEM)&&m.includes(TJ_SH)){set(wi,li,'ghunnah');return}
+  if(b==='ۥ'||b==='ۦ'){set(wi,li,'madda_normal');return}
+  const tan=TJ_TAN.test(m),noonS=b===TJ_NOON&&!TJ_HAR.test(m)&&!m.includes(TJ_SH);
+  if(tan||noonS){const n=nxt(wi,li);if(!n||last)return;const c=n.x.b;
+   if(TJ_IZ.includes(c)||c===TJ_WASL)return;
+   if(TJ_IDG.includes(c)){if(n.cross)set(wi,li,'idgham_ghunnah');return}
+   if(c===TJ_LAM||c===TJ_RA){if(n.cross)set(wi,li,'idgham_wo_ghunnah');return}
+   if(c===TJ_BA){set(wi,li,'iqlab');return}
+   if(TJ_IKH.includes(c))set(wi,li,'ikhafa');return}
+  if(b===TJ_MEEM&&!TJ_HAR.test(m)&&!m.includes(TJ_SH)){const n=nxt(wi,li);if(n&&n.x.b===TJ_BA)set(wi,li,'ikhafa_shafawi');else if(n&&n.x.b===TJ_MEEM)set(wi,li,'idgham_shafawi');return}
+  if(TJ_QAL.includes(b)&&(TJ_SUK.test(m)||(last&&!m.includes(TJ_SH)))){set(wi,li,'qalaqah');return}
+  if(!TJ_HAR.test(m)&&!TJ_SUK.test(m)&&!m.includes(TJ_SH)&&/[ء-ي]/.test(b)&&!'اوىي'.includes(b)&&!m.includes('ٰ')){const n=nxt(wi,li);if(n&&n.x.m.includes(TJ_SH))set(wi,li,'idgham_mutajanisayn')}
+ }));
+ return W.map((t,wi)=>{let h='',cur='';t.forEach((x,li)=>{const c=cls[wi][li],s=esc(x.b+x.m);if(c!==cur){if(cur)h+='</tajweed>';if(c)h+=`<tajweed class="${c}">`;cur=c}h+=s});if(cur)h+='</tajweed>';return h})}
+
+const TJV={};const tajOn=()=>store.get('tajc',true);
 async function tajVerses(s){if(TJV[s])return TJV[s];const out={};let page=1,g=0;while(page&&g++<12){const j=await qcom(`https://api.quran.com/api/v4/verses/by_chapter/${s}?fields=text_uthmani_tajweed&per_page=50&page=${page}`);(j.verses||[]).forEach(v=>out[v.verse_number]=v.text_uthmani_tajweed||'');page=j.pagination&&j.pagination.next_page}TJV[s]=out;return out}
 // фақат <tajweed class> ва <span class=end> қолдирилади
 function tjSafe(h){return String(h).replace(/<span class=["']?end["']?>[^<]*<\/span>/g,'').replace(/<(\/?)([a-z]+)([^>]*)>/gi,(m,cl,tag,at)=>{if(tag.toLowerCase()!=='tajweed')return '';if(cl)return '</tajweed>';const c=(at.match(/class=["']?([a-z_]+)/i)||[])[1]||'';return `<tajweed class="${c}">`})}
-async function tajFill(s){try{const d=await tajVerses(s);if(store.get('sura',1)!==s||!store.get('tajc',false))return;
- document.querySelectorAll('.msayat .ayah').forEach(el=>{const a=+el.dataset.a.split(':')[1],h=d[a];if(!h)return;const box=el.querySelector('.ar'),mk=box.querySelector('.amark');box.innerHTML=tjSafe(h)+' ';box.appendChild(mk)})}
- catch(e){const p=$('#msSetP');if(p)p.insertAdjacentHTML('beforeend',`<div class="small">${t('wbw_fail')}</div>`)}}
+async function tajFill(s){try{const d=await tajVerses(s);if(store.get('sura',1)!==s||!tajOn())return;
+ document.querySelectorAll('.msayat .ayah').forEach(el=>{const a=+el.dataset.a.split(':')[1],h=d[a];if(!h)return;const ws=tjSafe(h).trim().split(/\s+/).filter(x=>x.replace(/<[^>]+>/g,'').trim()),sp=el.querySelectorAll('.ar .w');if(ws.length!==sp.length)return;sp.forEach((e,i)=>{e.innerHTML=ws[i]})})}
+ catch(e){}}
 async function bookFill(s){const box=$('#msBook');if(!box)return;const l=trL(),key=TRK[l][0];try{const d=await trGet(key,s);if(store.get('sura',1)!==s)return;
  box.innerHTML=Object.keys(d).map(Number).sort((x,y)=>x-y).map(a=>`<span class="bka" data-a="${s}:${a}"><sup>${a}</sup> ${esc(d[a].t)} </span>`).join('');if(l==='ar')box.setAttribute('dir','rtl');trVer(key)}
  catch(e){box.innerHTML=`<span class="small">${t('tr_fail')}</span>`}}
@@ -1037,10 +1130,10 @@ async function pageFill(){const box=$('#msPage');if(!box)return;let p=+store.get
  box.innerHTML=`<p class="small">${t('loading')}</p>`;
  try{let vs=[],page=1,g=0;while(page&&g++<4){const j=await qcom(`https://api.quran.com/api/v4/verses/by_page/${p}?words=true&word_fields=text_uthmani,line_number&per_page=50&page=${page}`);vs=vs.concat(j.verses||[]);page=j.pagination&&j.pagination.next_page}
   if(+store.get('mpage',0)!==p)return;const lines={};
-  vs.forEach(v=>{const [s,a]=v.verse_key.split(':').map(Number);let wi=0;(v.words||[]).forEach(w=>{const L=w.line_number;(lines[L]=lines[L]||[]).push({w,s,a,wi:w.char_type_name==='word'?wi++:-1})})});
+  const tjp=tajOn();vs.forEach(v=>{const [s,a]=v.verse_key.split(':').map(Number);let wi=0;const ww=(v.words||[]).filter(w=>w.char_type_name==='word'),hs=tjp?tjWords(ww.map(w=>w.text_uthmani||w.text||''),true):null;(v.words||[]).forEach(w=>{const L=w.line_number;const k=w.char_type_name==='word'?wi++:-1;if(hs&&k>=0)w._h=hs[k];(lines[L]=lines[L]||[]).push({w,s,a,wi:k})})});
   const Ls=Object.keys(lines).filter(k=>!k.startsWith('h')).map(Number).sort((x,y)=>x-y);let prevS=0;
   const html=Ls.map(L=>{const ws=lines[L];let pre='';const f=ws[0];if(f.s!==prevS&&f.a===1&&f.wi===0){pre=`<div class="surahead pg"><div class="ar">${Q[f.s-1].ar}</div></div>${f.s!==1&&f.s!==9?'<div class="ar bism">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>':''}`}prevS=ws[ws.length-1].s;
-   return pre+`<div class="pline ar">${ws.map(x=>x.w.char_type_name==='word'?`<span class="w" data-s="${x.s}" data-a2="${x.a}" data-w="${x.wi}" data-pa="${x.s}:${x.a}">${esc(x.w.text_uthmani||x.w.text)}</span>`:`<button class="amark" data-am="${x.s}:${x.a}">${x.a}</button>`).join('')}</div>`}).join('');
+   return pre+`<div class="pline ar">${ws.map(x=>x.w.char_type_name==='word'?`<span class="w" data-s="${x.s}" data-a2="${x.a}" data-w="${x.wi}" data-pa="${x.s}:${x.a}">${x.w._h||esc(x.w.text_uthmani||x.w.text)}</span>`:`<button class="amark" data-am="${x.s}:${x.a}">${x.a}</button>`).join('')}</div>`}).join('');
   box.innerHTML=`<div class="pgnav"><button class="btn" data-pg="${p+1}" ${p>=604?'disabled':''}>← ${p+1}</button><b>${t('ms_pg',{n:p})} · ${t('ms_juz',{n:juzOf(...vs[0].verse_key.split(':').map(Number))})}</b><button class="btn" data-pg="${p-1}" ${p<=1?'disabled':''}>${p-1} →</button></div><div class="pgbody">${html}</div>
   <div class="pgnav"><button class="btn" data-pg="${p+1}" ${p>=604?'disabled':''}>← ${t('ms_next')}</button><button class="btn" data-pg="${p-1}" ${p<=1?'disabled':''}>${t('ms_prev')} →</button></div>`;
   const f=vs[0].verse_key.split(':').map(Number);store.set('sura',f[0]);vs.forEach(v=>rdLater(v.verse_key))}
@@ -1052,8 +1145,8 @@ let IO=null;function rdObserve(){if(IO)IO.disconnect();if(!('IntersectionObserve
  document.querySelectorAll('.msayat .ayah').forEach(el=>IO.observe(el))}
 function msAfter(){const s=store.get('sura',1);if(mview()==='page'){pageFill();return}
  const mm=mmode(),hide=store.get('hide',false);if(mm==='book'){bookFill(s);return}
- if(store.get('tajc',false)&&!hide)tajFill(s);else if(trOn()&&mm==='tr'&&!hide)trFill(s);
- if(trOn()&&mm==='tr'&&!hide&&store.get('tajc',false))trFill(s);
+ if(tajOn()&&!hide)tajFill(s);else if(trOn()&&mm==='tr'&&!hide)trFill(s);
+ if(trOn()&&mm==='tr'&&!hide&&tajOn())trFill(s);
  rdObserve();const go=store.get('msgo','');if(go){store.set('msgo','');const el=document.querySelector(`.ayah[data-a="${go}"]`);if(el){el.scrollIntoView({block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),2200)}}}
 function msGo(k){const [s,a]=k.split(':').map(Number);if(!Q||!Q[s-1]||a<1||a>Q[s-1].v.length)return;store.set('sura',s);store.set('msgo',k);store.set('mview','ayat');store.set('mpage',0);if(location.hash!=='#mushaf')location.hash='mushaf';else render()}
 // Сура рўйхати ва қидирув
@@ -1069,7 +1162,7 @@ function openSuras(){sheet(`<h3 style="margin:0 0 8px">${t('ms_suras')}</h3><inp
  <div id="msList">${suraList('')}</div>`,'suras')}
 // Оят менюси
 function openAyah(k){const [s,a]=k.split(':').map(Number),b=bm()[k],m=memo(),ab=store.get('ab',{});
- sheet(`<div class="ar" style="font-size:22px;text-align:center;margin:6px 24px">${esc(Q[s-1].v[a-1])}</div><div class="small" style="text-align:center">${esc(Q[s-1].tr)} ${k} · ${t('ms_juz',{n:juzOf(s,a)})}</div>
+ sheet(`<div class="ar${tajOn()?' tajc':''}" style="font-size:22px;text-align:center;margin:6px 24px">${tajOn()?tjWords(Q[s-1].v[a-1].split(' '),true).join(' '):esc(Q[s-1].v[a-1])}</div><div class="small" style="text-align:center">${esc(Q[s-1].tr)} ${k} · ${t('ms_juz',{n:juzOf(s,a)})}</div>
  <div class="shgrid">
  <button data-sh="play" data-k="${k}">▶<br>${t('sh_play')}</button>
  <button data-sh="playfrom" data-k="${k}">⏩<br>${t('sh_from')}</button>
@@ -1083,9 +1176,18 @@ function openAyah(k){const [s,a]=k.split(':').map(Number),b=bm()[k],m=memo(),ab=
  <button data-sh="share" data-k="${k}">📤<br>${t('ay_share')}</button></div>
  <div class="small" style="margin-top:6px">🔖 ${t('sh_bm')}</div><div class="bmrow">${['green','gold','red','blue'].map(c=>`<button class="bmc bm-${c}${b===c?' on':''}" data-bm="${c}" data-k="${k}"></button>`).join('')}<button class="btn" data-bm="" data-k="${k}">✕</button></div>
  <div id="shTr"></div>`,'ayah')}
-async function shTr(k){const [s,a]=k.split(':').map(Number),box=$('#shTr');if(!box)return;box.innerHTML=`<p class="small">${t('loading')}</p>`;const parts=[];
- for(const l of [trL()==='ar'?'uz':trL(),'ar']){try{const d=await trGet(TRK[l][0],s),x=d[a];if(x)parts.push(`<div class="trn"><div class="small"><b>${esc(tx(TRK[l][1]))}</b></div><p${l==='ar'?' dir="rtl" class="artr"':''}>${esc(x.t)}</p>${x.f?`<details><summary class="small">${t('tr_fn')}</summary><p class="small">${esc(x.f)}</p></details>`:''}</div>`)}catch(e){}}
- box.innerHTML=parts.join('')||`<span class="small">${t('tr_fail')}</span>`;box.insertAdjacentHTML('beforeend',`<div class="small">QuranEnc.com</div>`)}
+const TAF={uz:['uzbek_mokhtasar',{uz:'«Ал-Мухтасар фит-тафсир» — ўзбекча',ru:'«Аль-Мухтасар фи тафсир» — узбекский',tg:'«Ал-Мухтасар фит-тафсир» — ӯзбекӣ'}],
+ ru:['russian_mokhtasar',{uz:'«Ал-Мухтасар фит-тафсир» — русча',ru:'«Аль-Мухтасар фи тафсир» — русский',tg:'«Ал-Мухтасар фит-тафсир» — русӣ'}],
+ ar:['arabic_moyassar',{uz:'«Ат-Тафсир ал-муяссар» — арабча',ru:'«Ат-Тафсир аль-муяссар» — арабский',tg:'«Ат-Тафсир ал-муяссар» — арабӣ'}]};
+async function shTr(k){const [s,a]=k.split(':').map(Number),box=$('#shTr');if(!box)return;box.innerHTML=`<p class="small">${t('loading')}</p>`;
+ const l0=trL()==='ar'?(lang()==='ru'?'ru':lang()==='tg'?'tg':'uz'):trL(),ul=lang()==='ru'?'ru':lang()==='tg'?'tg':'uz';
+ const tfl=[...new Set([l0==='ru'||ul==='ru'||ul==='tg'?'ru':'uz',ul==='tg'?'uz':null].filter(Boolean))];
+ const one=async(key,lab,ar,cls)=>{try{const d=await trGet(key,s),x=d[a];if(!x||!x.t)return '';return `<div class="trn ${cls}"><div class="small"><b>${esc(lab)}</b></div><p${ar?' dir="rtl" class="artr"':''}>${esc(x.t)}</p>${x.f?`<details><summary class="small">${t('tr_fn')}</summary><p class="small">${esc(x.f)}</p></details>`:''}</div>`}catch(e){return ''}};
+ const jobs=[one(TRK[l0][0],t('sh_trn')+': '+tx(TRK[l0][1]),false,'')];
+ tfl.forEach(l=>jobs.push(one(TAF[l][0],t('sh_tafsir')+': '+tx(TAF[l][1]),false,'tfs')));
+ jobs.push(one(TAF.ar[0],t('sh_tafsir')+': '+tx(TAF.ar[1]),true,'tfs'));
+ const parts=await Promise.all(jobs);if(!$('#shTr'))return;
+ box.innerHTML=parts.join('')||`<span class="small">${t('tr_fail')}</span>`;box.insertAdjacentHTML('beforeend',`<div class="small">${t('sh_src')} <a href="https://quranenc.com" target="_blank" rel="noopener">QuranEnc.com</a></div>`)}
 // Ёддан ўқиш (ҳифз): овоз билан сўзларни очиш
 let HZ=null;
 function hzStart(){const s=store.get('sura',1),K=window.SpeechRecognition||window.webkitSpeechRecognition,st=$('#hzSt'),btn=$('#hzRec');
@@ -1105,6 +1207,7 @@ function hzStart(){const s=store.get('sura',1),K=window.SpeechRecognition||windo
 document.addEventListener('click',e=>{const el=e.target.closest('button,[data-shclose],.w,.bka');if(!el)return;const d=el.dataset;
  if(d.shclose){shClose();return}
  if(el.id==='msSura'){openSuras();return}
+ if(el.id==='msTaj'){store.set('tajc',!tajOn());render();return}
  if(el.id==='msSet'){const p=$('#msSetP');if(p)p.classList.toggle('hidden');return}
  if(d.mv){store.set('mview',d.mv);if(d.mv==='page')store.set('mpage',0);render();return}
  if(d.gos){shClose();store.set('sura',+d.gos);store.set('mpage',0);if(location.hash!=='#mushaf')location.hash='mushaf';else{render();window.scrollTo(0,0)}return}
