@@ -98,7 +98,7 @@ function stars(el){if(!document.body.classList.contains('kids')||!el)return;cons
 const ico={bosh:'<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>',darslar:'<path d="M4 5h7a3 3 0 0 1 3 3v11a2 2 0 0 0-2-2H4zM20 5h-5a3 3 0 0 0-3 3"/>',mushaf:'<path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/>',mahraj:'<path d="M7 9a5 5 0 0 1 10 0v3a5 5 0 0 1-10 0z"/><path d="M12 17v3"/>',kitob:'<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>',tekshiruv:'<path d="M3 12h3l2-6 4 12 3-9 2 3h4"/>',qoidalar:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1M4 12h1M4 18h1"/>'};
 const TABS=[['bosh','tab_home'],['darslar','tab_lessons'],['qoidalar','tab_rules'],['mushaf','tab_mushaf'],['mahraj','tab_makhraj'],['kitob','tab_book'],['tekshiruv','tab_check']];
 function navi(cur){$('#nav').innerHTML=TABS.map(([h,k])=>`<a href="#${h}" class="${cur===h?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ico[h]}</svg>${t(k)}</a>`).join('');
- $('#hdr').innerHTML=`<div><h1>${t('app')}</h1><div class="sub">${t('tagline')}</div></div><div class="row"><a class="btn" href="#ustozlar">${t('reciters')}</a><a class="btn" href="#sozlama" aria-label="${t('settings')}">⚙</a></div>`}
+ $('#hdr').innerHTML=`<div><h1>${/^#?(bosh)?$/.test(location.hash)?t('salam')+(prof.name?', '+esc(prof.name):''):t('app')}</h1><div class="sub">${esc(hdrDate())}</div></div><div class="row"><a class="hb" href="#ustozlar" aria-label="${t('reciters')}">🎙</a><a class="hb" href="#sozlama" aria-label="${t('settings')}">⚙</a></div>`}
 
 // ---------- Курслар ----------
 const done=()=>store.get('done',{}),doneA=()=>store.get('adone',{}),memo=()=>store.get('memo',{}),certs=()=>store.get('certs',{});
@@ -110,7 +110,7 @@ function nextLesson(){const a=doneA(),d=done();const na=AL.findIndex((_,i)=>!a[i
 function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins=Math.floor((days()[today()]||0)/60),goal=prof.goal||10,pc=Math.min(100,Math.round(mins/goal*100));
  const a=Object.keys(doneA()).length,d=Object.keys(done()).length,ms=Object.keys(store.get('bkdone',{})).length,MSN=bkBuild()?BK.length:60,m=Object.keys(memo()).length,cs=certs();
  const bar_=(n,tot)=>`<div class="pbar"><b style="width:${Math.round(n/tot*100)}%"></b></div>`;
- return `<h2>${t('salam')}${prof.name?', '+esc(prof.name):''}!</h2>
+ return `${homeTop()}
  ${g&&g.from?`<div class="card gift"><div class="gift-ic">🎁</div><div><b>${esc(t('gift_from',{from:g.from}))}</b><div class="small">${t('dua')}</div></div></div>`:''}
  <div class="grid3"><div class="card kpi"><div class="kv">🔥 ${st}</div><div class="small">${t('streak')}</div></div>
  <div class="card kpi"><div class="kv"><span id="todayMin">${mins}</span>/${goal} ${t('min')}</div><div class="pbar"><b style="width:${pc}%"></b></div><div class="small">${t('today')}</div></div>
@@ -119,7 +119,7 @@ function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins
  ${nl?`<a class="btn p lg" href="#${nl.h}">${t('next_lesson')}: ${esc(nl.t)}</a>`:''}
  <a class="btn lg" href="#imtihon-review">${t('review')}</a>
  <a class="btn lg" href="#kitob-ms">${t('book_title')} · ${store.get('bkpg',1)}/${BK?BK.length:'…'}</a></div>
- ${homeExtra()}
+
  <div class="card"><b>${t('progress')}</b>
  <div class="prow"><span>${t('course_alif')}</span><span>${a}/${AL.length}</span></div>${bar_(a,AL.length)}
  <div class="prow"><span>${t('course_tajwid')}</span><span>${d}/${C.L.length}</span></div>${bar_(d,C.L.length)}
@@ -517,11 +517,16 @@ function route2(h){let m;
  if(h==='taqvim')return {v:vTaqvim(),tab:'kitob'};
  if(h==='oyat')return {v:vOyat(),tab:'kitob'};
  if(h==='savol')return {v:vSavol(),tab:'kitob'};
+ if(h==='hifz'){store.set('hide',true);return {v:vMushaf(),tab:'mushaf'}}
+ if(h==='qibla')return {v:vQibla(),tab:'bosh'};
+ if(h==='tasbeh')return {v:vTasbeh(),tab:'bosh'};
+ if(h==='duo')return {v:vDuo(),tab:'bosh'};
  return null}
 let PTI=null;
 function after2(h){if(PTI){clearInterval(PTI);PTI=null}if(h!=='taqvim'&&store.get('hjoff',0))store.set('hjoff',0);
  if(h==='oyat')ayDraw();
- if(h==='namoz')PTI=setInterval(ptTick,20000);
+ if(h==='namoz'||h==='bosh'||h==='')PTI=setInterval(ptTick,1000);
+ if(h==='qibla')qbStart();else qbStop();
  if(h==='savol'){const q=store.get('fqq','');const i=$('#fqSearch');if(i&&q){i.value=q;fqFilter(q)}}}
 
 // ---------- Кутубхона жавони ----------
@@ -580,22 +585,22 @@ function vQori(id){const i=C.QB.findIndex(q=>q.id===id);if(i<0)return vQorilar()
 const PT=(()=>{const r=Math.PI/180,sn=d=>Math.sin(d*r),cs=d=>Math.cos(d*r),tn=d=>Math.tan(d*r),asn=x=>Math.asin(x)/r,acs=x=>Math.acos(Math.max(-1,Math.min(1,x)))/r,at2=(y,x)=>Math.atan2(y,x)/r,acot=x=>Math.atan(1/x)/r,fx=(a,b)=>{a=a-b*Math.floor(a/b);return a<0?a+b:a};
  const jul=(y,m,d)=>{if(m<=2){y--;m+=12}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5};
  const sun=jd=>{const D=jd-2451545,g=fx(357.529+.98560028*D,360),q=fx(280.459+.98564736*D,360),L=fx(q+1.915*sn(g)+.020*sn(2*g),360),e=23.439-.00000036*D,RA=fx(at2(cs(e)*sn(L),cs(L))/15,24);return {decl:asn(sn(e)*sn(L)),eqt:q/15-RA}};
- return (date,lat,lon,tz)=>{const JD=jul(date.getFullYear(),date.getMonth()+1,date.getDate())-lon/(15*24);
+ return (date,lat,lon,tz,af)=>{const JD=jul(date.getFullYear(),date.getMonth()+1,date.getDate())-lon/(15*24);
   const mid=t=>fx(12-sun(JD+t).eqt,24);
   const ang=(a,t,ccw)=>{const d=sun(JD+t).decl,T=acs((-sn(a)-sn(d)*sn(lat))/(cs(d)*cs(lat)))/15;return mid(t)+(ccw?-T:T)};
   const asr=(f,t)=>{const d=sun(JD+t).decl;return ang(-acot(f+tn(Math.abs(lat-d))),t)};
   let T={f:5,s:6,d:12,a:13,m:18,i:18};
-  for(let k=0;k<2;k++){const p=x=>x/24;T={f:ang(18,p(T.f),1),s:ang(.833,p(T.s),1),d:mid(p(T.d)),a:asr(2,p(T.a)),m:ang(.833,p(T.m)),i:ang(17,p(T.i))}}
+  for(let k=0;k<2;k++){const p=x=>x/24;T={f:ang(18,p(T.f),1),s:ang(.833,p(T.s),1),d:mid(p(T.d)),a:asr(af||2,p(T.a)),m:ang(.833,p(T.m)),i:ang(17,p(T.i))}}
   for(const k in T)T[k]=T[k]+tz-lon/15;return T}})();
 const PK=['f','s','d','a','m','i'],PN={f:'pt_fajr',s:'pt_sun',d:'pt_dhuhr',a:'pt_asr',m:'pt_maghrib',i:'pt_isha'};
 const hm=x=>{let m=Math.round(x*60);m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
 function ptPlace(){const p=store.get('pcity',null);if(p&&p.lat!=null)return {n:t('pt_mine'),lat:p.lat,lon:p.lon,tz:p.tz};
  const i=p&&p.i!=null?p.i:(prof.lang==='tg'?18:0),c=C.CITY[i]||C.CITY[0];return {i,n:lt_(pick(c.slice(0,3))),lat:c[3],lon:c[4],tz:5}}
-function ptDay(d){const p=ptPlace();return PT(d,p.lat,p.lon,p.tz)}
+function ptDay(d){const p=ptPlace();return PT(d,p.lat,p.lon,p.tz,store.get('asrf',2))}
 function ptNext(){try{const now=new Date(),T=ptDay(now),p=ptPlace(),nm=(now.getUTCHours()+now.getUTCMinutes()/60+p.tz+24)%24;
  for(const k of ['f','d','a','m','i']){if(T[k]>nm)return {k,n:t(PN[k]),s:hm(T[k]),left:T[k]-nm}}
  const tm=new Date(now);tm.setDate(tm.getDate()+1);const T2=ptDay(tm);return {k:'f',n:t('pt_fajr'),s:hm(T2.f),left:T2.f+24-nm}}catch(e){return null}}
-function ptTick(){const el=$('#ptLeft');if(!el)return;const nx=ptNext();if(!nx)return;const L=Math.max(0,Math.round(nx.left*60));el.textContent=t('pt_left',{h:Math.floor(L/60),m:L%60});const b=$('#ptNx');if(b)b.textContent=t('pt_next',{p:nx.n,t:nx.s})}
+function ptTick(){document.querySelectorAll('[data-cd]').forEach(e=>{const nw=ptNow();if(nw)e.textContent=fmtLeft(nw.left)});const el=$('#ptLeft');if(!el)return;const nx=ptNext();if(!nx)return;const L=Math.max(0,Math.round(nx.left*60));el.textContent=t('pt_left',{h:Math.floor(L/60),m:L%60});const b=$('#ptNx');if(b)b.textContent=t('pt_next',{p:nx.n,t:nx.s})}
 const WD={uz:['Як','Ду','Се','Чо','Па','Жу','Ша'],ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],tg:['Як','Ду','Се','Чо','Па','Ҷу','Ша']};
 function vNamoz(){const p=ptPlace(),now=new Date(),T=ptDay(now),nx=ptNext(),L=nx?Math.max(0,Math.round(nx.left*60)):0;
  const opts=C.CITY.map((c,i)=>`<option value="${i}"${p.i===i?' selected':''}>${esc(lt_(pick(c.slice(0,3))))}</option>`).join('');
@@ -605,7 +610,8 @@ function vNamoz(){const p=ptPlace(),now=new Date(),T=ptDay(now),nx=ptNext(),L=nx
  <div class="small" id="ptMsg"></div>
  ${nx?`<div class="card plan" style="text-align:center"><b id="ptNx" style="font-size:20px">${esc(t('pt_next',{p:nx.n,t:nx.s}))}</b><div class="small" id="ptLeft">${t('pt_left',{h:Math.floor(L/60),m:L%60})}</div></div>`:''}
  <div class="card"><div class="small">${esc(p.n)} · ${hjStr(now)||''}</div>
- ${PK.map(k=>`<div class="prow pt${nx&&nx.k===k?' ptn':''}"><span>${t(PN[k])}</span><b>${hm(T[k])}</b></div>`).join('')}</div>
+ ${PK.map(k=>{const nw=ptNow(),on=nw&&nw.k===k;return `<div class="prow pt${on?' ptn':''}"><span>${t(PN[k])}</span>${on?`<span class="small ptc" data-cd>${fmtLeft(nw.left)}</span>`:''}<b>${hm(T[k])}</b></div>`}).join('')}</div>
+ <div class="card"><b>${t('pt_asr_m')}</b><div class="links"><button class="btn${store.get('asrf',2)===2?' p':''}" data-asrf="2">${t('pt_hanafi')}</button><button class="btn${store.get('asrf',2)===1?' p':''}" data-asrf="1">${t('pt_shafii')}</button></div></div>
  <h3>${t('pt_week')}</h3><div class="card" style="overflow-x:auto"><table class="ptt"><tr><th></th>${PK.map(k=>`<th>${t(PN[k])}</th>`).join('')}</tr>
  ${days.map(([d,X])=>`<tr><td>${WD[L3()][d.getDay()]} ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</td>${PK.map(k=>`<td>${hm(X[k])}</td>`).join('')}</tr>`).join('')}</table></div>
  <div class="note">${t('pt_note')}</div>`}
@@ -715,6 +721,7 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg
   navigator.geolocation.getCurrentPosition(p=>{store.set('pcity',{lat:+p.coords.latitude.toFixed(4),lon:+p.coords.longitude.toFixed(4),tz:-new Date().getTimezoneOffset()/60});render()},()=>{const mm=$('#ptMsg');if(mm)mm.textContent=t('pt_geo_fail')},{timeout:15000,maximumAge:864e5});return}
  if(tg.id==='hjPrev'||tg.id==='hjNext'){store.set('hjoff',store.get('hjoff',0)+(tg.id==='hjNext'?1:-1));render();return}
  if(d.ayp){store.set('ayref',d.ayp);render();return}
+ if(d.asrf){store.set('asrf',+d.asrf);render();return}
  if(d.ayth){store.set('ayth',d.ayth);render();return}
  if(d.aysz){store.set('aysz',d.aysz);render();return}
  if(tg.id==='ayDl'){aySave(false);return}if(tg.id==='ayShare'){aySave(true);return}
@@ -724,6 +731,95 @@ document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='aySura'){store.set('ayref',e.target.value+':1');render();return}
  if(id==='ayNum'){store.set('ayref',store.get('ayref','94:5').split(':')[0]+':'+e.target.value);render();return}});
 document.addEventListener('input',e=>{if(e.target.id==='fqSearch'){store.set('fqq',e.target.value);fqFilter(e.target.value)}});
+
+// ---------- Бош саҳифа: ҳозирги/кейинги намоз ва плиткалар ----------
+const fmtLeft=h=>{const s=Math.max(0,Math.round(h*3600)),H=Math.floor(s/3600),M=Math.floor(s%3600/60),S=s%60;return t('pt_ends',{t:(H?H+' '+t('u_h')+' ':'')+M+' '+t('u_m')+' '+String(S).padStart(2,'0')+' '+t('u_s')})};
+function ptNow(){try{const now=new Date(),p=ptPlace(),nm=(now.getUTCHours()+now.getUTCMinutes()/60+now.getUTCSeconds()/3600+p.tz+24)%24,T=ptDay(now);
+ let cur=null;for(const k of PK)if(T[k]<=nm)cur=k;const seq=PK,nxt=k=>{const i=seq.indexOf(k);return i<seq.length-1?{k:seq[i+1],at:T[seq[i+1]]}:{k:'f',at:ptDay(new Date(now.getTime()+864e5)).f+24}};
+ if(!cur)return {k:'i',n:t('pt_isha'),left:T.f-nm};const n=nxt(cur);return {k:cur,n:t(PN[cur]),left:n.at-nm}}catch(e){return null}}
+const WDF={uz:['Якшанба','Душанба','Сешанба','Чоршанба','Пайшанба','Жума','Шанба'],ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],tg:['Якшанбе','Душанбе','Сешанбе','Чоршанбе','Панҷшанбе','Ҷумъа','Шанбе']};
+function hdrDate(){const d=new Date(),h=hjStr(d);return (h?h+' / ':'')+lt_(WDF[L3()][d.getDay()]+', '+d.getDate()+' '+GM[L3()][d.getMonth()])}
+const TI={
+mushaf:'<path d="M8 14c6-3 12-3 16 1 4-4 10-4 16-1v22c-6-3-12-3-16 1-4-4-10-4-16-1z" fill="#fff"/><path d="M24 15v22"/><path d="M12 19c3-1 6-1 8 0M12 24c3-1 6-1 8 0M28 19c2-1 5-1 8 0M28 24c2-1 5-1 8 0" stroke="var(--gold)"/>',
+qibla:'<path d="M15 17l9-5 9 5v14l-9 5-9-5z" fill="#1b1b1b" stroke="#1b1b1b"/><path d="M15 17l9 5 9-5M24 22v14" stroke="#555"/><path d="M15 21l9 5 9-5" stroke="var(--gold)" stroke-width="2"/><path d="M8 40l7-7M8 40v-5M8 40h5" stroke="var(--lapis)" stroke-width="2.4"/>',
+tasbeh:'<circle cx="24" cy="21" r="11" fill="none" stroke-dasharray="0.1 5.2" stroke-width="5" stroke="var(--lapis)"/><path d="M24 32v5" stroke="var(--gold)" stroke-width="2.5"/><path d="M20 37h8l-2 7h-4z" fill="var(--gold)" stroke="var(--gold)"/>',
+duo:'<path d="M22 40c-5-1-9-6-10-12l-2-9c0-2 3-2 3 0l2 6 0-12c0-2 3-2 3 0v10-13c0-2 3-2 3 0v13-11c0-2 3-2 3 0v19c0 3-1 6-2 9z" fill="#f6d9b8"/><path d="M26 40c5-1 9-6 10-12l2-9c0-2-3-2-3 0l-2 6 0-12c0-2-3-2-3 0v10-13c0-2-3-2-3 0v13-11c0-2-3-2-3 0v19c0 3 1 6 2 9z" fill="#f6d9b8"/>',
+namoz:'<path d="M14 40V24h20v16" fill="#fff"/><path d="M14 24c0-6 4-9 10-12 6 3 10 6 10 12" fill="var(--gold)" stroke="var(--gold)"/><path d="M8 40V18M40 40V18M7 18h2M39 18h2" stroke-width="2.2"/><circle cx="24" cy="32" r="5" fill="#fff"/><path d="M24 29v3l2 1.5"/><path d="M6 40h36"/>',
+tajvid:'<text x="24" y="33" text-anchor="middle" font-family="Amiri,serif" font-size="26" fill="var(--gold)" stroke="none">ضاد</text><path d="M9 38c10-3 20-3 30 0" />',
+hifz:'<circle cx="24" cy="14" r="6" fill="#f6d9b8"/><path d="M18 12c1-4 11-4 12 0" fill="#fff"/><path d="M12 40c0-8 5-14 12-14s12 6 12 14z" fill="#fff"/><path d="M15 31h18v9H15z" fill="var(--gold)" stroke="var(--gold)"/>',
+kitob:'<circle cx="14" cy="24" r="4" fill="var(--gold)" stroke="none"/><circle cx="24" cy="24" r="4" fill="var(--gold)" stroke="none"/><circle cx="34" cy="24" r="4" fill="var(--gold)" stroke="none"/>'};
+function tile(h,ic,l){return `<a class="tile" href="#${h}"><span class="ti"><svg viewBox="0 0 48 48" fill="none" stroke="var(--lapis)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${TI[ic]}</svg></span><span>${l}</span></a>`}
+function homeTop(){const nw=ptNow(),nx=ptNext(),p=ptPlace();
+ return `<div class="ptop"><a class="pnow" href="#namoz"><div class="pk">${t('pt_now')}</div><div class="pv">${nw?esc(nw.n):'—'}</div><div class="pc" data-cd>${nw?fmtLeft(nw.left):''}</div><svg class="pmq" viewBox="0 0 120 90" aria-hidden="true"><path d="M30 90V52h60v38" fill="rgba(255,255,255,.9)"/><path d="M30 52c0-16 14-24 30-32 16 8 30 16 30 32z" fill="#e9b949"/><path d="M60 8v12" stroke="#e9b949" stroke-width="3"/><circle cx="60" cy="6" r="3" fill="#e9b949"/><path d="M14 90V36h10v54zM96 90V36h10v54z" fill="rgba(255,255,255,.85)"/><path d="M13 36l6-10 6 10M95 36l6-10 6 10" fill="#e9b949"/><path d="M52 90V72a8 8 0 0 1 16 0v18" fill="#2c6e57"/></svg></a>
+ <a class="pnext" href="#namoz"><div class="pk">${t('pt_nextk')}</div><div class="pv">${nx?esc(nx.n):'—'}</div><div class="small">${t('pt_starts')}</div><div class="pt2">${nx?nx.s:''} <span class="arr">→</span></div></a></div>
+ <div class="small" style="margin:-4px 2px 6px;color:var(--mute)">📍 ${esc(p.n)}</div>
+ <div class="tiles">${tile('mushaf','mushaf',t('tab_mushaf'))}${tile('qibla','qibla',t('qb_t'))}${tile('tasbeh','tasbeh',t('ts_t'))}${tile('duo','duo',t('du_t'))}
+ ${tile('namoz','namoz',t('pt_title'))}${tile('darslar','tajvid',t('tj_t'))}${tile('hifz','hifz',t('hf_t'))}${tile('kitob','kitob',t('more_t'))}</div>`}
+
+// ---------- Қибла ----------
+const KAABA=[21.4225,39.8262];
+function qBearing(){const p=ptPlace(),r=Math.PI/180,f1=p.lat*r,f2=KAABA[0]*r,dl=(KAABA[1]-p.lon)*r;const b=Math.atan2(Math.sin(dl)*Math.cos(f2),Math.cos(f1)*Math.sin(f2)-Math.sin(f1)*Math.cos(f2)*Math.cos(dl))/r;return (b+360)%360}
+let QH=null,QON=false,QV=false;
+function vQibla(){const b=qBearing(),p=ptPlace();
+ const ticks=Array.from({length:72},(_,i)=>{const big=i%6===0;return `<line x1="150" y1="${big?22:26}" x2="150" y2="34" stroke="${big?'var(--lapis)':'#bbb'}" stroke-width="${big?4:2}" stroke-linecap="round" transform="rotate(${i*5} 150 150)"/>`}).join('');
+ return `<p><a href="#bosh">← ${t('tab_home')}</a></p><h2>🧭 ${t('qb_t')}</h2>
+ <div class="card" style="text-align:center"><b>${esc(p.n)}</b><div class="small">${t('qb_deg',{d:b.toFixed(1)})}</div></div>
+ <div class="qwrap"><svg id="qdial" viewBox="0 0 300 300"><circle cx="150" cy="150" r="140" fill="var(--card)" stroke="var(--ink)" stroke-width="8"/>${ticks}
+ <g font-size="22" font-weight="700" fill="var(--mute)" text-anchor="middle"><text x="150" y="62">N</text><text x="245" y="158">E</text><text x="150" y="252">S</text><text x="55" y="158">W</text></g>
+ <g transform="rotate(${b.toFixed(1)} 150 150)"><line x1="150" y1="150" x2="150" y2="58" stroke="var(--gold)" stroke-width="5" stroke-linecap="round"/><g transform="translate(150 44)"><rect x="-14" y="-14" width="28" height="28" rx="3" fill="#1b1b1b"/><rect x="-14" y="-6" width="28" height="4" fill="var(--gold)"/></g></g>
+ <circle cx="150" cy="150" r="8" fill="var(--lapis)"/></svg><div class="qtop">▲</div></div>
+ <div id="qmsg" class="note" style="text-align:center">${t('qb_static')}</div>
+ <div class="links" style="justify-content:center"><button class="btn p" id="qOn">🧭 ${t('qb_on')}</button><a class="btn" href="#namoz">📍 ${t('pt_city')}</a></div>
+ <div class="note">${t('qb_note')}</div>`}
+function qbOri(e){let h=null;if(e.webkitCompassHeading!=null)h=e.webkitCompassHeading;else if(e.absolute&&e.alpha!=null)h=360-e.alpha;if(h==null)return;QH=h;const d=$('#qdial');if(!d)return;d.style.transform=`rotate(${-h}deg)`;
+ const diff=((qBearing()-h+540)%360)-180,m=$('#qmsg');if(m){if(Math.abs(diff)<5){m.textContent=t('qb_ok');m.classList.add('qok');if(!QV&&navigator.vibrate){navigator.vibrate(60);QV=true}}else{m.textContent=t(diff>0?'qb_right':'qb_left',{d:Math.round(Math.abs(diff))});m.classList.remove('qok');QV=false}}}
+async function qbStart(){if(!QON)return;try{const D=window.DeviceOrientationEvent;if(D&&typeof D.requestPermission==='function'){const r=await D.requestPermission();if(r!=='granted'){$('#qmsg').textContent=t('qb_noperm');return}}
+ window.addEventListener('deviceorientationabsolute',qbOri,true);window.addEventListener('deviceorientation',qbOri,true);setTimeout(()=>{if(QH==null){const m=$('#qmsg');if(m)m.textContent=t('qb_nosensor')}},2500)}catch(e){const m=$('#qmsg');if(m)m.textContent=t('qb_nosensor')}}
+function qbStop(){window.removeEventListener('deviceorientationabsolute',qbOri,true);window.removeEventListener('deviceorientation',qbOri,true);QH=null}
+
+// ---------- Тасбеҳ ----------
+const DZ=[['سُبْحَانَ اللهِ',X3('Субҳаналлоҳ','Субханаллах','Субҳаналлоҳ'),X3('Аллоҳ барча нуқсонлардан покдир','Аллах свободен от всех недостатков','Аллоҳ аз ҳама нуқсон пок аст')],
+['الْحَمْدُ لِلَّهِ',X3('Алҳамдулиллаҳ','Альхамдулиллях','Алҳамдулиллоҳ'),X3('Барча ҳамд Аллоҳга','Вся хвала Аллаху','Ҳама ҳамд Аллоҳро')],
+['اللهُ أَكْبَرُ',X3('Аллоҳу акбар','Аллаху акбар','Аллоҳу акбар'),X3('Аллоҳ энг улуғдир','Аллах превыше всего','Аллоҳ бузургтар аст')],
+['لَا إِلَهَ إِلَّا اللهُ',X3('Лā илаҳа иллаллоҳ','Ля иляха илляллах','Ло илоҳа иллаллоҳ'),X3('Аллоҳдан ўзга илоҳ йўқ','Нет божества, кроме Аллаха','Ҷуз Аллоҳ худое нест')],
+['أَسْتَغْفِرُ اللهَ',X3('Астағфируллоҳ','Астагфируллах','Астағфируллоҳ'),X3('Аллоҳдан мағфират сўрайман','Прошу прощения у Аллаха','Аз Аллоҳ омурзиш мехоҳам')],
+['سُبْحَانَ اللهِ وَبِحَمْدِهِ',X3('Субҳаналлоҳи ва биҳамдиҳи','Субханаллахи ва бихамдихи','Субҳаналлоҳи ва биҳамдиҳӣ'),X3('Аллоҳни ҳамди ила поклайман','Пречист Аллах, и хвала Ему','Аллоҳро бо ҳамдаш пок медонам')],
+['لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ',X3('Лā ҳавла ва лā қуввата иллā биллаҳ','Ля хауля ва ля куввата илля билляh','Ло ҳавла ва ло қуввата илло биллоҳ'),X3('Куч ва қувват фақат Аллоҳ билан','Нет силы и мощи, кроме как у Аллаха','Қувват ва тавоно танҳо бо Аллоҳ аст')],
+['اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ',X3('Аллоҳумма солли ъалā Муҳаммад','Аллахумма салли аля Мухаммад','Аллоҳумма салли ало Муҳаммад'),X3('Аллоҳим, Муҳаммадга салавот йўллагин','О Аллах, благослови Мухаммада','Худоё, ба Муҳаммад дуруд фирист')]];
+function X3(uz,ru,tg){return {uz,ru,tg}}
+function tsS(){const d=today(),a=store.get('tsb',{});if(a.d!==d)return {d,c:{},tot:0};return a}
+function vTasbeh(){const i=store.get('tsi',0),z=DZ[i]||DZ[0],g=store.get('tsg',33),S=tsS(),n=S.c[i]||0,pc=g?Math.min(1,(n%g||(n&&n%g===0?g:0))/g):0;
+ return `<p><a href="#bosh">← ${t('tab_home')}</a></p><h2>📿 ${t('ts_t')}</h2>
+ <div class="card tsz"><div class="ar" style="text-align:center;font-size:calc(46px*var(--arz));line-height:1.6">${z[0]}</div><div style="text-align:center"><b>${esc(tx(z[1]))}</b><div class="small">${esc(tx(z[2]))}</div></div></div>
+ <div class="tsl">${DZ.map((x,k)=>`<button class="btn${k===i?' p':''}" data-tsi="${k}"><span class="ar" style="font-size:20px;line-height:1.5">${x[0]}</span></button>`).join('')}</div>
+ <div class="links" style="justify-content:center"><span class="small">${t('ts_goal')}:</span>${[33,99,100,0].map(v=>`<button class="btn${v===g?' p':''}" data-tsg="${v}">${v||'∞'}</button>`).join('')}</div>
+ <button id="tsTap" class="tstap" aria-label="+1"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="90" fill="none" stroke="var(--lapisbg)" stroke-width="12"/><circle id="tsRing" cx="100" cy="100" r="90" fill="none" stroke="var(--lapis)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${(565.5*pc).toFixed(1)} 565.5" transform="rotate(-90 100 100)"/></svg><b id="tsN">${n}</b><span class="small" id="tsG">${g?(Math.floor(n/g))+' × '+g:''}</span></button>
+ <div class="links" style="justify-content:center"><button class="btn" id="tsReset">↺ ${t('ts_reset')}</button></div>
+ <div class="small" style="text-align:center">${t('ts_today',{n:S.tot})}</div>`}
+function tsTap(){const i=store.get('tsi',0),g=store.get('tsg',33),S=tsS();S.c[i]=(S.c[i]||0)+1;S.tot++;store.set('tsb',S);const n=S.c[i];
+ const N=$('#tsN');if(N)N.textContent=n;const G=$('#tsG');if(G)G.textContent=g?Math.floor(n/g)+' × '+g:'';const pc=g?((n%g)||g)/g:0;const R=$('#tsRing');if(R)R.setAttribute('stroke-dasharray',(565.5*pc).toFixed(1)+' 565.5');
+ try{if(navigator.vibrate)navigator.vibrate(g&&n%g===0?[80,60,80]:12)}catch(e){}if(g&&n%g===0)markActive()}
+
+// ---------- Дуолар (Қуръондан) ----------
+const DUC=[['du_c1',['2:201','2:127','2:128','2:250','2:286','3:8','3:16','3:147','3:193','7:23','14:40','14:41','18:10','23:109','25:65','25:74','59:10']],
+['du_c2',['1:6','20:25','20:26','20:27','20:28','20:114','3:8','26:83']],
+['du_c3',['17:24','14:41','25:74','71:28','27:19']],
+['du_c4',['7:23','21:87','3:193','23:118','28:16','3:147']],
+['du_c5',['2:250','21:83','9:129','3:173','2:286','28:24','60:4']],
+['du_c6',['2:201','14:40','26:83','26:85','12:101']]];
+function vDuo(){const c=store.get('duc',0),L=DUC[c]||DUC[0];
+ const head=`<p><a href="#bosh">← ${t('tab_home')}</a></p><h2>🤲 ${t('du_t')}</h2><div class="small">${t('du_note')}</div>
+ <div class="dgrid">${DUC.map((x,k)=>`<button class="dcat${k===c?' on':''}" data-duc="${k}"><span>${['📖','💡','👨‍👩‍👧','🌙','🕊','🌍'][k]}</span>${t(x[0])}</button>`).join('')}</div>`;
+ if(!Q)return head+`<p class="small">${t('loading')}</p>`;
+ return head+`<h3>${t(L[0])}</h3>`+L[1].map(r=>{const [s,a]=r.split(':').map(Number),v=Q[s-1]&&Q[s-1].v[a-1];if(!v)return '';return `<div class="card"><div class="ref">${esc(Q[s-1].tr)} ${r}</div><div class="ar" style="font-size:calc(28px*var(--arz))">${esc(v)}</div><div class="links"><button class="btn p" data-ayk="${r}">${t('play_ayah')}</button><button class="btn" data-ayp2="${r}">🖼 ${t('ay_title')}</button></div></div>`}).join('')}
+
+document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg)return;const d=tg.dataset;
+ if(tg.id==='tsTap'){tsTap();return}
+ if(d.tsi!==undefined){store.set('tsi',+d.tsi);render();return}if(d.tsg!==undefined){store.set('tsg',+d.tsg);render();return}
+ if(tg.id==='tsReset'){const S=tsS(),i=store.get('tsi',0);S.c[i]=0;store.set('tsb',S);render();return}
+ if(tg.id==='qOn'){QON=true;qbStart();tg.disabled=true;return}
+ if(d.duc!==undefined){store.set('duc',+d.duc);render();return}
+ if(d.ayp2){store.set('ayref',d.ayp2);location.hash='oyat';return}});
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
