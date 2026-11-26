@@ -224,7 +224,7 @@ function vSozlama(){const L4=[['uz','Ўзбекча'],['uzl','O‘zbekcha'],['tg
  <div class="card"><b>${t('s_lang')}</b>${seg('lang',L4,lang())}</div>
  <div class="card"><b>${t('s_name')}</b><input id="sName" class="inp" value="${esc(prof.name||'')}" placeholder="${t('ob_name_ph')}"></div>
  <div class="card"><b>${t('s_font')}</b>${seg('font',[[0,'A'],[1,'A+'],[2,'A++'],[3,'A+++']],prof.font||0)}<div class="ar" style="text-align:center">بِسْمِ ٱللَّهِ</div></div>
- <div class="card"><b>${t('s_theme')}</b>${seg('theme',[['auto',t('th_auto')],['light',t('th_light')],['dark',t('th_dark')]],prof.theme||'auto')}</div>
+ <div class="card"><b>${t('s_theme')}</b>${seg('theme',[['auto',t('th_auto')],['light',t('th_light')],['sepia',t('th_sepia')],['dark',t('th_dark')]],prof.theme||'auto')}</div>
  <div class="card"><b>${t('s_goal')}</b>${seg('goal',[[5,'5 '+t('min')],[10,'10 '+t('min')],[20,'20 '+t('min')],[30,'30 '+t('min')]],prof.goal||10)}</div>
  <div class="card"><label class="row"><input type="checkbox" id="sKids"${prof.kids?' checked':''} style="width:24px;height:24px"> ${t('s_kids')}</label></div>
  <div class="card"><b>🎁 ${t('gift_make')}</b><p class="small">${t('gift_note')}</p><input id="gName" class="inp" value="${esc(gl)}" placeholder="${t('your_name')}">
@@ -601,7 +601,7 @@ function ptDay(d){const p=ptPlace();return PT(d,p.lat,p.lon,p.tz,store.get('asrf
 function ptNext(){try{const now=new Date(),T=ptDay(now),p=ptPlace(),nm=(now.getUTCHours()+now.getUTCMinutes()/60+p.tz+24)%24;
  for(const k of ['f','d','a','m','i']){if(T[k]>nm)return {k,n:t(PN[k]),s:hm(T[k]),left:T[k]-nm}}
  const tm=new Date(now);tm.setDate(tm.getDate()+1);const T2=ptDay(tm);return {k:'f',n:t('pt_fajr'),s:hm(T2.f),left:T2.f+24-nm}}catch(e){return null}}
-function ptTick(){document.querySelectorAll('[data-cd]').forEach(e=>{const nw=ptNow();if(nw)e.textContent=fmtLeft(nw.left)});const el=$('#ptLeft');if(!el)return;const nx=ptNext();if(!nx)return;const L=Math.max(0,Math.round(nx.left*60));el.textContent=t('pt_left',{h:Math.floor(L/60),m:L%60});const b=$('#ptNx');if(b)b.textContent=t('pt_next',{p:nx.n,t:nx.s})}
+function ptTick(){document.querySelectorAll('[data-cd]').forEach(e=>{const nw=ptNow();if(nw)e.innerHTML=fmtLeft(nw.left)});const el=$('#ptLeft');if(!el)return;const nx=ptNext();if(!nx)return;const L=Math.max(0,Math.round(nx.left*60));el.textContent=t('pt_left',{h:Math.floor(L/60),m:L%60});const b=$('#ptNx');if(b)b.textContent=t('pt_next',{p:nx.n,t:nx.s})}
 const WD={uz:['Як','Ду','Се','Чо','Па','Жу','Ша'],ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],tg:['Як','Ду','Се','Чо','Па','Ҷу','Ша']};
 function vNamoz(){const p=ptPlace(),now=new Date(),T=ptDay(now),nx=ptNext(),L=nx?Math.max(0,Math.round(nx.left*60)):0;
  const opts=C.CITY.map((c,i)=>`<option value="${i}"${p.i===i?' selected':''}>${esc(lt_(pick(c.slice(0,3))))}</option>`).join('');
@@ -611,7 +611,7 @@ function vNamoz(){const p=ptPlace(),now=new Date(),T=ptDay(now),nx=ptNext(),L=nx
  <div class="small" id="ptMsg"></div>
  ${nx?`<div class="card plan" style="text-align:center"><b id="ptNx" style="font-size:20px">${esc(t('pt_next',{p:nx.n,t:nx.s}))}</b><div class="small" id="ptLeft">${t('pt_left',{h:Math.floor(L/60),m:L%60})}</div></div>`:''}
  <div class="card"><div class="small">${esc(p.n)} · ${hjStr(now)||''}</div>
- ${PK.map(k=>{const nw=ptNow(),on=nw&&nw.k===k;return `<div class="prow pt${on?' ptn':''}"><span>${t(PN[k])}</span>${on?`<span class="small ptc" data-cd>${fmtLeft(nw.left)}</span>`:''}<b>${hm(T[k])}</b></div>`}).join('')}</div>
+ ${PK.map(k=>{const nw=ptNow(),on=nw&&nw.k===k;return `<div class="prow pt${on?' ptn':''}"><span>${t(PN[k])}${on?`<span class="ptc" data-cd>${fmtLeft(nw.left)}</span>`:''}</span><b>${hm(T[k])}</b></div>`}).join('')}</div>
  <div class="card"><b>${t('pt_asr_m')}</b><div class="links"><button class="btn${store.get('asrf',2)===2?' p':''}" data-asrf="2">${t('pt_hanafi')}</button><button class="btn${store.get('asrf',2)===1?' p':''}" data-asrf="1">${t('pt_shafii')}</button></div></div>
  <h3>${t('pt_week')}</h3><div class="card" style="overflow-x:auto"><table class="ptt"><tr><th></th>${PK.map(k=>`<th>${t(PN[k])}</th>`).join('')}</tr>
  ${days.map(([d,X])=>`<tr><td>${WD[L3()][d.getDay()]} ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</td>${PK.map(k=>`<td>${hm(X[k])}</td>`).join('')}</tr>`).join('')}</table></div>
@@ -734,7 +734,7 @@ document.addEventListener('change',e=>{const id=e.target.id;
 document.addEventListener('input',e=>{if(e.target.id==='fqSearch'){store.set('fqq',e.target.value);fqFilter(e.target.value)}});
 
 // ---------- Бош саҳифа: ҳозирги/кейинги намоз ва плиткалар ----------
-const fmtLeft=h=>{const s=Math.max(0,Math.round(h*3600)),H=Math.floor(s/3600),M=Math.floor(s%3600/60),S=s%60;return t('pt_ends',{t:(H?H+' '+t('u_h')+' ':'')+M+' '+t('u_m')+' '+String(S).padStart(2,'0')+' '+t('u_s')})};
+const fmtLeft=h=>{const s=Math.max(0,Math.round(h*3600)),H=Math.floor(s/3600),M=Math.floor(s%3600/60),S=s%60;return t('pt_ends',{t:`<b class="clk">${H}:${String(M).padStart(2,'0')}:${String(S).padStart(2,'0')}</b>`})};
 function ptNow(){try{const now=new Date(),p=ptPlace(),nm=(now.getUTCHours()+now.getUTCMinutes()/60+now.getUTCSeconds()/3600+p.tz+24)%24,T=ptDay(now);
  let cur=null;for(const k of PK)if(T[k]<=nm)cur=k;const seq=PK,nxt=k=>{const i=seq.indexOf(k);return i<seq.length-1?{k:seq[i+1],at:T[seq[i+1]]}:{k:'f',at:ptDay(new Date(now.getTime()+864e5)).f+24}};
  if(!cur)return {k:'i',n:t('pt_isha'),left:T.f-nm};const n=nxt(cur);return {k:cur,n:t(PN[cur]),left:n.at-nm}}catch(e){return null}}
