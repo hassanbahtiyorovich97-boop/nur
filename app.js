@@ -50,7 +50,7 @@ const S=new Audio();S.preload='auto';let sRAF=0,sEnd=0,sOnEnd=null,sOnTick=null,
 function stopSeg(){cancelAnimationFrame(sRAF);if(!S.paused)S.pause();const f=sOnEnd;sOnEnd=null;sOnTick=null;f&&f()}
 function playSeg(s,a,st,en,onTick,onEnd){P.a.pause();stopSeg();const url=audioURL(R[0],s,a);sEnd=en;sOnEnd=onEnd;sOnTick=onTick;
  const go=()=>{S.currentTime=st/1000};S.muted=true;
- if(S.src!==url){S.src=url;sPend=go}else go();
+ if(S.src!==url){S.src=url;sPend=go;cacheAudio(url)}else go();
  pl(S);markActive()}
 S.addEventListener('loadedmetadata',()=>{if(sPend){const f=sPend;sPend=null;f()}});
 S.addEventListener('seeked',()=>{S.muted=false;cancelAnimationFrame(sRAF);const tick=()=>{const ms=S.currentTime*1000;sOnTick&&sOnTick(ms);if(ms>=sEnd||S.paused||S.ended){S.pause();const f=sOnEnd;sOnEnd=null;sOnTick=null;f&&f();return}sRAF=requestAnimationFrame(tick)};sRAF=requestAnimationFrame(tick)});
@@ -108,7 +108,7 @@ function nextLesson(){const a=doneA(),d=done();const na=AL.findIndex((_,i)=>!a[i
  if((prof.level||0)===0&&na>=0)return {h:'alif-'+(na+1),t:tx(AL[na].t)};if(nt>=0)return {h:'dars-'+(nt+1),t:tx(C.L[nt].t)};if(na>=0)return {h:'alif-'+(na+1),t:tx(AL[na].t)};return null}
 
 function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins=Math.floor((days()[today()]||0)/60),goal=prof.goal||10,pc=Math.min(100,Math.round(mins/goal*100));
- const a=Object.keys(doneA()).length,d=Object.keys(done()).length,ms=Object.keys(store.get('msdone',{})).length,m=Object.keys(memo()).length,cs=certs();
+ const a=Object.keys(doneA()).length,d=Object.keys(done()).length,ms=Object.keys(store.get('bkdone',{})).length,MSN=bkBuild()?BK.length:60,m=Object.keys(memo()).length,cs=certs();
  const bar_=(n,tot)=>`<div class="pbar"><b style="width:${Math.round(n/tot*100)}%"></b></div>`;
  return `<h2>${t('salam')}${prof.name?', '+esc(prof.name):''}!</h2>
  ${g&&g.from?`<div class="card gift"><div class="gift-ic">🎁</div><div><b>${esc(t('gift_from',{from:g.from}))}</b><div class="small">${t('dua')}</div></div></div>`:''}
@@ -118,11 +118,11 @@ function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins
  <div class="card plan"><b>${t('today_plan')}</b>
  ${nl?`<a class="btn p lg" href="#${nl.h}">${t('next_lesson')}: ${esc(nl.t)}</a>`:''}
  <a class="btn lg" href="#imtihon-review">${t('review')}</a>
- <a class="btn lg" href="#kitob">${t('book_title')} · ${store.get('mspg',1)}/43</a></div>
+ <a class="btn lg" href="#kitob">${t('book_title')} · ${store.get('bkpg',1)}/${BK?BK.length:'…'}</a></div>
  <div class="card"><b>${t('progress')}</b>
  <div class="prow"><span>${t('course_alif')}</span><span>${a}/${AL.length}</span></div>${bar_(a,AL.length)}
  <div class="prow"><span>${t('course_tajwid')}</span><span>${d}/${C.L.length}</span></div>${bar_(d,C.L.length)}
- <div class="prow"><span>${t('book_title')}</span><span>${ms}/43</span></div>${bar_(ms,43)}
+ <div class="prow"><span>${t('book_title')}</span><span>${ms}/${MSN}</span></div>${bar_(ms,MSN)}
  <div class="prow"><span><a href="#qoidalar">${t('gl_title')}</a></span><span>${Object.keys(glk()).length}/${GLA.length}</span></div>${bar_(Object.keys(glk()).length,GLA.length)}
  ${Object.keys(cs).length?`<div class="links">${Object.keys(cs).map(k=>`<a class="btn" href="#sertifikat-${k}">🏅 ${t('certificate')}: ${t(k==='alif'?'course_alif':'course_tajwid')}</a>`).join('')}</div>`:''}</div>`}
 
@@ -310,7 +310,6 @@ const loadLib=()=>window.pdfjsLib?Promise.resolve():new Promise((ok,no)=>{const 
 
 async function openPdf(buf){await loadLib();PDF=await window.pdfjsLib.getDocument({data:new Uint8Array(buf.slice(0))}).promise}
 
-function vKitob(){return `<h2>${t('book_title')}</h2><div id="kb"><p class="small">${t('loading')}</p></div>`}
 function kbPicker(msg){const kb=$('#kb');if(!kb)return;kb.innerHTML=`<div class="card"><p>${msg||t('book_pick')}</p><input type="file" id="mspdf" accept="application/pdf,.pdf"><p class="small" id="kst"></p></div>`}
 function kbUI(){const kb=$('#kb');if(!kb||!PDF)return;const N=PDF.numPages,n=Math.min(store.get('mspg',1),N),dn=store.get('msdone',{});
  const su=(C.MSS[n]||[]).map(([s0,f,e])=>`<button class="btn p" data-range="${s0}:${f||1}:${e||(Q?Q[s0-1].v.length:1)}">▶ ${esc(Q?Q[s0-1].tr:s0)}${f?` ${f}–${e}`:''}</button>`).join('');
@@ -327,6 +326,63 @@ async function setPdf(f){const k=$('#kst')||$('#st');if(k)k.textContent=t('savin
 const goPage=n=>{if(!PDF)return;store.set('mspg',Math.max(1,Math.min(PDF.numPages,n)));kbUI();window.scrollTo(0,0)};
 
 // ---------- Рендер ----------
+
+
+// ---------- Китоб: «Муаллими соний» усулида (ички мазмун, PDF керак эмас) ----------
+const L28=['ا','ر','ز','م','ت','ن','ي','ب','ك','ل','و','ه','ف','ق','ش','س','ث','ص','ط','ج','خ','ح','غ','ع','د','ض','ذ','ظ'];
+const BKMAP={'ٱ':'ا','أ':'ا','إ':'ا','آ':'ا','ء':'ا','ى':'ي','ة':'ت','ؤ':'وا','ئ':'يا'};
+const bkLets=w=>{const o=new Set();for(const ch of w){const c=BKMAP[ch]||(/[ا-ي]/.test(ch)?ch:'');for(const x of c)o.add(x)}return o};
+const BKS=[1,2,...Array.from({length:24},(_,i)=>91+i)];
+const bkAy=s=>s===2?5:(Q?Q[s-1].v.length:0);
+const BKSN={1:{uz:'Фотиҳа',tg:'Фотиҳа',ru:'Аль-Фатиха'},2:{uz:'Бақара',tg:'Бақара',ru:'Аль-Бакара'},91:{uz:'Шамс',tg:'Шамс',ru:'Аш-Шамс'},92:{uz:'Лайл',tg:'Лайл',ru:'Аль-Ляйль'},93:{uz:'Зуҳо',tg:'Зуҳо',ru:'Ад-Духа'},94:{uz:'Шарҳ',tg:'Шарҳ',ru:'Аш-Шарх'},95:{uz:'Тийн',tg:'Тийн',ru:'Ат-Тин'},96:{uz:'Алақ',tg:'Алақ',ru:'Аль-Аляк'},97:{uz:'Қадр',tg:'Қадр',ru:'Аль-Кадр'},98:{uz:'Баййина',tg:'Баййина',ru:'Аль-Баййина'},99:{uz:'Залзала',tg:'Залзала',ru:'Аз-Зальзаля'},100:{uz:'Одиёт',tg:'Одиёт',ru:'Аль-Адият'},101:{uz:'Қориъа',tg:'Қориъа',ru:'Аль-Кариа'},102:{uz:'Такосур',tg:'Такосур',ru:'Ат-Такасур'},103:{uz:'Аср',tg:'Аср',ru:'Аль-Аср'},104:{uz:'Ҳумаза',tg:'Ҳумаза',ru:'Аль-Хумаза'},105:{uz:'Фил',tg:'Фил',ru:'Аль-Филь'},106:{uz:'Қурайш',tg:'Қурайш',ru:'Курайш'},107:{uz:'Моъун',tg:'Моъун',ru:'Аль-Маун'},108:{uz:'Кавсар',tg:'Кавсар',ru:'Аль-Каусар'},109:{uz:'Кофирун',tg:'Кофирун',ru:'Аль-Кафирун'},110:{uz:'Наср',tg:'Наср',ru:'Ан-Наср'},111:{uz:'Масад',tg:'Масад',ru:'Аль-Масад'},112:{uz:'Ихлос',tg:'Ихлос',ru:'Аль-Ихлас'},113:{uz:'Фалақ',tg:'Фалақ',ru:'Аль-Фаляк'},114:{uz:'Нос',tg:'Нос',ru:'Ан-Нас'}};
+let BK=null,BKW=null;
+function bkBuild(){if(BK||!Q||!TM)return BK;const W=[];
+ for(const s of BKS)for(let a=1;a<=bkAy(s);a++){if(s===2&&a===1)continue;const tm=TM.t[s+':'+a];if(!tm)continue;Q[s-1].v[a-1].split(' ').forEach((w,i)=>{if(tm.some(g=>g[0]===i))W.push({s,a,i,w,L:bkLets(w)})})}
+ BKW=W;const uniq=(arr,n)=>{const seen=new Set();return arr.filter(x=>{if(seen.has(x.w))return false;seen.add(x.w);return true}).slice(0,n)};
+ const P=[{k:'ov'}];
+ L28.forEach((c,k)=>{const kn=new Set(L28.slice(0,k+1));P.push({k:'l',c,idx:k,w:uniq(W.filter(x=>x.L.has(c)&&[...x.L].every(l=>kn.has(l))).sort((a,b)=>a.w.length-b.w.length),10)})});
+ const byLen=(re,n)=>uniq(W.filter(x=>re.test(x.w)).sort((a,b)=>a.w.length-b.w.length),n);
+ P.push({k:'t',ttl:'bk_madd',gl:['madharf','maddt'],w:byLen(/َا|ٰ|ُو|ِي/,12)});
+ P.push({k:'t',ttl:'bk_shadda',gl:['shadda','ghunna'],w:byLen(/ّ/,12)});
+ P.push({k:'t',ttl:'bk_tanwin',gl:['tanwin'],w:byLen(/[ً-ࣰٍٖٗٞ-ࣲ]/,12)});
+ P.push({k:'t',ttl:'bk_waqf',gl:['waqf','waqfs'],w:[]});
+ P.push({k:'t',ttl:'bk_idgham',gl:['idgham','idghamb','iqlab'],w:[]});
+ BKS.forEach(s=>P.push({k:'s',s}));BK=P;return P}
+const bkRefs=()=>{const o=new Set();if(!bkBuild())return [];BK.forEach(p=>{(p.w||[]).forEach(x=>o.add(x.s+':'+x.a));if(p.k==='s')for(let a=1;a<=bkAy(p.s);a++)o.add(p.s+':'+a)});return [...o]};
+const bkTitle=p=>p.k==='ov'?t('bk_overview'):p.k==='l'?t('bk_letter',{x:tx(LF(p.c)[2])}):p.k==='t'?t(p.ttl):t('bk_sura',{x:tx(BKSN[p.s])})+(Q?' · '+Q[p.s-1].ar:'');
+const bkWords=ws=>ws.length?`<h3>${t('bk_words')}</h3><div class="syl bkws">${ws.map(x=>`<button class="btn bkw" data-ww="${x.s}:${x.a}:${x.i}"><span class="ar">${esc(x.w)}</span><small>${x.s}:${x.a}</small></button>`).join('')}</div>`:'';
+function bkPage(p){const H=['َ','ِ','ُ'];
+ if(p.k==='ov')return `<p class="small">${t('bk_names_note')}</p><div class="syl">${L28.map(c=>{const x=LF(c);return `<button class="btn" data-say="${x[1]}"><span class="ar" style="font-size:calc(30px*var(--arz))">${c}</span><small>${esc(tx(x[2]))}</small></button>`}).join('')}</div>`;
+ if(p.k==='l'){const x=LF(p.c),j=x[4],F=t('forms').split('|'),fm=j?[p.c,p.c+'‍','‍'+p.c+'‍','‍'+p.c]:[p.c,'—','—','‍'+p.c],prev=L28.slice(Math.max(0,p.idx-3),p.idx);
+  const combo=prev.flatMap(q=>[q+'َ'+p.c+'َ',p.c+'َ'+q+'ِ',q+'ُ'+p.c+'ْ']);
+  return `<div class="card"><div class="big">${p.c}</div><div style="text-align:center"><b style="font-size:20px">${esc(tx(x[2]))}</b> <span class="ar" style="font-size:22px;line-height:1">${x[1]}</span></div><p>${esc(tx(x[3]))}</p>
+  <div class="forms">${F.map((nm,k)=>`<div><div class="g">${esc(fm[k])}</div><span class="small">${nm}</span></div>`).join('')}</div></div>
+  <h3>${t('bk_syll')}</h3><div class="syl">${H.map(h=>`<button class="btn" data-say="${p.c+h}"><span class="ar">${p.c+h}</span></button>`).join('')}${p.idx?`<button class="btn" data-say="${p.c}ْ"><span class="ar">${'أَ'+p.c+'ْ'}</span></button>`:''}</div>
+  ${combo.length?`<h3>${t('bk_combo')}</h3><div class="syl">${combo.map(c=>`<button class="btn" data-say="${c}"><span class="ar">${c}</span></button>`).join('')}</div>`:''}
+  ${p.w.length?bkWords(p.w):`<div class="note">${t('bk_nowords')}</div>`}`}
+ if(p.k==='t'){const gs=p.gl.map(k=>GLA.find(x=>x.k===k)).filter(Boolean);
+  return gs.map(g=>`<div class="card"><div class="row" style="justify-content:space-between"><b>${esc(tx(g.n))}</b><span class="ar" style="font-size:22px">${g.ar}</span></div><p>${tx(g.d)}</p><a class="btn" href="#qoida-${g.k}">${t('bk_more')} →</a></div>`).join('')+bkWords(p.w)}
+ const n=bkAy(p.s);return `<div class="links"><button class="btn" data-bkmus="${p.s}">${t('bk_open_mushaf')}</button></div>`+Array.from({length:n},(_,i)=>{const a=i+1;return `<div class="card ex" data-ref="${p.s}:${a}">${ayahHTML(p.s+':'+a,null)}<div class="links"><button class="btn p" data-ayk="${p.s}:${a}">▶ ${p.s}:${a}</button></div></div>`}).join('')}
+function vKitob(){if(!bkBuild())return `<h2>${t('book_title')}</h2><p class="small">${t('loading')}</p>`;const N=BK.length,n=Math.min(Math.max(1,store.get('bkpg',1)),N),dn=store.get('bkdone',{}),p=BK[n-1];
+ return `<h2>${t('bk_title')}</h2><div class="note">${t('bk_note')} <a href="https://islom.uz/kitob/1" target="_blank" rel="noopener">${t('bk_orig')}</a></div>
+ <div class="card" id="bkdl"></div>
+ <div class="row" style="margin:8px 0"><button class="btn" id="bkprev" aria-label="←"${n<=1?' disabled':''}>←</button><select id="bkpg" class="inp" style="flex:1;min-width:0">${BK.map((q,i)=>`<option value="${i+1}"${i+1===n?' selected':''}>${dn[i+1]?'✓ ':''}${i+1}. ${esc(bkTitle(q))}</option>`).join('')}</select><button class="btn" id="bknext" aria-label="→"${n>=N?' disabled':''}>→</button></div>
+ <h2>${n}. ${esc(bkTitle(p))}</h2>${bkPage(p)}
+ <div class="row" style="margin-top:14px;justify-content:space-between"><button class="btn p" id="bkok">${dn[n]?t('bk_readdone'):t('bk_read')}</button>${n<N?`<button class="btn" id="bknext2">${t('gl_next')}</button>`:''}</div>`}
+// Аудиони телефонга сақлаш (Service Worker шу кешдан беради)
+const AC='qu-audio';
+async function bkDlStatus(){const el=$('#bkdl');if(!el||!('caches' in window))return el&&el.remove();const refs=bkRefs(),c=await caches.open(AC),keys=new Set((await c.keys()).map(r=>r.url));
+ const urls=refs.map(r=>{const [s,a]=r.split(':').map(Number);return audioURL(R[0],s,a)}),have=urls.filter(u=>keys.has(u)).length;
+ if(BKDL){el.innerHTML=`<b>${t('bk_dl_prog',{n:BKDL.n,m:BKDL.m})}</b><div class="pbar"><b style="width:${Math.round(BKDL.n/BKDL.m*100)}%"></b></div>`;return}
+ if(have>=urls.length){let sz=0;for(const u of urls){const r=await c.match(u);if(r){const b=await r.clone().blob();sz+=b.size}}el.innerHTML=`<span class="small">${t('bk_dl_done',{mb:(sz/1048576).toFixed(0)})}</span>`;return}
+ el.innerHTML=`<button class="btn p" id="bkdlgo" style="width:100%;white-space:normal">${have?t('bk_dl_part',{n:have,m:urls.length}):t('bk_dl',{n:urls.length})}</button>${navigator.onLine===false?`<div class="small">${t('bk_dl_off')}</div>`:''}`}
+let BKDL=null;
+async function bkDownload(){if(BKDL)return;const refs=bkRefs(),c=await caches.open(AC),keys=new Set((await c.keys()).map(r=>r.url));const urls=refs.map(r=>{const [s,a]=r.split(':').map(Number);return audioURL(R[0],s,a)}).filter(u=>!keys.has(u));
+ BKDL={n:0,m:urls.length};bkDlStatus();let i=0;
+ const worker=async()=>{while(i<urls.length){const u=urls[i++];try{const r=await fetch(u,{mode:'cors'});if(r.ok)await c.put(u,r)}catch(e){}BKDL.n++;if(BKDL.n%5===0||BKDL.n===BKDL.m)bkDlStatus()}};
+ await Promise.all([worker(),worker(),worker()]);BKDL=null;bkDlStatus()}
+const cacheAudio=u=>{if(!('caches' in window)||navigator.onLine===false)return;caches.open(AC).then(c=>c.match(u).then(m=>{if(!m)fetch(u,{mode:'cors'}).then(r=>{if(r.ok)c.put(u,r)}).catch(()=>{})}))};
+const bkGo=n=>{store.set('bkpg',Math.max(1,Math.min(BK?BK.length:1,n)));render()};
 
 // ---------- Қоидалар луғати ----------
 const GLA=C.GL.flatMap((g,gi)=>g.i.map(x=>({k:x[0],ar:x[1],n:x[2],s:x[3],d:x[4],ex:x[5],L:x[6],g:gi})));
@@ -369,7 +425,7 @@ function render(){applyProf();const h=(location.hash||'#bosh').slice(1);let v,ta
  else if(h==='glmashq'){v=vGlTest();tab='qoidalar'}
  else v=({bosh:vBosh,darslar:vDarslar,qoidalar:vQoidalar,mushaf:vMushaf,ustozlar:vUstozlar,mahraj:vMahraj,tekshiruv:vTek,kitob:vKitob,sozlama:vSozlama}[h]||vBosh)();
  navi(tab);$('#view').innerHTML=v;window.scrollTo(0,0);bar();
- if(tab==='kitob')bookInit();
+ if(tab==='kitob')bkDlStatus();
  if(/^sertifikat-/.test(h)){const cv=$('#cert');if(cv){drawCert(cv,h.split('-')[1]);const a=$('#certSave');try{a.href=cv.toDataURL('image/png')}catch(e){}}}
  $('#ob').innerHTML=prof.onb?'':obHTML()}
 
@@ -378,6 +434,11 @@ const say=tt=>{try{const ss=window.speechSynthesis;if(!ss)return false;const v=s
 try{window.speechSynthesis&&window.speechSynthesis.getVoices()}catch(e){}
 function answer(btn,ok,box,correctSel){box.querySelectorAll('.opt,.aq').forEach(b=>{b.disabled=true;if(correctSel(b))b.classList.add('ok')});if(!ok)btn.classList.add('no');const r=box.querySelector('.qres');if(r)r.textContent=ok?t('correct'):t('wrong');if(ok)stars(btn);markActive()}
 document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k],.w,.mk');if(!tg)return;const d=tg.dataset;
+ if(tg.id==='bkprev'){bkGo(store.get('bkpg',1)-1);return}if(tg.id==='bknext'||tg.id==='bknext2'){bkGo(store.get('bkpg',1)+1);return}
+ if(tg.id==='bkok'){const dd=store.get('bkdone',{}),n=store.get('bkpg',1);if(dd[n])delete dd[n];else{dd[n]=1;stars(tg)}store.set('bkdone',dd);markActive();if(dd[n]&&BK&&n<BK.length)bkGo(n+1);else render();return}
+ if(tg.id==='bkdlgo'){bkDownload();return}
+ if(d.ww){const [s,a,w]=d.ww.split(':').map(Number);tg.classList.add('kw');if(!playWords(s,a,[w],null,()=>tg.classList.remove('kw')))tg.classList.remove('kw');return}
+ if(d.bkmus){store.set('sura',+d.bkmus);location.hash='mushaf';return}
  if(tg.classList.contains('glo')){if(GT.ans)return;GT.ans=true;const q=GT.qs[GT.i],ok=d.v===q.x.k;if(ok){GT.score++;const kk=glk();kk[q.x.k]=1;store.set('glk',kk)}answer(tg,ok,tg.closest('.card'),b=>b.dataset.v===q.x.k);$('#glMore').classList.remove('hidden');return}
  if(tg.id==='glNext'){GT.i++;GT.ans=false;render();return}
  if(tg.id==='glAgain'){GT=null;render();return}
@@ -417,7 +478,7 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k]
  if(tg.id==='gCopy'){copy(giftLink(($('#gName').value||'').trim()));return}
  if(tg.id==='rst'){$('#rstq').innerHTML=`<p>${t('reset_q')}</p><div class="links"><button class="btn p" id="rstY">${t('yes')}</button><button class="btn" id="rstN">${t('no')}</button></div>`;return}
  if(tg.id==='rstN'){$('#rstq').innerHTML='';return}
- if(tg.id==='rstY'){['done','adone','memo','cnt','certs','days','msdone','mspg'].forEach(k=>store.set(k,k==='mspg'?1:{}));render();return}
+ if(tg.id==='rstY'){['done','adone','memo','cnt','certs','days','bkdone','bkpg','glk'].forEach(k=>store.set(k,k==='bkpg'?1:{}));render();return}
  if(tg.id==='certShare'){const cv=$('#cert');cv.toBlob(b=>{const f=new File([b],'sertifikat.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:t('certificate')}).catch(()=>{});else{const a=$('#certSave');a.click()}});return}
  if(tg.id==='pplay'){P.a.paused?pl(P.a):P.a.pause();return}
  if(tg.id==='pnext'){if(P.i<P.list.length-1){P.i++;P.left=+store.get('rep',1);startCur()}else{const [s,a]=P.list[P.i];if(Q&&a<Q[s-1].v.length){P.list=[[s,a+1]];P.i=0;P.left=+store.get('rep',1);startCur()}}return}
@@ -430,7 +491,7 @@ function copy(u){try{navigator.clipboard.writeText(u).then(()=>{const b=$('#gCop
 document.addEventListener('input',e=>{if(e.target.id==='glSearch'){const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.glc').forEach(c=>c.style.display=!q||c.dataset.f.includes(q)?'':'none');document.querySelectorAll('.glg').forEach(g=>g.style.display=[...g.querySelectorAll('.glc')].some(c=>c.style.display!=='none')?'':'none');return}if(e.target.id==='gName'){store.set('giftName',e.target.value);$('#gLink').textContent=giftLink(e.target.value.trim())}if(e.target.id==='sName'){prof.name=e.target.value.trim();store.set('prof',prof)}});
 document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='sKids'){prof.kids=e.target.checked;saveProf();return}
- if(id==='mspg'){goPage(+e.target.value);return}if(id==='mspdf'&&e.target.files[0]){setPdf(e.target.files[0]);return}
+ if(id==='mspg'){goPage(+e.target.value);return}if(id==='bkpg'){bkGo(+e.target.value);return}if(id==='mspdf'&&e.target.files[0]){setPdf(e.target.files[0]);return}
  if(id==='prep'){store.set('rep',+e.target.value);P.left=+e.target.value;bar();return}if(id==='prate'){store.set('rate',+e.target.value);P.a.playbackRate=+e.target.value;return}
  if(id==='ts'){store.set('tref',e.target.value+':1');render();return}if(id==='ta'){store.set('tref',$('#ts').value+':'+e.target.value);render();return}
  if(id==='sura'){store.set('sura',+e.target.value);render();return}if(id==='hide'){store.set('hide',e.target.checked);render()}});
