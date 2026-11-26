@@ -849,7 +849,7 @@ const TRK={uz:['uzbek_sadiq',{uz:'Шайх Муҳаммад Содиқ Муҳа�
 const trOn=()=>!!store.get('trOn',false);
 const trL=()=>{const v=store.get('trL','');return TRK[v]?v:L3()};
 const TRM={};let TRV={};
-function trBar(){const on=trOn(),l=trL();return `<div class="row trbar"><label class="row"><input type="checkbox" id="trOn"${on?' checked':''} style="width:22px;height:22px"> 🌐 ${t('tr_on')}</label>${on?`<select id="trL" class="inp" style="width:auto">${['uz','ru','tg'].map(k=>`<option value="${k}"${k===l?' selected':''}>${t('tr_'+k)}</option>`).join('')}</select>`:''}</div>${on&&store.get('hide',false)?`<div class="small">${t('tr_hidden')}</div>`:''}`}
+function trBar(){const on=trOn(),l=trL();return `<div class="row trbar"><label class="row"><input type="checkbox" id="trOn"${on?' checked':''} style="width:22px;height:22px"> 🌐 ${t('tr_on')}</label><label class="row"><input type="checkbox" id="wbwOn"${wbwOn()?' checked':''} style="width:22px;height:22px"> 🔤 ${t('wbw_on')}</label>${on?`<select id="trL" class="inp" style="width:auto">${['uz','ru','tg'].map(k=>`<option value="${k}"${k===l?' selected':''}>${t('tr_'+k)}</option>`).join('')}</select>`:''}</div>${on&&store.get('hide',false)?`<div class="small">${t('tr_hidden')}</div>`:''}`}
 function trCredit(){const l=trL(),k=TRK[l];return `<div class="note small" id="trCredit">${t('tr_credit',{a:esc(tx(k[1]))})} <a href="https://quranenc.com/${l==='ru'?'ru':l==='tg'?'tg':'uz'}/browse/${k[0]}/${store.get('sura',1)}" target="_blank" rel="noopener">QuranEnc.com</a>${TRV[k[0]]?' · '+t('tr_ver',{v:esc(TRV[k[0]])}):''}. ${t('tr_note')}</div>`}
 async function trGet(key,s){const id=key+':'+s;if(TRM[id])return TRM[id];const url=`https://quranenc.com/api/v1/translation/sura/${key}/${s}`;let j=null;
  try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();try{if('caches' in window){const c=await caches.open('qu-audio');c.put(url,new Response(JSON.stringify(j),{headers:{'Content-Type':'application/json'}}))}}catch(_){}}}catch(e){}
@@ -906,6 +906,34 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg
  if(d.tw){const [s,a,w]=d.tw.split(':').map(Number);tg.classList.add('kw');if(!playWords(s,a,[w],null,()=>tg.classList.remove('kw'))){tg.classList.remove('kw');playList([[s,a]],0)}return}
  if(tg.id==='tfMine'){const au=document.querySelector('#mine audio');if(au){au.currentTime=0;au.play()}return}
  if(tg.id==='rec2'){const r=$('#rec');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.click()}return}});
+
+// ---------- Сўзма-сўз маъно (Quran.com API, инглизча) ----------
+const wbwOn=()=>!!store.get('wbwOn',false);const WBM={};
+async function wbwGet(s){if(WBM[s])return WBM[s];const out={};let page=1,guard=0;
+ const ca='caches' in window?await caches.open('qu-audio').catch(()=>null):null;
+ while(page&&guard++<12){const url=`https://api.quran.com/api/v4/verses/by_chapter/${s}?words=true&language=en&word_fields=text_uthmani&per_page=50&page=${page}`;let j=null;
+  try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();if(ca)ca.put(url,new Response(JSON.stringify(j),{headers:{'Content-Type':'application/json'}})).catch(()=>{})}}catch(e){}
+  if(!j&&ca){const m=await ca.match(url).catch(()=>null);if(m)j=await m.json()}
+  if(!j||!j.verses)throw new Error('wbw');
+  j.verses.forEach(v=>{out[v.verse_number]=(v.words||[]).filter(w=>w.char_type_name==='word').map(w=>({ar:w.text_uthmani||w.text||'',n:arNorm(w.text_uthmani||w.text||''),m:(w.translation&&w.translation.text)||'',tl:(w.transliteration&&w.transliteration.text)||'',au:w.audio_url||''}))});
+  page=j.pagination&&j.pagination.next_page}
+ WBM[s]=out;return out}
+// бизнинг матндаги сўз рақамини API сўзига мослаш
+function wbwMatch(tokens,api,wi){const ours=tokens.map((x,i)=>({i,n:arNorm(x)})).filter(x=>x.n);const k=ours.findIndex(x=>x.i===wi);if(k<0)return null;
+ if(ours.length===api.length&&wsim(ours[k].n,api[k].n)>=0.5)return api[k];
+ let best=null,bs=0;api.forEach((w,j)=>{const sc=wsim(ours[k].n,w.n)-Math.abs(j/Math.max(1,api.length-1)-k/Math.max(1,ours.length-1))*0.5;if(sc>bs){bs=sc;best=w}});return bs>0.4?best:null}
+function wbwPop(html){let p=$('#wbwPop');if(!p){p=document.createElement('div');p.id='wbwPop';document.body.appendChild(p)}p.innerHTML=`<button class="wbx" id="wbwX" aria-label="close">✕</button>${html}`;p.classList.add('on')}
+async function wbwShow(s,a,wi){const tok=(Q&&Q[s-1].v[a-1]||'').split(' ');const w0=tok[wi]||'';
+ wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('loading')}</div>`);
+ try{const d=await wbwGet(s),m=wbwMatch(tok,d[a]||[],wi);
+  if(!m){wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('wbw_none')}</div>`);return}
+  wbwPop(`<div class="ar wbar">${esc(w0)}</div>${m.tl?`<div class="wbtl">${esc(m.tl)}</div>`:''}<div class="wbm"><span class="tag">EN</span> ${esc(m.m)}</div>
+   <div class="links"><button class="btn p" data-ww2="${s}:${a}:${wi}">▶ ${t('wbw_play')}</button></div><div class="small" style="opacity:.7">${t('wbw_src')}</div>`)}
+ catch(e){wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('wbw_fail')}</div>`)}}
+document.addEventListener('click',e=>{if(e.target.closest('#wbwX')){const p=$('#wbwPop');if(p)p.classList.remove('on');return}
+ const b=e.target.closest('[data-ww2]');if(b){const [s,a,w]=b.dataset.ww2.split(':').map(Number);if(!playWords(s,a,[w]))playList([[s,a]],0);return}
+ const w=e.target.closest('.ayah .w');if(w&&wbwOn()&&!store.get('hide',false)){wbwShow(+w.dataset.s,+w.dataset.a2,+w.dataset.w)}});
+document.addEventListener('change',e=>{if(e.target.id==='wbwOn'){store.set('wbwOn',e.target.checked);const p=$('#wbwPop');if(p)p.classList.remove('on');render()}});
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
