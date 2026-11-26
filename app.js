@@ -890,15 +890,15 @@ function teacherHTML(s,a,A,B,sr){const raw=(Q&&Q[s-1].v[a-1]||'').split(' '),wor
  if(sr&&sr.ok&&sr.txt){const hw=sr.txt.split(/\s+/).map(arNorm).filter(Boolean),st=alignAyah(words,hw),bad=words.map((w,k)=>({...w,...st[k]})).filter(x=>!x.ok);score=Math.round((words.length-bad.length)/words.length*100);
   head=bad.length===0?t('tf_all_ok'):bad.length<=2?t('tf_few',{n:bad.length}):t('tf_many',{n:bad.length,m:words.length});
   body=`<div class="ar tfay">${raw.map((w,i)=>{const b=bad.find(x=>x.i===i),isW=words.some(x=>x.i===i);return isW?`<button class="tfw ${b?'no':'ok'}" data-tw="${s}:${a}:${i}">${esc(w)}</button>`:esc(w)}).join(' ')}</div><p class="small">${t('tf_tap')}</p>`+
-   bad.slice(0,8).map(x=>`<div class="tfcard"><div><b>${x.heard?t('tf_said',{h:esc(x.heard)}):t('tf_missed')}</b></div><div class="row" style="align-items:center;gap:10px;margin-top:6px"><span class="ar" style="font-size:calc(34px*var(--arz));line-height:1.5">${esc(x.w)}</span><button class="btn p" data-tw="${s}:${a}:${x.i}">▶ ${t('tf_listen',{r:esc(rec_)})}</button></div><div class="small">${t('tf_repeat')}</div></div>`).join('')}
+   bad.slice(0,8).map(x=>`<div class="tfcard"><div><b>${x.heard?t('tf_said',{h:esc(x.heard)}):t('tf_missed')}</b></div><div class="row" style="align-items:center;gap:10px;margin-top:6px"><span class="ar" style="font-size:calc(34px*var(--arz));line-height:1.5">${esc(x.w)}</span><button class="btn p" data-tw="${s}:${a}:${x.i}">▶ ${t('tf_listen')}</button></div><div class="small">${t('tf_repeat')}</div></div>`).join('')}
  else if(sr&&sr.ok){head=t('tf_silent')}
  else head=t('tf_noasr');
- if(A&&B){const r=A.rate/B.rate;if(r>1.25)tips.push(t('tf_fast',{x:Math.round((r-1)*100)}));else if(r<0.6)tips.push(t('tf_slow'));
-  const am=A.long.length?Math.max(...A.long.map(o=>o.h)):0,bm=B.long.length?Math.max(...B.long.map(o=>o.h)):0;
+ if(A&&B){const r=A.rate/B.rate;if(r>1.25)tips.push(t('tf_fast',{x:Math.min(100,Math.round((r-1)*100))}));else if(r<0.6)tips.push(t('tf_slow'));
+  const am=A.long.length?Math.max(...A.long.map(o=>o.h)):0,bm=Math.min(6,B.long.length?Math.max(...B.long.map(o=>o.h)):0);
   if(bm>=4&&am<bm-1.5)tips.push(t('tf_madd',{a:am,b:bm}));else if(A.long.length<B.long.length-1)tips.push(t('tf_fewlong'));
   if(!tips.length)tips.push(t('tf_tempo_ok'))}
  const all=score===100&&tips.length===1&&A&&B&&tips[0]===t('tf_tempo_ok');
- return `<div class="card tfbox"><div class="tfhead"><span class="tfav">👳</span><div><div class="small">${t('tf_from',{r:esc(rec_)})}</div><b style="font-size:18px">${esc(head)}</b>${score!=null?`<div class="pbar" style="margin-top:6px"><b style="width:${score}%"></b></div><div class="small">${t('tf_score',{n:score})}</div>`:''}</div></div>
+ return `<div class="card tfbox"><div class="tfhead"><span class="tfav">📊</span><div><div class="small">${t('tf_from',{r:esc(rec_)})}</div><b style="font-size:18px">${esc(head)}</b>${score!=null?`<div class="pbar" style="margin-top:6px"><b style="width:${score}%"></b></div><div class="small">${t('tf_score',{n:score})}</div>`:''}</div></div>
  ${body}${tips.length?`<div class="tfcard"><b>${t('tf_tempo')}</b><ul style="margin:6px 0 0;padding-left:18px">${tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
  <div class="links"><button class="btn p" data-play="${s}:${a}">▶ ${t('tf_whole',{r:esc(rec_)})}</button><button class="btn" id="tfMine">▶ ${t('tf_mine')}</button><button class="btn" id="rec2">🎙 ${t('tf_again')}</button></div>
  ${all?`<div class="note">🌟 ${t('tf_next')}</div>`:''}<div class="note small">${t('tf_note')}</div></div>`}
