@@ -1,4 +1,4 @@
-const C='qu-v7';
+const C='qu-v8';
 const A=['./','./index.html','./app.js','./i18n.js','./content.js','./timings.json','./manifest.webmanifest'];
 const CDN=['fonts.googleapis.com','fonts.gstatic.com','cdnjs.cloudflare.com','cdn.jsdelivr.net'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)));self.skipWaiting()});

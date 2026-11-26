@@ -95,8 +95,8 @@ const listen=(s,a,chk)=>{const x=prec();return `<button class="btn p" data-play=
 function stars(el){if(!document.body.classList.contains('kids')||!el)return;const r=el.getBoundingClientRect();for(let i=0;i<6;i++){const s=document.createElement('span');s.className='star';s.textContent='⭐';s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+window.scrollY)+'px';s.style.setProperty('--dx',(Math.random()*160-80)+'px');s.style.setProperty('--dy',(-60-Math.random()*90)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),900)}}
 
 // ---------- Навигация ----------
-const ico={bosh:'<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>',darslar:'<path d="M4 5h7a3 3 0 0 1 3 3v11a2 2 0 0 0-2-2H4zM20 5h-5a3 3 0 0 0-3 3"/>',mushaf:'<path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/>',mahraj:'<path d="M7 9a5 5 0 0 1 10 0v3a5 5 0 0 1-10 0z"/><path d="M12 17v3"/>',kitob:'<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>',tekshiruv:'<path d="M3 12h3l2-6 4 12 3-9 2 3h4"/>'};
-const TABS=[['bosh','tab_home'],['darslar','tab_lessons'],['mushaf','tab_mushaf'],['mahraj','tab_makhraj'],['kitob','tab_book'],['tekshiruv','tab_check']];
+const ico={bosh:'<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>',darslar:'<path d="M4 5h7a3 3 0 0 1 3 3v11a2 2 0 0 0-2-2H4zM20 5h-5a3 3 0 0 0-3 3"/>',mushaf:'<path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6M9 14h6"/>',mahraj:'<path d="M7 9a5 5 0 0 1 10 0v3a5 5 0 0 1-10 0z"/><path d="M12 17v3"/>',kitob:'<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>',tekshiruv:'<path d="M3 12h3l2-6 4 12 3-9 2 3h4"/>',qoidalar:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h1M4 12h1M4 18h1"/>'};
+const TABS=[['bosh','tab_home'],['darslar','tab_lessons'],['qoidalar','tab_rules'],['mushaf','tab_mushaf'],['mahraj','tab_makhraj'],['kitob','tab_book'],['tekshiruv','tab_check']];
 function navi(cur){$('#nav').innerHTML=TABS.map(([h,k])=>`<a href="#${h}" class="${cur===h?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ico[h]}</svg>${t(k)}</a>`).join('');
  $('#hdr').innerHTML=`<div><h1>${t('app')}</h1><div class="sub">${t('tagline')}</div></div><div class="row"><a class="btn" href="#ustozlar">${t('reciters')}</a><a class="btn" href="#sozlama" aria-label="${t('settings')}">⚙</a></div>`}
 
@@ -123,6 +123,7 @@ function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins
  <div class="prow"><span>${t('course_alif')}</span><span>${a}/${AL.length}</span></div>${bar_(a,AL.length)}
  <div class="prow"><span>${t('course_tajwid')}</span><span>${d}/${C.L.length}</span></div>${bar_(d,C.L.length)}
  <div class="prow"><span>${t('book_title')}</span><span>${ms}/43</span></div>${bar_(ms,43)}
+ <div class="prow"><span><a href="#qoidalar">${t('gl_title')}</a></span><span>${Object.keys(glk()).length}/${GLA.length}</span></div>${bar_(Object.keys(glk()).length,GLA.length)}
  ${Object.keys(cs).length?`<div class="links">${Object.keys(cs).map(k=>`<a class="btn" href="#sertifikat-${k}">🏅 ${t('certificate')}: ${t(k==='alif'?'course_alif':'course_tajwid')}</a>`).join('')}</div>`:''}</div>`}
 
 function vDarslar(){const d=done(),da=doneA(),cs=certs();
@@ -326,12 +327,47 @@ async function setPdf(f){const k=$('#kst')||$('#st');if(k)k.textContent=t('savin
 const goPage=n=>{if(!PDF)return;store.set('mspg',Math.max(1,Math.min(PDF.numPages,n)));kbUI();window.scrollTo(0,0)};
 
 // ---------- Рендер ----------
+
+// ---------- Қоидалар луғати ----------
+const GLA=C.GL.flatMap((g,gi)=>g.i.map(x=>({k:x[0],ar:x[1],n:x[2],s:x[3],d:x[4],ex:x[5],L:x[6],g:gi})));
+const glk=()=>store.get('glk',{});
+const strip=h=>String(h).replace(/<[^>]+>/g,'');
+function vQoidalar(){const kn=glk(),n=GLA.filter(x=>kn[x.k]).length;
+ return `<h2>${t('gl_title')}</h2><div class="note">${t('gl_note')}</div>
+ <div class="card"><div class="prow"><span>${t('gl_learned')}</span><span>${n}/${GLA.length}</span></div><div class="pbar"><b style="width:${Math.round(n/GLA.length*100)}%"></b></div>
+ <a class="btn p lg" href="#glmashq" style="margin-top:10px">🎯 ${t('gl_test')}</a></div>
+ <input id="glSearch" class="inp" type="search" placeholder="${t('gl_search')}" style="width:100%;margin:6px 0 4px">
+ ${C.GL.map((g,gi)=>`<div class="glg"><h3>${esc(tx(g.g))}</h3><div class="grid">${GLA.filter(x=>x.g===gi).map(x=>`<a class="card lesson glc" href="#qoida-${x.k}" data-f="${esc((tx(x.n)+' '+strip(tx(x.s))+' '+x.ar+' '+x.k).toLowerCase())}"><span class="num${kn[x.k]?' done':''}">${kn[x.k]?'✓':'•'}</span><span style="flex:1"><b>${esc(tx(x.n))}</b><br><span class="small">${esc(strip(tx(x.s)))}</span></span><span class="ar glar">${x.ar}</span></a>`).join('')}</div></div>`).join('')}`}
+function vQoida(k){const i=GLA.findIndex(x=>x.k===k);if(i<0)return vQoidalar();const x=GLA[i],kn=glk(),p=GLA[i-1],nx=GLA[i+1];let ex='';
+ if(x.ex.r){const [li_,ei]=x.ex.r,e=C.L[li_].ex[ei],[s]=e[0].split(':');
+  ex=`${stageHTML()}<h3>${t('gl_example')}</h3><div class="card ex" data-ref="${e[0]}"><div class="ref">${e[0]} · ${esc(sname(+s))}</div>${ayahHTML(e[0],e[1])}<div>${esc(tx(e[2]))}</div><div class="links"><button class="btn p" data-rule="${li_}:${ei}">${t('play_rule')}</button><button class="btn" data-ayk="${e[0]}">${t('play_ayah')}</button></div></div>`}
+ else ex=`<h3>${t('gl_example')}</h3><div class="card"><div class="big" style="font-size:calc(52px*var(--arz))">${x.ex.show}</div><div class="links" style="justify-content:center"><button class="btn p" data-say="${x.ex.say}">🔊 ${esc(x.ex.show)}</button></div></div>`;
+ const lk=x.L?`<a class="btn" href="#${x.L}">${x.L==='mahraj'?t('tab_makhraj'):x.L==='ustozlar'?t('reciters'):t('gl_open_lesson')}</a>`:'';
+ return `<p><a href="#qoidalar">${t('gl_all')}</a> · <span class="small">${esc(tx(C.GL[x.g].g))}</span></p>
+ <div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">${esc(tx(x.n))}</h2><span class="ar" style="font-size:calc(30px*var(--arz));line-height:1.4">${x.ar}</span></div>
+ <p><b>${tx(x.s)}</b></p><p>${tx(x.d)}</p><div class="links"><button class="btn${kn[x.k]?'':' p'}" id="glKnow" data-k="${x.k}">${kn[x.k]?t('gl_known'):t('gl_know')}</button>${lk}</div></div>
+ ${ex}
+ <div class="row" style="margin-top:14px;justify-content:space-between">${p?`<a class="btn" href="#qoida-${p.k}">${t('gl_prev')}</a>`:'<span></span>'}${nx?`<a class="btn" href="#qoida-${nx.k}">${t('gl_next')}</a>`:`<a class="btn p" href="#glmashq">🎯 ${t('gl_test')}</a>`}</div>`}
+let GT=null;
+function glStart(){const sh=a=>a.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);const pick=sh(GLA).slice(0,10);
+ GT={i:0,score:0,ans:false,qs:pick.map((x,j)=>{const ty=j%3,oth=sh(GLA.filter(o=>o.k!==x.k)).slice(0,3),opts=sh([x,...oth]);return {ty,x,opts}})}}
+function vGlTest(){if(!GT)glStart();if(GT.i>=GT.qs.length){const pct=Math.round(GT.score/GT.qs.length*100);
+  return `<p><a href="#qoidalar">${t('gl_all')}</a></p><h2>${t('gl_test')}</h2><div class="card" style="text-align:center"><div class="kv" style="font-size:40px">${pct>=80?'🏆':pct>=50?'👍':'📖'}</div><h3>${t('gl_result',{n:GT.score,m:GT.qs.length})}</h3><div class="links" style="justify-content:center"><button class="btn p" id="glAgain">${t('gl_again')}</button><a class="btn" href="#qoidalar">${t('gl_all')}</a></div></div>`}
+ const q=GT.qs[GT.i],x=q.x,qt=q.ty===0?t('gl_q_what',{x:tx(x.n)}):q.ty===1?t('gl_q_which',{x:strip(tx(x.s))}):t('gl_q_ar',{x:x.ar});
+ const lab=o=>q.ty===0?strip(tx(o.s)):tx(o.n);
+ return `<p><a href="#qoidalar">${t('gl_all')}</a></p><h2>${t('gl_test')}</h2><div class="pbar"><b style="width:${Math.round(GT.i/GT.qs.length*100)}%"></b></div><p class="small">${GT.i+1} / ${GT.qs.length}</p>
+ <div class="card"><b ${q.ty===2?'class="ar" style="font-size:calc(30px*var(--arz))"':''}>${esc(q.ty===2?x.ar:qt)}</b>${q.ty===2?`<div>${esc(qt)}</div>`:''}
+ ${q.opts.map(o=>`<button class="btn opt glo" data-v="${o.k}">${esc(lab(o))}</button>`).join('')}<div class="small qres"></div>
+ <div class="links hidden" id="glMore"><a class="btn" href="#qoida-${x.k}">${esc(tx(x.n))} →</a><button class="btn p" id="glNext">${t('gl_next_q')}</button></div></div>`}
+
 function render(){applyProf();const h=(location.hash||'#bosh').slice(1);let v,tab=h;
  if(/^dars-\d+$/.test(h)){v=vDars(+h.split('-')[1]-1);tab='darslar'}
  else if(/^alif-\d+$/.test(h)){v=vAlif(+h.split('-')[1]-1);tab='darslar'}
  else if(/^imtihon-(alif|tajwid|review)$/.test(h)){v=vExam(h.split('-')[1]);tab=h.endsWith('review')?'bosh':'darslar'}
  else if(/^sertifikat-(alif|tajwid)$/.test(h)){v=vCert(h.split('-')[1]);tab='bosh'}
- else v=({bosh:vBosh,darslar:vDarslar,mushaf:vMushaf,ustozlar:vUstozlar,mahraj:vMahraj,tekshiruv:vTek,kitob:vKitob,sozlama:vSozlama}[h]||vBosh)();
+ else if(/^qoida-[a-z]+$/.test(h)){v=vQoida(h.slice(6));tab='qoidalar'}
+ else if(h==='glmashq'){v=vGlTest();tab='qoidalar'}
+ else v=({bosh:vBosh,darslar:vDarslar,qoidalar:vQoidalar,mushaf:vMushaf,ustozlar:vUstozlar,mahraj:vMahraj,tekshiruv:vTek,kitob:vKitob,sozlama:vSozlama}[h]||vBosh)();
  navi(tab);$('#view').innerHTML=v;window.scrollTo(0,0);bar();
  if(tab==='kitob')bookInit();
  if(/^sertifikat-/.test(h)){const cv=$('#cert');if(cv){drawCert(cv,h.split('-')[1]);const a=$('#certSave');try{a.href=cv.toDataURL('image/png')}catch(e){}}}
@@ -342,6 +378,10 @@ const say=tt=>{try{const ss=window.speechSynthesis;if(!ss)return false;const v=s
 try{window.speechSynthesis&&window.speechSynthesis.getVoices()}catch(e){}
 function answer(btn,ok,box,correctSel){box.querySelectorAll('.opt,.aq').forEach(b=>{b.disabled=true;if(correctSel(b))b.classList.add('ok')});if(!ok)btn.classList.add('no');const r=box.querySelector('.qres');if(r)r.textContent=ok?t('correct'):t('wrong');if(ok)stars(btn);markActive()}
 document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k],.w,.mk');if(!tg)return;const d=tg.dataset;
+ if(tg.classList.contains('glo')){if(GT.ans)return;GT.ans=true;const q=GT.qs[GT.i],ok=d.v===q.x.k;if(ok){GT.score++;const kk=glk();kk[q.x.k]=1;store.set('glk',kk)}answer(tg,ok,tg.closest('.card'),b=>b.dataset.v===q.x.k);$('#glMore').classList.remove('hidden');return}
+ if(tg.id==='glNext'){GT.i++;GT.ans=false;render();return}
+ if(tg.id==='glAgain'){GT=null;render();return}
+ if(tg.id==='glKnow'){const kk=glk();if(kk[d.k])delete kk[d.k];else{kk[d.k]=1;stars(tg)}store.set('glk',kk);markActive();render();return}
  if(tg.classList.contains('w')&&d.s){const hb=tg.closest('.hide .ar');if(hb&&!hb.classList.contains('show')){hb.classList.add('show');return}const s=+d.s,a=+d.a2,w=+d.w;if(TM&&TM.t[s+':'+a]){tg.classList.add('kw');playWords(s,a,[w],null,()=>tg.classList.remove('kw'))}return}
  if(d.ob){if(d.ob==='lang'){prof.lang=d.v;OB=1}else if(d.ob==='name'){prof.name=($('#obName').value||'').trim();OB=2}else if(d.ob==='level'){prof.level=+d.v;OB=3}else if(d.ob==='goal'){prof.goal=+d.v;prof.onb=1;OB=0;saveProf();location.hash=nextLesson()?nextLesson().h:'bosh';render();return}saveProf();$('#ob').innerHTML=obHTML();return}
  if(d.rule){const [li_,ei]=d.rule.split(':').map(Number),l=C.L[li_],[ref,hl,n]=l.ex[ei],[s,a]=ref.split(':').map(Number),w=Q?Q[s-1].v[a-1].split(' '):[],box=tg.closest('.ex');
@@ -387,7 +427,7 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k]
  if(tg.id==='mszoom'){store.set('msz',store.get('msz',1)>1?1:2);kbUI();return}
  if(tg.id==='msok'){const dd=store.get('msdone',{}),n=store.get('mspg',1);if(dd[n])delete dd[n];else{dd[n]=1;stars(tg)}store.set('msdone',dd);markActive();kbUI();return}});
 function copy(u){try{navigator.clipboard.writeText(u).then(()=>{const b=$('#gCopy');if(b)b.textContent=t('copied')})}catch(e){}}
-document.addEventListener('input',e=>{if(e.target.id==='gName'){store.set('giftName',e.target.value);$('#gLink').textContent=giftLink(e.target.value.trim())}if(e.target.id==='sName'){prof.name=e.target.value.trim();store.set('prof',prof)}});
+document.addEventListener('input',e=>{if(e.target.id==='glSearch'){const q=e.target.value.trim().toLowerCase();document.querySelectorAll('.glc').forEach(c=>c.style.display=!q||c.dataset.f.includes(q)?'':'none');document.querySelectorAll('.glg').forEach(g=>g.style.display=[...g.querySelectorAll('.glc')].some(c=>c.style.display!=='none')?'':'none');return}if(e.target.id==='gName'){store.set('giftName',e.target.value);$('#gLink').textContent=giftLink(e.target.value.trim())}if(e.target.id==='sName'){prof.name=e.target.value.trim();store.set('prof',prof)}});
 document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='sKids'){prof.kids=e.target.checked;saveProf();return}
  if(id==='mspg'){goPage(+e.target.value);return}if(id==='mspdf'&&e.target.files[0]){setPdf(e.target.files[0]);return}
