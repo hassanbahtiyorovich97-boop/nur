@@ -59,10 +59,10 @@ h3{font-size:18px;margin:18px 0 8px}
 .num{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--lapisbg);color:var(--lapis);border:1px solid var(--gold)}
 .num.done{background:var(--tq);color:#fff;border-color:var(--tq)}
 .small{font-size:14px;color:var(--mute)}
-.ar{font-family:"Amiri Quran","Amiri",serif;direction:rtl;font-size:calc(30px*var(--arz,1));line-height:2.1;text-align:right}
+.ar{font-family:var(--qf);direction:rtl;font-size:calc(30px*var(--arz,1));line-height:2.1;text-align:right}
 .ar .w{padding:0 2px;border-radius:6px}
 .ar .hl{background:var(--hl);box-shadow:inset 0 -2px 0 var(--gold)}
-.letters{font-family:"Amiri Quran",serif;direction:rtl;font-size:34px;letter-spacing:10px;color:var(--lapis);text-align:center;padding:6px 0}
+.letters{font-family:var(--qf);direction:rtl;font-size:34px;letter-spacing:10px;color:var(--lapis);text-align:center;padding:6px 0}
 .ex{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
 .ref{font-size:13px;color:var(--gold);font-weight:600}
 .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
@@ -244,7 +244,7 @@ details.tjd{margin:4px 0 8px}details.tjd summary{cursor:pointer}
 .mpt{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 12px 2px;opacity:.95;white-space:nowrap}.mpt .clk{font-variant-numeric:tabular-nums}
 .mpt:empty{display:none}
 .mcart{display:flex;align-items:center;gap:6px;padding:6px 10px 8px;background:linear-gradient(#d6cdb9,#cbc0a8);direction:ltr}
-.cart{flex:1;min-width:0;border:1.5px solid #b08a3e;border-radius:6px;background:linear-gradient(#fbf6e6,#efe4c6);color:#5a4413;font:20px/1.2 "Amiri","Amiri Quran",serif;padding:4px 14px;position:relative;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 0 0 0 2px #fbf6e6,inset 0 0 0 3px #cdb27a}
+.cart{flex:1;min-width:0;border:1.5px solid #b08a3e;border-radius:6px;background:linear-gradient(#fbf6e6,#efe4c6);color:#5a4413;font:20px/1.2 "Amiri",var(--qf);padding:4px 14px;position:relative;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:inset 0 0 0 2px #fbf6e6,inset 0 0 0 3px #cdb27a}
 .cart:before,.cart:after{content:"❖";position:absolute;top:50%;transform:translateY(-50%);color:#b08a3e;font-size:13px}.cart:before{left:4px}.cart:after{right:4px}
 .cart span{display:block;overflow:hidden;text-overflow:ellipsis}
 .mpgn{border:0;background:none;color:#5a4413;font:700 22px "Amiri",serif;min-width:52px;cursor:pointer}
@@ -254,7 +254,7 @@ details.tjd{margin:4px 0 8px}details.tjd summary{cursor:pointer}
 .mpaper .surahead{background:linear-gradient(#fbf6e6,#efe4c6);border:1.5px solid var(--mgold);border-radius:8px;box-shadow:inset 0 0 0 3px #fbf6e6,inset 0 0 0 4px #cdb27a;color:#4a3a14}
 .mpaper .surahead .small{color:#6b5a35}
 :root[data-theme=dark] .mpaper .surahead{background:linear-gradient(#2c271d,#231f17);box-shadow:inset 0 0 0 3px #2c271d,inset 0 0 0 4px #6d5a2c;color:#e9d9a8}:root[data-theme=dark] .mpaper .surahead .small{color:#c8b88a}
-.msayat.flow{--fz:calc(27px*var(--arz,1));font-size:var(--fz);line-height:2.3;text-align:justify;text-align-last:center;direction:rtl;background-image:linear-gradient(to bottom,transparent calc(100% - 1px),var(--mrule) calc(100% - 1px));background-size:100% 2.3em;background-origin:content-box;font-family:"Amiri Quran","Amiri",serif}
+.msayat.flow{--fz:calc(27px*var(--arz,1));font-size:var(--fz);line-height:2.3;text-align:justify;text-align-last:center;direction:rtl;background-image:linear-gradient(to bottom,transparent calc(100% - 1px),var(--mrule) calc(100% - 1px));background-size:100% 2.3em;background-origin:content-box;font-family:var(--qf)}
 .msayat.flow .ayah{display:inline;border:0;padding:0;background:none}.msayat.flow .ar{display:inline;font-size:1em;line-height:inherit}
 .msayat.flow .ayah.now .ar,.msayat.flow .ayah.flash .ar{background:var(--hl);border-radius:6px}
 .msayat .amark{font-family:"Amiri",serif}.msayat.flow .amark{font-size:.5em;min-width:2em;height:2em;vertical-align:.35em;margin:0 .15em;line-height:1}
@@ -263,7 +263,7 @@ details.tjd{margin:4px 0 8px}details.tjd summary{cursor:pointer}
 .msayat.trg .ayah .trn p{margin:.2em 0}
 .ayah.rub .ar:before{content:"۞";color:var(--mgold);margin-left:.25em;font-size:.9em}
 .mpage{background:none;border:0;padding:0}
-.mpage .pline{border-bottom:1px solid var(--mrule);padding:4px 0;font-size:calc(25px*var(--arz,1));line-height:2.1;font-family:"Amiri Quran","Amiri",serif}
+.mpage .pline{border-bottom:1px solid var(--mrule);padding:4px 0;font-size:calc(25px*var(--arz,1));line-height:2.1;font-family:var(--qf)}
 .mpage .pgbody{direction:rtl}
 .mtool{position:fixed;left:0;right:0;bottom:calc(57px + env(safe-area-inset-bottom));z-index:6;display:flex;justify-content:space-around;background:#4a443c;padding:5px 2px 4px;box-shadow:0 -2px 8px rgba(0,0,0,.18)}
 .mtool button{flex:1;min-width:0;background:none;border:0;color:#fff;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;padding:2px 0;border-radius:10px}
@@ -279,6 +279,39 @@ body:has(#pl:not(.hidden)) .mtool{display:none}
 .bmi .bmc{grid-row:span 2;width:18px;height:18px}.bmi .ar{font-size:18px;direction:rtl;text-align:right;color:var(--mut,#777)}
 .juzg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}.juzg .btn{display:flex;flex-direction:column;align-items:center;gap:0;padding:8px}.juzg .ar{font-size:17px}.juzg small{opacity:.7;font-size:11px}
 .msayat.trg .ayah .trn{background:none!important;box-shadow:none!important;border-radius:0}.msayat.trg .ayah.now{background:var(--hl)}
+:root{--tj6:#9b0e1e;--tj45:#e0301e;--tj246:#ef8a14;--tj2:#c49412;--tjg:#1f9a3c;--tjq:#2a9fd8;--tjr:#1c3d94;--tjs:#a4a4a4}
+:root[data-theme=dark]{--tj6:#ef5468;--tj45:#ff6a4d;--tj246:#ffa640;--tj2:#e3bb3a;--tjg:#45c46a;--tjq:#5cc3f2;--tjr:#7d9bff;--tjs:#8a8a8a}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){--tj6:#ef5468;--tj45:#ff6a4d;--tj246:#ffa640;--tj2:#e3bb3a;--tjg:#45c46a;--tjq:#5cc3f2;--tjr:#7d9bff;--tjs:#8a8a8a}}
+.tajc tajweed.madda_necessary{color:var(--tj6);font-weight:inherit}.tajc tajweed.madda_obligatory,.tajc tajweed.madda_munfasil{color:var(--tj45)}.tajc tajweed.madda_permissible{color:var(--tj246)}.tajc tajweed.madda_normal{color:var(--tj2)}
+.tajc tajweed.ghunnah,.tajc tajweed.ikhafa,.tajc tajweed.ikhafa_shafawi,.tajc tajweed.iqlab,.tajc tajweed.idgham_ghunnah,.tajc tajweed.idgham_shafawi{color:var(--tjg)}
+.tajc tajweed.qalaqah{color:var(--tjq)}.tajc tajweed.ra_tafkhim{color:var(--tjr)}
+.tajc tajweed.ham_wasl,.tajc tajweed.laam_shamsiyah,.tajc tajweed.slnt,.tajc tajweed.idgham_wo_ghunnah,.tajc tajweed.idgham_mutajanisayn,.tajc tajweed.idgham_mutaqaribayn{color:var(--tjs)}
+.tjleg{display:flex;flex-direction:column;gap:2px;margin:6px 0}.tjl{display:grid;grid-template-columns:14px 92px 1fr;align-items:center;gap:8px;font-size:13.5px;line-height:1.3}.tjl .ar{font-size:22px;line-height:1.6;text-align:center}
+.tjdot{width:12px;height:12px;border-radius:50%}.tj-madda_necessary{background:var(--tj6)}.tj-madda_obligatory{background:var(--tj45)}.tj-madda_permissible{background:var(--tj246)}.tj-madda_normal{background:var(--tj2)}.tj-ghunnah{background:var(--tjg)}.tj-qalaqah{background:var(--tjq)}.tj-ra_tafkhim{background:var(--tjr)}.tj-slnt{background:var(--tjs)}
+@font-face{font-family:"KFGQPC Hafs";src:url("fonts/UthmanicHafs1Ver18.woff2") format("woff2");font-display:swap}
+:root{--qf:"KFGQPC Hafs","Amiri Quran","Amiri",serif;--qsz:1}
+:root[data-qf=am]{--qf:"Amiri Quran","Amiri",serif}:root[data-qf=sh]{--qf:"Scheherazade New","Amiri",serif}
+.mpaper .msayat.flow{font-size:calc(27px*var(--arz,1)*var(--qsz,1))}.mpaper .mpage .pline{font-size:calc(25px*var(--arz,1)*var(--qsz,1))}.mpaper .msayat.trg .ar{font-size:calc(27px*var(--arz,1)*var(--qsz,1))}
+.norule .msayat.flow{background-image:none}.norule .mpage .pline{border-bottom-color:transparent}.norule .msayat.trg .ayah{border-bottom-color:transparent}
+.fth{display:grid;grid-template-columns:120px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;color:var(--ink);margin-bottom:8px}
+.fth.on{border:2px solid #2e9b6a;background:rgba(46,155,106,.08)}.fth .pv{border:1px solid var(--line);border-radius:10px;background:var(--mpaper);font-size:24px;line-height:1.9;text-align:center;direction:rtl;padding:2px 4px;overflow:hidden;white-space:nowrap}
+.fth b{display:block;color:#2e7d55}.fth small{opacity:.75}.fth .ck{color:#2e9b6a;font-size:22px}
+.tgl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}.tgl label{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12.5px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 4px}
+.szr{display:flex;align-items:center;gap:10px;margin:8px 0}.szr input{flex:1}.szr .ar{font-size:calc(26px*var(--qsz,1));line-height:1.6}
+.mpgn.off{visibility:hidden}
+.hfbar{display:flex;gap:8px;margin:10px 0 6px}.hfbar .hfgo{flex:1;font-size:17px;padding:12px}.hfgo.rec{background:#c0392b;border-color:#c0392b;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(192,57,43,.18)}}
+.hfst{display:flex;gap:14px;align-items:center;font-size:15px}.hfst .small{margin-left:auto}.hflive{min-height:1.5em;margin:4px 0 8px;direction:auto}
+.hftext{font-family:var(--qf);font-size:calc(27px*var(--arz,1)*var(--qsz,1));line-height:2.3;direction:rtl;text-align:justify;text-align-last:center}
+.hftext .hfw{border-radius:6px;transition:color .25s,background .25s}
+.hftext.hid .hfw:not(.ok):not(.err):not(.hint){color:transparent;background:var(--mrule);box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
+.hftext.faint .hfw:not(.ok):not(.err):not(.hint){opacity:.16}
+.hftext .hfw.cur{outline:2px dashed #2e9b6a;outline-offset:2px}
+.hftext .hfw.ok{color:inherit;animation:hfin .35s}.hftext .hfw.err{color:#d0021b;background:rgba(208,2,27,.09);animation:hfin .35s}.hftext .hfw.hint{color:#d17a00}
+@keyframes hfin{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.hftext .amark{font-size:.5em;min-width:2em;height:2em;vertical-align:.35em;line-height:1}.hfa.done .amark{background:#2e9b6a;color:#fff;border-color:#2e9b6a}.hfa.bad .amark{background:#d0021b;border-color:#d0021b}
+.hfsum{margin-top:12px;border:2px solid #2e9b6a}
+.hflive{font-family:"Noto Sans",var(--qf)}
 </style>
 </head>
 <body>

@@ -517,7 +517,7 @@ function route2(h){let m;
  if(h==='taqvim')return {v:vTaqvim(),tab:'kitob'};
  if(h==='oyat')return {v:vOyat(),tab:'kitob'};
  if(h==='savol')return {v:vSavol(),tab:'kitob'};
- if(h==='hifz'){store.set('hide',true);store.set('mview','ayat');return {v:vMushaf2(),tab:'mushaf'}}
+ if(h==='hifz')return {v:vHifz(),tab:'mushaf'};
  if(h==='qibla')return {v:vQibla(),tab:'bosh'};
  if(h==='tasbeh')return {v:vTasbeh(),tab:'bosh'};
  if(h==='duo')return {v:vDuo(),tab:'bosh'};
@@ -526,7 +526,9 @@ let PTI=null;
 function after2(h){if(PTI){clearInterval(PTI);PTI=null}if(h!=='taqvim'&&store.get('hjoff',0))store.set('hjoff',0);
  if(h==='oyat')ayDraw();
  if(h!=='mushaf')asStop();
- if(h==='mushaf'||h==='hifz')msAfter();
+ if(h!=='hifz'&&HZF)hfStop(true);
+ if(h==='mushaf')msAfter();
+ if(h==='hifz')hfAfter();
  if(h==='namoz'||h==='bosh'||h==='')PTI=setInterval(ptTick,1000);
  if(h==='qibla')qbStart();else qbStop();
  if(h==='savol'){const q=store.get('fqq','');const i=$('#fqSearch');if(i&&q){i.value=q;fqFilter(q)}}}
@@ -723,7 +725,7 @@ function ayWrap(c,text,maxW){const words=text.split(/\s+/),lines=[];let cur='';f
 let AYN=0;
 async function ayDraw(){const cv=$('#aycv');if(!cv||!Q)return;const my=++AYN;const [s,a]=store.get('ayref','94:5').split(':').map(Number),k0=store.get('ayth','night'),k=AYT[k0]?k0:'night',th=AYT[k],st=store.get('aysz','sq')==='st',wtr=store.get('aytr',true);
  const W=1080,H=st?1920:1080;cv.width=W;cv.height=H;const c=cv.getContext("2d");if(!c)return;
- try{await Promise.all([document.fonts.load('60px "Amiri Quran"'),document.fonts.load('40px "Amiri"'),document.fonts.load('600 30px "Noto Sans"')])}catch(e){}
+ try{await Promise.all([document.fonts.load('60px "KFGQPC Hafs"'),document.fonts.load('60px "Amiri Quran"'),document.fonts.load('40px "Amiri"'),document.fonts.load('600 30px "Noto Sans"')])}catch(e){}
  let trT='',trA='';if(wtr){const l=trL()==='ar'?'uz':trL();try{const d=await trGet(TRK[l][0],s);trT=(d[a]&&d[a].t||'').replace(/\s*\[\d+\]/g,'').replace(/^\d+[.)]\s*/,'').trim();trA=tx(TRK[l][1])}catch(e){}}
  if(my!==AYN||!$('#aycv'))return;
  ayBg(c,W,H,k,ayRnd(s*1000+a));
@@ -736,10 +738,10 @@ async function ayDraw(){const cv=$('#aycv');if(!cv||!Q)return;const my=++AYN;con
  if(trT){tf=st?40:34;for(;tf>=22;tf-=2){c.font=`italic ${tf}px "Noto Sans",sans-serif`;tl=ayWrap(c,'«'+trT+'»',maxW+20);if(tl.length<=(st?6:4))break}tlh=tf*1.38;const mx=st?7:4;if(tl.length>mx){tl=tl.slice(0,mx);tl[mx-1]=tl[mx-1].replace(/\s*\S*$/,'')+' …»'}}
  const trBlock=tl.length?60+tl.length*tlh:0;
  c.direction='rtl';let fs=st?118:104,lines;
- for(;fs>=30;fs-=4){c.font=`${fs}px "Amiri Quran","Amiri",serif`;lines=ayWrap(c,Q[s-1].v[a-1].trim(),maxW);if(lines.length*fs*1.85+trBlock<=avail)break}
+ for(;fs>=30;fs-=4){c.font=`${fs}px ${qFont()==="kf"?'"KFGQPC Hafs",':''}"Amiri Quran","Amiri",serif`;lines=ayWrap(c,Q[s-1].v[a-1].trim(),maxW);if(lines.length*fs*1.85+trBlock<=avail)break}
  const lh=fs*1.85,grp=lines.length*lh+trBlock,g0=top+Math.max(0,(avail-grp)/2),y0=g0+lh*.68;let long=grp>avail+4;
  if(scene||k==='photo'){const pg=c.createLinearGradient(0,g0-70,0,g0+grp+70);pg.addColorStop(0,'rgba(0,0,0,0)');pg.addColorStop(.25,'rgba(0,0,0,.22)');pg.addColorStop(.75,'rgba(0,0,0,.22)');pg.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=pg;c.fillRect(0,g0-70,W,grp+140)}
- c.save();if(k!=='paper'){c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=18;c.shadowOffsetY=3}c.fillStyle=ink;c.font=`${fs}px "Amiri Quran","Amiri",serif`;lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));c.restore();
+ c.save();if(k!=='paper'){c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=18;c.shadowOffsetY=3}c.fillStyle=ink;c.font=`${fs}px ${qFont()==="kf"?'"KFGQPC Hafs",':''}"Amiri Quran","Amiri",serif`;lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));c.restore();
  if(tl.length){const dy=g0+lines.length*lh+22;c.save();c.strokeStyle=gold;c.globalAlpha=.85;c.lineWidth=2;c.beginPath();c.moveTo(W/2-200,dy);c.lineTo(W/2-22,dy);c.moveTo(W/2+22,dy);c.lineTo(W/2+200,dy);c.stroke();c.fillStyle=gold;ayStar8(c,W/2,dy,12);c.fill();c.restore();
   c.direction='ltr';c.save();if(k!=='paper'){c.shadowColor='rgba(0,0,0,.7)';c.shadowBlur=10}c.fillStyle=ink;c.globalAlpha=.95;c.font=`italic ${tf}px "Noto Sans",sans-serif`;tl.forEach((l,i)=>c.fillText(l,W/2,dy+30+tf+i*tlh));c.restore()}
  const msg=$('#ayMsg');if(msg)msg.textContent=long?t('ay_long'):'';
@@ -1058,7 +1060,7 @@ const bm=()=>store.get('bm',{});
 const JUZN=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر','الحادي عشر','الثاني عشر','الثالث عشر','الرابع عشر','الخامس عشر','السادس عشر','السابع عشر','الثامن عشر','التاسع عشر','العشرون','الحادي والعشرون','الثاني والعشرون','الثالث والعشرون','الرابع والعشرون','الخامس والعشرون','السادس والعشرون','السابع والعشرون','الثامن والعشرون','التاسع والعشرون','الثلاثون'];
 const TJP={};
 function msHead(s,a,p){return `<div class="mhead"><div class="mpt" id="msPt">${msPtHTML()}</div>
- <div class="mcart"><button class="cart" id="msJuz" aria-label="juz"><span>الجزء ${JUZN[juzOf(s,a)-1]}</span></button><button class="mpgn" id="msPgN" aria-label="page">${p?arNum(p):'•'}</button><button class="cart" id="msSura" aria-label="sura"><span>سورة ${Q[s-1].ar}</span></button></div></div>`}
+ <div class="mcart"><button class="cart" id="msJuz" aria-label="juz"><span>الجزء ${JUZN[juzOf(s,a)-1]}</span></button><button class="mpgn${store.get('mpgn',true)?'':' off'}" id="msPgN" aria-label="page">${p?arNum(p):'•'}</button><button class="cart" id="msSura" aria-label="sura"><span>سورة ${Q[s-1].ar}</span></button></div></div>`}
 function msPtHTML(){const nw=ptNow(),nx=ptNext();if(!nw||!nx)return '';const S=Math.max(0,Math.round(nw.left*3600));return `<span>${esc(nw.n)}: <b class="clk">${Math.floor(S/3600)}:${String(Math.floor(S%3600/60)).padStart(2,'0')}:${String(S%60).padStart(2,'0')}</b></span><span>${esc(nx.n)} ${nx.s}</span>`}
 function msPtTick(){const e=$('#msPt');if(e)e.innerHTML=msPtHTML()}
 function msTool(){const hide=store.get('hide',false),mm=mmode(),pl=typeof P!=='undefined'&&P.list.length&&!P.a.paused;
@@ -1106,47 +1108,72 @@ function openJuz(){sheet(`<h3 style="margin-top:0">${t('ms_juzs')}</h3><div clas
 // саҳифани суриб ўтказиш
 let SWX=null;document.addEventListener('touchstart',e=>{const p=e.target.closest('#msPage');SWX=p&&e.touches.length===1?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
 document.addEventListener('touchend',e=>{if(!SWX)return;const t0=e.changedTouches[0],dx=t0.clientX-SWX.x,dy=t0.clientY-SWX.y;SWX=null;if(Math.abs(dx)<70||Math.abs(dy)>Math.abs(dx)*.6)return;const p=+store.get('mpage',1),np=Math.max(1,Math.min(604,p+(dx>0?1:-1)));if(np!==p){store.set('mpage',np);pageFill();window.scrollTo(0,0)}},{passive:true});
-function msSettings(){const f=prof.font||0,th=prof.theme||'auto',mm=mmode(),g=store.get('mgoal',10);
- return `<div class="msset"><div><span class="small">${t('ms_font')}</span><div class="seg"><button data-fz="-1">A−</button><button data-fz="1">A+</button></div></div>
+const QFT=[['tj','kf',1,'qf_tj','qf_tj_d'],['ms','kf',0,'qf_ms','qf_ms_d'],['am','am',null,'qf_am','qf_am_d'],['sh','sh',null,'qf_sh','qf_sh_d']];
+const qFont=()=>store.get('qfont','kf');
+function qfCur(){const f=qFont();return f==='kf'?(tajOn()?'tj':'ms'):f}
+function qConvW(w,f){return f==='kf'?w:w.replace(/ٗ/g,'ࣰ').replace(/ٞ/g,'ࣱ').replace(/ٖ/g,'ࣲ')}
+let Q0=null;function qConv(){if(!Q)return;if(!Q0)Q0=Q.map(x=>x.v.slice());const f=qFont();Q.forEach((x,i)=>{x.v=Q0[i].map(v=>qConvW(v,f))})}
+function applyQf(){const r=document.documentElement,f=qFont();if(f==='kf')delete r.dataset.qf;else r.dataset.qf=f;r.style.setProperty('--qsz',(+store.get('qsz',100)/100).toFixed(2));
+ document.body&&document.body.classList.toggle('norule',!store.get('mrule',true));
+ if(f==='sh'&&!document.getElementById('shFont')){const l=document.createElement('link');l.id='shFont';l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap';document.head.appendChild(l)}}
+applyQf();
+const QFS='قُلۡ هُوَ ٱللَّهُ أَحَدٌ';
+function msSettings(){const th=prof.theme||'auto',mm=mmode(),g=store.get('mgoal',10),cur=qfCur(),sz=+store.get('qsz',100);
+ return `<div class="small" style="margin-bottom:6px">${t('qf_title')}</div>${QFT.map(([k,f,tj,n,d])=>{const w=qConvW(QFS,f),html=(k==='tj')?tjWords(w.split(' '),false).join(' '):esc(w),ff=f==='kf'?'"KFGQPC Hafs"':f==='am'?'"Amiri Quran"':'"Scheherazade New","Amiri"';
+  return `<button class="fth${cur===k?' on':''}" data-qft="${k}"><span class="pv${k==='tj'?' tajc':''}" style="font-family:${ff}">${html}</span><span><b>${t(n)}</b><small>${t(d)}</small></span><span class="ck">${cur===k?'✓':''}</span></button>`}).join('')}
+ <div class="tgl"><label><input type="checkbox" id="mpgnOn"${store.get('mpgn',true)?' checked':''}>${t('qf_pgn')}</label><label><input type="checkbox" id="mruleOn"${store.get('mrule',true)?' checked':''}>${t('qf_rule')}</label><label><input type="checkbox" id="wbwOn"${wbwOn()?' checked':''}>${t('wbw_on')}</label></div>
+ <div class="szr"><span class="small">${t('qf_size')} <b id="qszV">${sz}%</b></span><input type="range" id="qsz" min="60" max="180" step="5" value="${sz}"><span class="ar">سُورَةٌ</span></div>
+ <div class="msset">
  <div><span class="small">${t('ms_theme')}</span><div class="seg">${['auto','light','sepia','dark'].map(x=>`<button class="${th===x?'on':''}" data-th="${x}">${t('th_'+x)}</button>`).join('')}</div></div>
  <div><span class="small">${t('ms_mode')}</span><div class="seg">${['ar','tr','book'].map(x=>`<button class="${mm===x?'on':''}" data-mm="${x}">${t('mm_'+x)}</button>`).join('')}</div></div>
  ${mm!=='ar'?`<div><span class="small">${t('tr_on')}</span> <select id="trL2" class="inp" style="width:auto">${['uz','ru','tg','en','ar'].map(k=>`<option value="${k}"${k===trL()?' selected':''}>${t('tr_'+k)}</option>`).join('')}</select></div>`:''}
- <label class="row"><input type="checkbox" id="tajcOn"${tajOn()?' checked':''}> 🎨 ${t('ms_tajc')}</label>
- <label class="row"><input type="checkbox" id="wbwOn"${wbwOn()?' checked':''}> 🔤 ${t('wbw_on')}</label>
- <label class="row"><input type="checkbox" id="hide"${store.get('hide',false)?' checked':''}> 🙈 ${t('hide_mode')}</label>
  <div><span class="small">${t('ms_goal')}</span> <select id="mgoal" class="inp" style="width:auto">${[5,10,20,50,100].map(x=>`<option${x===g?' selected':''}>${x}</option>`).join('')}</select></div></div>
- ${tajOn()?tajLegend():''}`}
-const TJC=[['ham_wasl','tc_wasl'],['laam_shamsiyah','tc_shams'],['slnt','tc_slnt'],['madda_normal','tc_mnorm'],['madda_permissible','tc_mperm'],['madda_obligatory','tc_mobl'],['madda_necessary','tc_mnec'],['qalaqah','tc_qal'],['ghunnah','tc_ghun'],['ikhafa','tc_ikh'],['ikhafa_shafawi','tc_ikhs'],['iqlab','tc_iql'],['idgham_ghunnah','tc_idg'],['idgham_wo_ghunnah','tc_idgw'],['idgham_shafawi','tc_idgs'],['idgham_mutajanisayn','tc_mutaj'],['idgham_mutaqaribayn','tc_mutaq']];
-function tajLegend(){return `<div class="tjleg">${TJC.map(([c,k])=>`<span><tajweed class="${c}">●</tajweed> ${t(k)}</span>`).join('')}</div><div class="small" style="opacity:.7">${t('tc_src')}</div>`}
+ ${tajOn()?`<h4 style="margin:10px 0 0">🎨 ${t('ms_tajc')}</h4>`+tajLegend():''}`}
+const TJC=[['madda_necessary','tl_6','ٱلضَّآلِّينَ'],['madda_obligatory','tl_45','جَآءَ'],['madda_permissible','tl_246','نَسۡتَعِينُ'],['madda_normal','tl_2','مَٰلِكِ'],['ghunnah','tl_gh','إِنَّ'],['qalaqah','tl_q','أَحَدٌ'],['ra_tafkhim','tl_r','رَبِّ'],['slnt','tl_s','ٱللَّهِ']];
+function tajLegend(){return `<div class="tjleg tajc">${TJC.map(([c,k,ex])=>`<div class="tjl"><span class="tjdot tj-${c}"></span><span class="ar">${tjWords(ex.split(' '),true).join(' ')}</span><span>${t(k)}</span></div>`).join('')}</div><div class="small" style="opacity:.7">${t('tl_src')}</div>`}
 // Quran.com маълумотлари: оятлар (таржима ранглари, сўзлар), саҳифа
 async function qcom(url){const ca='caches' in window?await caches.open('qu-audio').catch(()=>null):null;let j=null;
  try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();if(ca)ca.put(url,new Response(JSON.stringify(j))).catch(()=>{})}}catch(e){}
  if(!j&&ca){const m=await ca.match(url).catch(()=>null);if(m)j=await m.json()}if(!j)throw new Error('qcom');return j}
-// ---------- Маҳаллий тажвид ранглари (Ҳафс, усмоний ёзув) ----------
+// ---------- Маҳаллий тажвид ранглари (Ҳафс, усмоний ёзув; «Мусҳаф ат-Тажвид» ранг тизими) ----------
 const TJ_H=/[ً-ٰٟۖ-ࣰۭ-ࣳ]/,TJ_TAN=/[ً-ࣰٍ-ࣲٖٗٞ]/,TJ_SUK=/[ْۡ]/,TJ_SH='ّ',TJ_HAR=/[ً-ࣰِ-ࣲٖٗٞ]/;
-const TJ_HAMZA='ءأإؤئ',TJ_IZ='ءأإؤئهعحغخ',TJ_IDG='ينمو',TJ_IKH='تثجدذزسشصضطظفقك',TJ_QAL='قطبجد';
-const TJ_ALEF='ا',TJ_WASL='ٱ',TJ_LAM='ل',TJ_NOON='ن',TJ_MEEM='م',TJ_BA='ب',TJ_RA='ر',TJ_WAW='و';
+const TJ_FD=/[ًࣰٌࣱَُٗٞ]/,TJ_KS=/[ٍࣲِٖ]/;
+const TJ_HAMZA='ءأإؤئ',TJ_IZ='ءأإؤئهعحغخ',TJ_IDG='ينمو',TJ_IKH='تثجدذزسشصضطظفقك',TJ_QAL='قطبجد',TJ_HEAVY='خصضغطقظ';
+const TJ_ALEF='ا',TJ_WASL='ٱ',TJ_LAM='ل',TJ_NOON='ن',TJ_MEEM='م',TJ_BA='ب',TJ_RA='ر',TJ_WAW='و',TJ_YA='ي',TJ_AM='ى';
 function tjTok(w){const out=[];for(const ch of w){if(TJ_H.test(ch)&&out.length)out[out.length-1].m+=ch;else out.push({b:ch,m:''})}return out}
+const tjLet=x=>x&&/[ء-يٱۥۦ]/.test(x.b);
 function tjWords(words,endAyah){const W=words.map(tjTok),cls=W.map(t=>t.map(()=>''));
- const nxt=(wi,li)=>{let i=wi,j=li+1;for(;;){if(!W[i])return null;if(j<W[i].length){const x=W[i][j];if((x.b===TJ_ALEF||x.b==='ى')&&!x.m){j++;continue}if(!/[ء-يٱۥۦ]/.test(x.b)){j++;continue}return {x,cross:i!==wi,i,j}}i++;j=0}};
- const set=(i,j,c)=>{if(!cls[i][j])cls[i][j]=c};
- W.forEach((t,wi)=>t.forEach((x,li)=>{const b=x.b,m=x.m,last=endAyah&&wi===W.length-1&&li===t.length-1;
+ const nxt=(wi,li)=>{let i=wi,j=li+1;for(;;){if(!W[i])return null;if(j<W[i].length){const x=W[i][j];if((x.b===TJ_ALEF||x.b===TJ_AM)&&!TJ_HAR.test(x.m)&&!TJ_SUK.test(x.m)&&!x.m.includes(TJ_SH)&&!x.m.includes('\u0653')&&!(i!==wi&&j===0)){j++;continue}if(!tjLet(x)){j++;continue}return {x,cross:i!==wi,i,j}}i++;j=0}};
+ const prv=(wi,li)=>{let i=wi,j=li-1;for(;;){if(j<0){i--;if(i<0)return null;j=W[i].length-1;continue}const x=W[i][j];if(!tjLet(x)||((x.b===TJ_ALEF||x.b===TJ_AM)&&!x.m)){j--;continue}return {x,i,j}}};
+ const set=(i,j,c)=>{if(i!=null&&W[i]&&W[i][j]&&!cls[i][j])cls[i][j]=c};
+ const LW=W.length-1;
+ // вақфдаги ориз мад (охирги сўз)
+ if(endAyah&&W[LW]){const t=W[LW];let L=t.length-1;while(L>0&&!tjLet(t[L]))L--;const M=t[L-1],Pm=t[L-2];
+  if(M&&!t[L].m.includes(TJ_SH)){const isMadd=(M.b===TJ_ALEF&&!M.m)||(M.b===TJ_WAW&&!TJ_HAR.test(M.m)&&!TJ_SUK.test(M.m)&&Pm&&Pm.m.includes('ُ'))||(M.b===TJ_YA&&!TJ_HAR.test(M.m)&&!TJ_SUK.test(M.m)&&Pm&&Pm.m.includes('ِ'))||M.m.includes('ٰ')||((M.b===TJ_WAW||M.b===TJ_YA)&&TJ_SUK.test(M.m)&&Pm&&Pm.m.includes('َ'));
+   if(isMadd)set(LW,L-1,'madda_permissible')}}
+ W.forEach((t,wi)=>t.forEach((x,li)=>{const b=x.b,m=x.m,last=endAyah&&wi===LW&&!t.slice(li+1).some(tjLet);
   if(b===TJ_WASL){set(wi,li,'ham_wasl');const l=t[li+1],n2=t[li+2];if(l&&l.b===TJ_LAM&&!l.m&&n2&&n2.m.includes(TJ_SH))cls[wi][li+1]='laam_shamsiyah';return}
-  if(m.includes('ۢ')||m.includes('ۭ')){set(wi,li,'iqlab');return}
+  if(!last&&(m.includes('ۢ')||m.includes('ۭ'))){set(wi,li,'iqlab');return}
   if(m.includes('۟')){set(wi,li,'slnt');return}
   if(b===TJ_ALEF&&!m&&li===t.length-1&&li>0&&t[li-1].b===TJ_WAW){set(wi,li,'slnt');return}
-  if(m.includes('ٓ')){const n=nxt(wi,li);let c='madda_necessary';if(n){c='madda_obligatory';if(TJ_HAMZA.includes(n.x.b)||n.x.m.includes('ٔ'))c=n.cross?'madda_permissible':'madda_obligatory';else if(n.x.m.includes(TJ_SH)||TJ_SUK.test(n.x.m)||!TJ_HAR.test(n.x.m))c='madda_necessary'}set(wi,li,c);return}
+  if(m.includes('ٓ')){const n=nxt(wi,li);let c='madda_necessary';if(n){c='madda_normal';if(TJ_HAMZA.includes(n.x.b)||n.x.m.includes('ٔ'))c=n.cross?'madda_munfasil':'madda_obligatory';else if(n.x.m.includes(TJ_SH)||TJ_SUK.test(n.x.m)||!TJ_HAR.test(n.x.m))c='madda_necessary'}set(wi,li,c);return}
   if((b===TJ_NOON||b===TJ_MEEM)&&m.includes(TJ_SH)){set(wi,li,'ghunnah');return}
-  if(b==='ۥ'||b==='ۦ'){set(wi,li,'madda_normal');return}
+  if(b==='ۥ'||b==='ۦ'||m.includes('ٰ')){set(wi,li,'madda_normal')}
   const tan=TJ_TAN.test(m),noonS=b===TJ_NOON&&!TJ_HAR.test(m)&&!m.includes(TJ_SH);
-  if(tan||noonS){const n=nxt(wi,li);if(!n||last)return;const c=n.x.b;
+  if((tan||noonS)&&!last){const n=nxt(wi,li);if(!n)return;const c=n.x.b;
    if(TJ_IZ.includes(c)||c===TJ_WASL)return;
-   if(TJ_IDG.includes(c)){if(n.cross)set(wi,li,'idgham_ghunnah');return}
-   if(c===TJ_LAM||c===TJ_RA){if(n.cross)set(wi,li,'idgham_wo_ghunnah');return}
+   if(TJ_IDG.includes(c)){if(n.cross){if(noonS)set(wi,li,'slnt');set(n.i,n.j,'idgham_ghunnah')}return}
+   if(c===TJ_LAM||c===TJ_RA){if(n.cross&&noonS)set(wi,li,'idgham_wo_ghunnah');return}
    if(c===TJ_BA){set(wi,li,'iqlab');return}
    if(TJ_IKH.includes(c))set(wi,li,'ikhafa');return}
-  if(b===TJ_MEEM&&!TJ_HAR.test(m)&&!m.includes(TJ_SH)){const n=nxt(wi,li);if(n&&n.x.b===TJ_BA)set(wi,li,'ikhafa_shafawi');else if(n&&n.x.b===TJ_MEEM)set(wi,li,'idgham_shafawi');return}
+  if(b===TJ_MEEM&&!TJ_HAR.test(m)&&!m.includes(TJ_SH)){const n=nxt(wi,li);if(n&&n.x.b===TJ_BA)set(wi,li,'ikhafa_shafawi');else if(n&&n.x.b===TJ_MEEM)set(wi,li,'slnt');return}
   if(TJ_QAL.includes(b)&&(TJ_SUK.test(m)||(last&&!m.includes(TJ_SH)))){set(wi,li,'qalaqah');return}
+  if(b===TJ_RA){let heavy=false;
+   if(!last&&TJ_FD.test(m))heavy=true;
+   else if(!last&&TJ_KS.test(m))heavy=false;
+   else{const p=prv(wi,li);if(p){let q=p;if(!TJ_HAR.test(q.x.m)&&q.x.b!==TJ_WASL){if(q.x.b===TJ_YA&&TJ_SUK.test(q.x.m))q=null;else q=prv(q.i,q.j)}
+     if(q){if(q.x.b===TJ_WASL)heavy=true;else if(TJ_FD.test(q.x.m))heavy=true;else if(TJ_KS.test(q.x.m)){const n=nxt(wi,li);heavy=!!(n&&!n.cross&&TJ_HEAVY.includes(n.x.b))}}}}
+   if(heavy)set(wi,li,'ra_tafkhim');return}
   if(!TJ_HAR.test(m)&&!TJ_SUK.test(m)&&!m.includes(TJ_SH)&&/[ء-ي]/.test(b)&&!'اوىي'.includes(b)&&!m.includes('ٰ')){const n=nxt(wi,li);if(n&&n.x.m.includes(TJ_SH))set(wi,li,'idgham_mutajanisayn')}
  }));
  return W.map((t,wi)=>{let h='',cur='';t.forEach((x,li)=>{const c=cls[wi][li],s=esc(x.b+x.m);if(c!==cur){if(cur)h+='</tajweed>';if(c)h+=`<tajweed class="${c}">`;cur=c}h+=s});if(cur)h+='</tajweed>';return h})}
@@ -1164,9 +1191,9 @@ async function bookFill(s){const box=$('#msBook');if(!box)return;const l=trL(),k
 // 604 саҳифали кўриниш
 async function pageFill(){const box=$('#msPage');if(!box)return;let p=+store.get('mpage',0);if(!p){try{const C_=await chapters();p=C_[store.get('sura',1)-1].pages[0]}catch(e){p=1}store.set('mpage',p)}
  box.innerHTML=`<p class="small">${t('loading')}</p>`;
- try{let vs=[],page=1,g=0;while(page&&g++<4){const j=await qcom(`https://api.quran.com/api/v4/verses/by_page/${p}?words=true&word_fields=text_uthmani,line_number&per_page=50&page=${page}`);vs=vs.concat(j.verses||[]);page=j.pagination&&j.pagination.next_page}
+ try{let vs=[],page=1,g=0;while(page&&g++<4){const j=await qcom(`https://api.quran.com/api/v4/verses/by_page/${p}?words=true&word_fields=text_uthmani,text_qpc_hafs,line_number&per_page=50&page=${page}`);vs=vs.concat(j.verses||[]);page=j.pagination&&j.pagination.next_page}
   if(+store.get('mpage',0)!==p)return;const lines={};
-  const tjp=tajOn();vs.forEach(v=>{const [s,a]=v.verse_key.split(':').map(Number);let wi=0;const ww=(v.words||[]).filter(w=>w.char_type_name==='word'),hs=tjp?tjWords(ww.map(w=>w.text_uthmani||w.text||''),true):null;(v.words||[]).forEach(w=>{const L=w.line_number;const k=w.char_type_name==='word'?wi++:-1;if(hs&&k>=0)w._h=hs[k];(lines[L]=lines[L]||[]).push({w,s,a,wi:k})})});
+  const tjp=tajOn();vs.forEach(v=>{const [s,a]=v.verse_key.split(':').map(Number);let wi=0;const ww=(v.words||[]).filter(w=>w.char_type_name==='word'),wt=ww.map(w=>qFont()==='kf'?(w.text_qpc_hafs||w.text_uthmani||w.text||''):(w.text_uthmani||w.text||'')),hs=tjp?tjWords(wt,true):wt.map(esc);(v.words||[]).forEach(w=>{const L=w.line_number;const k=w.char_type_name==='word'?wi++:-1;if(hs&&k>=0)w._h=hs[k];(lines[L]=lines[L]||[]).push({w,s,a,wi:k})})});
   const Ls=Object.keys(lines).filter(k=>!k.startsWith('h')).map(Number).sort((x,y)=>x-y);let prevS=0;
   const html=Ls.map(L=>{const ws=lines[L];let pre='';const f=ws[0];if(f.s!==prevS&&f.a===1&&f.wi===0){pre=`<div class="surahead pg"><div class="ar">سورة ${Q[f.s-1].ar}</div></div>${f.s!==1&&f.s!==9?'<div class="ar bism">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>':''}`}prevS=ws[ws.length-1].s;
    return pre+`<div class="pline ar">${ws.map(x=>x.w.char_type_name==='word'?`<span class="w" data-s="${x.s}" data-a2="${x.a}" data-w="${x.wi}" data-pa="${x.s}:${x.a}">${x.w._h||esc(x.w.text_uthmani||x.w.text)}</span>`:`<button class="amark${bm()[x.s+":"+x.a]?" bm-"+bm()[x.s+":"+x.a]:""}" data-am="${x.s}:${x.a}">${arNum(x.a)}</button>`).join('')}</div>`}).join('');
@@ -1182,7 +1209,7 @@ let IO=null;function rdObserve(){if(IO)IO.disconnect();if(!('IntersectionObserve
 function msAfter(){const s=store.get('sura',1);if(PTI)clearInterval(PTI);PTI=setInterval(msPtTick,1000);const sh=$('#msSheet.on');if(sh&&sh.dataset.k==='set')openSet();
  if(mview()==='page'){pageFill();return}
  const mm=mmode(),hide=store.get('hide',false);if(mm==='book'){bookFill(s);return}
- msMeta(s).then(()=>{if(tajOn()&&!hide)tajFill(s)});if(trOn()&&mm==='tr'&&!hide)trFill(s);
+ msMeta(s);if(trOn()&&mm==='tr'&&!hide)trFill(s);
  rdObserve();const go=store.get('msgo','');if(go){store.set('msgo','');const el=document.querySelector(`.ayah[data-a="${go}"]`);if(el){el.scrollIntoView({block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),2200)}}}
 function msGo(k){const [s,a]=k.split(':').map(Number);if(!Q||!Q[s-1]||a<1||a>Q[s-1].v.length)return;store.set('sura',s);store.set('msgo',k);store.set('mview','ayat');store.set('mpage',0);if(location.hash!=='#mushaf')location.hash='mushaf';else render()}
 // Сура рўйхати ва қидирув
@@ -1244,6 +1271,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('button,[data-sh
  if(d.shclose){shClose();return}
  if(el.id==='msSura'){openSuras();return}
  if(el.id==='msTaj'){store.set('tajc',!tajOn());render();return}
+ if(d.qft){const x=QFT.find(q=>q[0]===d.qft);store.set('qfont',x[1]);if(x[2]!==null)store.set('tajc',!!x[2]);qConv();applyQf();render();return}
  if(el.id==='msJuz'){openJuz();return}
  if(el.id==='msPgN'){const p=+store.get('mpage',0)||1;sheet(`<h3 style="margin-top:0">${t('ms_page')}</h3><div class="row" style="gap:8px"><input id="pgIn" class="inp" type="number" min="1" max="604" value="${p}" style="flex:1"><button class="btn p" id="pgGo">→</button></div>`,'pg');return}
  if(el.id==='pgGo'){const v=Math.max(1,Math.min(604,+($('#pgIn')||{}).value||1));shClose();store.set('mpage',v);store.set('mview','page');render();window.scrollTo(0,0);return}
@@ -1252,7 +1280,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('button,[data-sh
  if(el.id==='mtAuto'){if(AS)asStop();else asStart();return}
  if(el.id==='mtShare'){const k=firstVis(),[s,a]=k.split(':').map(Number),txt=`${Q[s-1].v[a-1]}\n— ${Q[s-1].tr} ${k}\n${location.origin+location.pathname}#mushaf`;if(navigator.share)navigator.share({text:txt}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>{el.querySelector('small').textContent='✓'}).catch(()=>{});return}
  if(el.id==='mtTr'){const k=firstVis();if(mview()==='page')store.set('mview','ayat');const on=mmode()==='tr';store.set('mmode',on?'ar':'tr');if(!on)store.set('trOn',true);store.set('msgo',k);render();return}
- if(el.id==='mtHz'){store.set('hide',!store.get('hide',false));if(mview()==='page')store.set('mview','ayat');render();return}
+ if(el.id==='mtHz'){const k=firstVis(),[s1,a1]=k.split(':').map(Number);if(+store.get('hfs',0)!==s1){store.set('hfs',s1);store.set('hfa',a1);store.set('hfb',0)}location.hash='hifz';return}
  if(el.id==='mtMore'){openSet();return}
  if(d.asp!==undefined){const v=+d.asp;if(!v){asStop();return}const n=Math.max(1,Math.min(6,+store.get('asp',2)+v));store.set('asp',n);const b=$('#asV');if(b)b.textContent=n+'×';return}
  if(el.id==='msSet'){const p=$('#msSetP');if(p)p.classList.toggle('hidden');return}
@@ -1282,11 +1310,83 @@ document.addEventListener('click',e=>{const el=e.target.closest('button,[data-sh
  if(el.id==='hzRec'){hzStart();return}
  if(el.id==='hzReset'){document.querySelectorAll('.msayat .w').forEach(w=>w.classList.remove('rev','miss'));return}
  if(el.classList.contains('w')&&el.closest('.msayat.hz')){el.classList.add('peek');setTimeout(()=>el.classList.remove('peek'),1500)}},true);
-document.addEventListener('input',e=>{if(e.target.id==='msQ'){const l=$('#msList');if(l)l.innerHTML=suraList(e.target.value)}});
+document.addEventListener('input',e=>{if(e.target.id==='qsz'){store.set('qsz',+e.target.value);applyQf();const v=$('#qszV');if(v)v.textContent=e.target.value+'%';return}if(e.target.id==='msQ'){const l=$('#msList');if(l)l.innerHTML=suraList(e.target.value)}});
 document.addEventListener('change',e=>{const id=e.target.id;
+ if(id==='mpgnOn'){store.set('mpgn',e.target.checked);render();return}
+ if(id==='mruleOn'){store.set('mrule',e.target.checked);applyQf();return}
  if(id==='tajcOn'){store.set('tajc',e.target.checked);render();setTimeout(()=>{const p=$('#msSetP');if(p)p.classList.remove('hidden')},0);return}
  if(id==='mgoal'){store.set('mgoal',+e.target.value);const r=$('#msRd');if(r)r.innerHTML=rdLine();return}
  if(id==='trL2'){store.set('trL',e.target.value);render();return}});
+
+// =================== ҲИФЗ: ёддан ўқиш, овоз билан текшириш ===================
+let HZF=null;
+function hfRange(){const s=+store.get('hfs',store.get('sura',1)),N=Q[s-1].v.length;let a=+store.get('hfa',1),b=+store.get('hfb',N);a=Math.max(1,Math.min(N,a));b=Math.max(a,Math.min(N,b||N));return {s,a,b,N}}
+function vHifz(){if(!Q)return `<p class="small">${t('loading')}</p>`;const {s,a,b,N}=hfRange(),md=store.get('hfm','hid'),K=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const opt=(n,v)=>Array.from({length:n},(_,i)=>`<option${i+1===v?' selected':''}>${i+1}</option>`).join('');
+ const ay=[];for(let i=a;i<=b;i++){const ws=Q[s-1].v[i-1].split(' ');ay.push(`<span class="hfa" data-a="${i}">${ws.map((w,wi)=>`<span class="hfw" data-i="${i}" data-wi="${wi}">${esc(w)}</span>`).join(' ')} <span class="amark" data-hfam="${i}">${arNum(i)}</span></span>`)}
+ const last=store.get('hfres',{})[`${s}:${a}-${b}`];
+ return `<h2>🧠 ${t('hf2_title')}</h2><p class="small">${t('hf2_d')}</p>
+ <div class="card"><div class="row" style="gap:8px;flex-wrap:wrap">
+ <label style="flex:2;min-width:150px" class="small">${t('ay_sura')}<select id="hfS" class="inp" style="width:100%">${Q.map((q,i)=>`<option value="${i+1}"${i+1===s?' selected':''}>${i+1}. ${esc(q.tr)} ${q.ar}</option>`).join('')}</select></label>
+ <label style="flex:1;min-width:70px" class="small">${t('hf2_from')}<select id="hfA" class="inp" style="width:100%">${opt(N,a)}</select></label>
+ <label style="flex:1;min-width:70px" class="small">${t('hf2_to')}<select id="hfB" class="inp" style="width:100%">${opt(N,b)}</select></label></div>
+ <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap"><span class="small">${t('hf2_mode')}:</span><div class="seg"><button class="${md==='hid'?'on':''}" data-hfm="hid">${t('hf2_hid')}</button><button class="${md==='faint'?'on':''}" data-hfm="faint">${t('hf2_faint')}</button></div></div>
+ ${last?`<div class="small" style="margin-top:6px">${t('hf2_last',{ok:last.ok,n:last.n,e:last.e})}</div>`:''}</div>
+ ${K?'':`<div class="note">${t('hf2_noasr')}</div>`}
+ <div class="hfbar"><button class="btn p hfgo" id="hfGo">🎙 ${t('hf2_start')}</button><button class="btn" id="hfHint">💡 ${t('hf2_hint')}</button><button class="btn" id="hfReset">↺</button></div>
+ <div class="hfst"><span>✅ <b id="hfOk">0</b></span><span>❌ <b id="hfErr">0</b></span><span>💡 <b id="hfH">0</b></span><span class="small" id="hfPct"></span></div>
+ <div class="pbar"><b id="hfBar" style="width:0%"></b></div>
+ <div class="small hflive" id="hfLive">${t('hf2_ready')}</div>
+ <div class="mframe"><div class="mpaper"><div class="surahead"><div class="ar">سورة ${Q[s-1].ar}</div><div class="small">${esc(Q[s-1].tr)} · ${a}–${b}</div></div>
+ ${a===1&&s!==1&&s!==9?'<div class="ar bism">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>':''}
+ <div class="hftext ${md}" id="hfText">${ay.join(' ')}</div></div></div>
+ <div id="hfSum"></div>`}
+function hfInit(){const el=[...document.querySelectorAll('#hfText .hfw')];HZF={el,w:el.map(e=>arNorm(e.textContent)),pos:0,pend:null,ok:0,err:0,hint:0,rec:null,used:0,on:false,errA:new Set()};
+ el.forEach((e,i)=>{if(!HZF.w[i])e.classList.add('ok','skip')});hfAdv();hfStat()}
+function hfAdv(){while(HZF.pos<HZF.el.length&&HZF.el[HZF.pos].classList.contains('skip'))HZF.pos++;document.querySelectorAll('#hfText .cur').forEach(e=>e.classList.remove('cur'));const c=HZF.el[HZF.pos];if(c){c.classList.add('cur');const r=c.getBoundingClientRect();if(HZF.on&&c.scrollIntoView&&(r.top>innerHeight*.7||r.top<90))c.scrollIntoView({block:'center',behavior:'smooth'})}
+ document.querySelectorAll('#hfText .hfa').forEach(a=>{const ws=[...a.querySelectorAll('.hfw')];if(ws.length&&ws.every(w=>w.classList.contains('ok')||w.classList.contains('err')||w.classList.contains('hint'))){a.classList.add('done');if(ws.some(w=>w.classList.contains('err')))a.classList.add('bad')}});
+ if(HZF.pos>=HZF.el.length)hfFinish()}
+function hfStat(){const n=HZF.el.filter(e=>!e.classList.contains('skip')).length,d=HZF.ok+HZF.err+HZF.hint;const set=(i,v)=>{const e=$(i);if(e)e.textContent=v};set('#hfOk',HZF.ok);set('#hfErr',HZF.err);set('#hfH',HZF.hint);set('#hfPct',`${d}/${n}`);const b=$('#hfBar');if(b)b.style.width=(n?d/n*100:0)+'%'}
+function hfMark(i,c){const e=HZF.el[i];if(!e||e.classList.contains('ok')||e.classList.contains('err')||e.classList.contains('hint'))return;e.classList.add(c);if(c==='ok')HZF.ok++;else if(c==='err'){HZF.err++;HZF.errA.add(+e.dataset.i)}else HZF.hint++}
+function hfM(h,i){const w=HZF.w[i];if(!w)return false;if(h===w)return true;if(wsim(h,w)>=0.62)return true;if(w.length>=4&&h.length>=4&&(h.includes(w)||w.includes(h)))return true;return false}
+function hfFeed(h){if(!HZF||!h||HZF.pos>=HZF.el.length)return;const p=HZF.pos;
+ if(hfM(h,p)){hfMark(p,'ok');HZF.pos=p+1;HZF.pend=null;hfAdv();hfStat();return}
+ const two=HZF.w[p]+(HZF.w[p+1]||'');if(HZF.w[p+1]&&wsim(h,two)>=0.75){hfMark(p,'ok');hfMark(p+1,'ok');HZF.pos=p+2;HZF.pend=null;hfAdv();hfStat();return}
+ if(HZF.pend&&wsim(HZF.pend+h,HZF.w[p])>=0.75){hfMark(p,'ok');HZF.pos=p+1;HZF.pend=null;hfAdv();hfStat();return}
+ for(let k=1;k<=3;k++){let q=p+k;if(q<HZF.el.length&&hfM(h,q)){for(let j=p;j<q;j++)hfMark(j,'err');hfMark(q,'ok');HZF.pos=q+1;HZF.pend=null;hfAdv();hfStat();return}}
+ if(HZF.pend!==null){hfMark(p,'err');HZF.pos=p+1;HZF.pend=null;hfAdv();if(HZF.pos<HZF.el.length&&hfM(h,HZF.pos)){hfMark(HZF.pos,'ok');HZF.pos++;hfAdv()}else HZF.pend=h;hfStat();return}
+ HZF.pend=h}
+function hfStart(){const K=window.SpeechRecognition||window.webkitSpeechRecognition;if(!K){const l=$('#hfLive');if(l)l.textContent=t('hf2_noasr');return}
+ if(!HZF)hfInit();if(HZF.pos>=HZF.el.length){hfInit();document.querySelectorAll('#hfText .hfw').forEach(e=>e.classList.remove('ok','err','hint','cur'));document.querySelectorAll('#hfText .hfa').forEach(e=>e.classList.remove('done','bad'));hfInit();const sm=$('#hfSum');if(sm)sm.innerHTML=''}
+ const r=new K();r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;HZF.rec=r;HZF.on=true;let used=0;
+ const b=$('#hfGo');if(b){b.textContent='⏹ '+t('stop');b.classList.add('rec')}const l=$('#hfLive');if(l)l.textContent=t('hf2_listen');
+ r.onstart=()=>{used=0};
+ r.onresult=e=>{let all='',fin=true;for(let i=0;i<e.results.length;i++){all+=' '+e.results[i][0].transcript;if(!e.results[i].isFinal)fin=false}
+  const hw=all.trim().split(/\s+/).map(arNorm).filter(Boolean),lim=fin?hw.length:Math.max(used,hw.length-1);
+  while(used<lim){hfFeed(hw[used]);used++}const lv=$('#hfLive');if(lv)lv.textContent='🎧 '+all.trim().split(/\s+/).slice(-6).join(' ')};
+ r.onerror=ev=>{if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){HZF.on=false;const lv=$('#hfLive');if(lv)lv.textContent=t('hf2_mic')}};
+ r.onend=()=>{if(HZF&&HZF.on&&HZF.rec===r&&HZF.pos<HZF.el.length){try{r.start()}catch(e){hfStop()}}else if(HZF&&HZF.rec===r)hfStop(true)};
+ try{r.start()}catch(e){hfStop()}}
+function hfStop(silent){if(!HZF)return;HZF.on=false;const r=HZF.rec;HZF.rec=null;if(r){try{r.stop()}catch(e){}}const b=$('#hfGo');if(b){b.textContent='🎙 '+t(HZF.pos>0&&HZF.pos<HZF.el.length?'hf2_cont':'hf2_start');b.classList.remove('rec')}const l=$('#hfLive');if(l&&!silent)l.textContent=t('hf2_paused')}
+function hfFinish(){if(!HZF||HZF.fin)return;HZF.fin=true;hfStop(true);const {s,a,b}=hfRange(),n=HZF.ok+HZF.err+HZF.hint;const res=store.get('hfres',{});res[`${s}:${a}-${b}`]={ok:HZF.ok,e:HZF.err,n,d:today()};store.set('hfres',res);
+ const pct=n?Math.round(HZF.ok/n*100):0,ea=[...HZF.errA].sort((x,y)=>x-y);
+ const sm=$('#hfSum');if(sm)sm.innerHTML=`<div class="card hfsum"><h3 style="margin-top:0">${pct>=95?'🌟':pct>=75?'👍':'💪'} ${t('hf2_res',{p:pct})}</h3><p>${t('hf2_res_d',{ok:HZF.ok,e:HZF.err,h:HZF.hint,n})}</p>
+ ${ea.length?`<p class="small">${t('hf2_erra')}: ${ea.map(x=>`<b>${x}</b>`).join(', ')}</p><div class="links"><button class="btn p" id="hfPlayErr">▶ ${t('hf2_play_err')}</button><button class="btn" id="hfRetryErr">↺ ${t('hf2_retry_err')}</button></div>`:`<p>${t('hf2_perfect')}</p>`}
+ <div class="links"><button class="btn" id="hfAgain">↺ ${t('hf2_again')}</button>${b<Q[s-1].v.length?`<button class="btn" id="hfNext">→ ${t('hf2_next')}</button>`:''}</div></div>`;
+ if(sm)sm.scrollIntoView({block:'center',behavior:'smooth'});const lv=$('#hfLive');if(lv)lv.textContent=t('hf2_done')}
+function hfAfter(){HZF=null;if($('#hfText'))hfInit()}
+document.addEventListener('click',e=>{const el=e.target.closest('button,.hfw');if(!el||!el.closest('#view'))return;const d=el.dataset;
+ if(el.id==='hfGo'){if(HZF&&HZF.on)hfStop();else hfStart();return}
+ if(el.id==='hfHint'||(el.classList.contains('hfw')&&HZF&&+HZF.el.indexOf(el)===HZF.pos)){if(!HZF)hfInit();if(HZF.pos<HZF.el.length){hfMark(HZF.pos,'hint');HZF.pos++;HZF.pend=null;hfAdv();hfStat()}return}
+ if(el.id==='hfReset'||el.id==='hfAgain'){hfStop(true);render();return}
+ if(d.hfm){store.set('hfm',d.hfm);const tx_=$('#hfText');if(tx_){tx_.classList.remove('hid','faint');tx_.classList.add(d.hfm)}document.querySelectorAll('[data-hfm]').forEach(b=>b.classList.toggle('on',b===el));return}
+ if(el.id==='hfPlayErr'){const {s}=hfRange();playList([...HZF.errA].sort((x,y)=>x-y).map(a=>[s,a]),0);return}
+ if(el.id==='hfRetryErr'){const ea=[...HZF.errA].sort((x,y)=>x-y);store.set('hfa',ea[0]);store.set('hfb',ea[ea.length-1]);render();return}
+ if(el.id==='hfNext'){const {b,N}=hfRange(),len=b-+store.get('hfa',1)+1;store.set('hfa',b+1);store.set('hfb',Math.min(N,b+len));render();return}});
+document.addEventListener('change',e=>{const id=e.target.id;
+ if(id==='hfS'){hfStop(true);store.set('hfs',+e.target.value);store.set('hfa',1);store.set('hfb',0);render();return}
+ if(id==='hfA'){hfStop(true);store.set('hfa',+e.target.value);if(+store.get('hfb',0)&&+store.get('hfb',0)<+e.target.value)store.set('hfb',+e.target.value);render();return}
+ if(id==='hfB'){hfStop(true);store.set('hfb',+e.target.value);render();return}});
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
@@ -1299,5 +1399,5 @@ const viaCDN=()=>fetch(CDNQ).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=
 const viaLocal=()=>fetch('quran.json').then(r=>{if(!r.ok)throw 0;return r.json()});
 const tmP=fetch('timings.json').then(r=>r.ok?r.json():null).catch(()=>null);
 const qP=location.protocol==='file:'?viaScript():viaCDN().catch(viaLocal).catch(viaScript);
-Promise.all([qP.catch(()=>null),tmP]).then(([q,tm])=>{Q=q;TM=tm;if(!q)$('#view').insertAdjacentHTML('afterbegin',`<div class="note">${t('audio_fail')}</div>`);render()});
+Promise.all([qP.catch(()=>null),tmP]).then(([q,tm])=>{Q=q;TM=tm;if(q)qConv();if(!q)$('#view').insertAdjacentHTML('afterbegin',`<div class="note">${t('audio_fail')}</div>`);render()});
 }
