@@ -292,7 +292,7 @@ async function refBuffer(){const [s,a]=store.get('tref','1:1').split(':').map(Nu
 async function run(blob,sr){const f1=blob||($('#f1')&&$('#f1').files[0]),f2=$('#f2')&&$('#f2').files[0];if(!f1){st(t('need_rec'));return}st(t('analyzing'));await new Promise(r=>setTimeout(r,30));
  let A;try{A=analyze(await decode(f1))}catch(e){st(t('bad_file'));return}let B=null,note='';const book=location.hash==='#kitob';
  if(!book){try{B=analyze(await decode(f2||await refBuffer()))}catch(e){B=null;note=t('ref_fail')}}else note=t('book_note');
- lastA=A;const [s_,a_]=store.get('tref','1:1').split(':').map(Number);$('#res').innerHTML=(book?'':teacherHTML(s_,a_,A,B,sr))+`<details class="card"${book?' open':''}><summary class="small">${t('tf_details')}</summary>`+resHTML(A,B)+'</details>'+(note?`<div class="note small">${esc(note)}</div>`:'');plot($('#cv1'),A);st(t('ready'));markActive();const tb=$('.tfbox');if(tb)tb.scrollIntoView({behavior:'smooth',block:'start'})}
+ lastA=A;const [s_,a_]=store.get('tref','1:1').split(':').map(Number);$('#res').innerHTML=(book?'':teacherHTML(s_,a_,A,B,sr))+`<details class="card"${book?' open':''}><summary class="small">${t('tf_details')}</summary>`+resHTML(A,B)+'</details>'+(note?`<div class="note small">${esc(note)}</div>`:'');plot($('#cv1'),A);st(t('ready'));markActive();const tb=$('.tfbox');if(tb)tb.scrollIntoView({behavior:'smooth',block:'start'});if(!book)tajRun(f1,s_,a_)}
 async function recToggle(){const b=$('#rec');if(mr&&mr.state==='recording'){mr.stop();return}
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){st(t('no_mic'));return}P.a.pause();stopSeg();
  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}catch(e){st(t('mic_denied'));return}
@@ -844,13 +844,15 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg
 
 // ---------- Мусҳаф таржимаси (QuranEnc.com, ўзгаришсиз, манбаси билан) ----------
 const TRK={uz:['uzbek_sadiq',{uz:'Шайх Муҳаммад Содиқ Муҳаммад Юсуф',ru:'Шейх Мухаммад Садык Мухаммад Юсуф',tg:'Шайх Муҳаммад Содиқ Муҳаммад Юсуф'}],
- ru:['russian_kuliev',{uz:'Эльмир Кулиев',ru:'Эльмир Кулиев',tg:'Элмир Кулиев'}],
- tg:['tajik_arifi',{uz:'Рувводут таржима маркази',ru:'Центр переводов «Руввад»',tg:'Маркази тарҷумаи «Рувод»'}]};
+ ru:['russian_aboadel',{uz:'Абу Адель',ru:'Абу Адель',tg:'Абу Одил'}],
+ tg:['tajik_arifi',{uz:'Рувводут таржима маркази',ru:'Центр переводов «Руввад»',tg:'Маркази тарҷумаи «Рувод»'}],
+ en:['english_saheeh',{uz:'Saheeh International',ru:'Saheeh International',tg:'Saheeh International'}],
+ ar:['arabic_moyassar',{uz:'ат-Тафсир ал-Муяссар (арабча қисқа тафсир)',ru:'ат-Тафсир аль-Муяссар (краткий тафсир на арабском)',tg:'ат-Тафсир ал-Муяссар (тафсири кӯтоҳи арабӣ)'}]};
 const trOn=()=>!!store.get('trOn',false);
 const trL=()=>{const v=store.get('trL','');return TRK[v]?v:L3()};
 const TRM={};let TRV={};
-function trBar(){const on=trOn(),l=trL();return `<div class="row trbar"><label class="row"><input type="checkbox" id="trOn"${on?' checked':''} style="width:22px;height:22px"> 🌐 ${t('tr_on')}</label><label class="row"><input type="checkbox" id="wbwOn"${wbwOn()?' checked':''} style="width:22px;height:22px"> 🔤 ${t('wbw_on')}</label>${on?`<select id="trL" class="inp" style="width:auto">${['uz','ru','tg'].map(k=>`<option value="${k}"${k===l?' selected':''}>${t('tr_'+k)}</option>`).join('')}</select>`:''}</div>${on&&store.get('hide',false)?`<div class="small">${t('tr_hidden')}</div>`:''}`}
-function trCredit(){const l=trL(),k=TRK[l];return `<div class="note small" id="trCredit">${t('tr_credit',{a:esc(tx(k[1]))})} <a href="https://quranenc.com/${l==='ru'?'ru':l==='tg'?'tg':'uz'}/browse/${k[0]}/${store.get('sura',1)}" target="_blank" rel="noopener">QuranEnc.com</a>${TRV[k[0]]?' · '+t('tr_ver',{v:esc(TRV[k[0]])}):''}. ${t('tr_note')}</div>`}
+function trBar(){const on=trOn(),l=trL();return `<div class="row trbar"><label class="row"><input type="checkbox" id="trOn"${on?' checked':''} style="width:22px;height:22px"> 🌐 ${t('tr_on')}</label><label class="row"><input type="checkbox" id="wbwOn"${wbwOn()?' checked':''} style="width:22px;height:22px"> 🔤 ${t('wbw_on')}</label>${on?`<select id="trL" class="inp" style="width:auto">${['uz','ru','tg','en','ar'].map(k=>`<option value="${k}"${k===l?' selected':''}>${t('tr_'+k)}</option>`).join('')}</select>`:''}</div>${on&&store.get('hide',false)?`<div class="small">${t('tr_hidden')}</div>`:''}`}
+function trCredit(){const l=trL(),k=TRK[l];return `<div class="note small" id="trCredit">${t('tr_credit',{a:esc(tx(k[1]))})} <a href="https://quranenc.com/${l==='ru'?'ru':l==='tg'?'tg':l==='ar'?'ar':l==='en'?'en':'uz'}/browse/${k[0]}/${store.get('sura',1)}" target="_blank" rel="noopener">QuranEnc.com</a>${TRV[k[0]]?' · '+t('tr_ver',{v:esc(TRV[k[0]])}):''}. ${t('tr_note')}</div>`}
 async function trGet(key,s){const id=key+':'+s;if(TRM[id])return TRM[id];const url=`https://quranenc.com/api/v1/translation/sura/${key}/${s}`;let j=null;
  try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();try{if('caches' in window){const c=await caches.open('qu-audio');c.put(url,new Response(JSON.stringify(j),{headers:{'Content-Type':'application/json'}}))}}catch(_){}}}catch(e){}
  if(!j&&'caches' in window){try{const c=await caches.open('qu-audio'),m=await c.match(url);if(m)j=await m.json()}catch(_){}}
@@ -858,7 +860,7 @@ async function trGet(key,s){const id=key+':'+s;if(TRM[id])return TRM[id];const u
 async function trVer(key){if(TRV[key]!==undefined)return;TRV[key]='';try{const r=await fetch('https://quranenc.com/api/v1/translations/list',{mode:'cors'});if(r.ok){const j=await r.json();const it=(j.translations||[]).find(x=>x.key===key);if(it&&it.version){TRV[key]=String(it.version);const c=$('#trCredit');if(c)c.outerHTML=trCredit()}}}catch(_){}}
 async function trFill(s){const l=trL(),key=TRK[l][0];document.querySelectorAll('.trn').forEach(e=>{e.innerHTML=`<span class="small">${t('loading')}</span>`});
  try{const d=await trGet(key,s);if(store.get('sura',1)!==s)return;
-  document.querySelectorAll('.trn').forEach(e=>{const x=d[+e.dataset.tr];if(!x){e.innerHTML='';return}e.innerHTML=`<p>${esc(x.t)}</p>${x.f?`<details><summary class="small">${t('tr_fn')}</summary><p class="small">${esc(x.f)}</p></details>`:''}`});trVer(key)}
+  document.querySelectorAll('.trn').forEach(e=>{const x=d[+e.dataset.tr];if(!x){e.innerHTML='';return}e.innerHTML=`<p${l==='ar'?' dir="rtl" class="artr"':''}>${esc(x.t)}</p>${x.f?`<details><summary class="small">${t('tr_fn')}</summary><p class="small">${esc(x.f)}</p></details>`:''}`});trVer(key)}
  catch(e){document.querySelectorAll('.trn').forEach((el,i)=>{el.innerHTML=i===0?`<span class="small">${t('tr_fail')} <a href="https://quranenc.com/uz/browse/${key}/${s}" target="_blank" rel="noopener">QuranEnc.com</a></span>`:''})}}
 document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='trOn'){store.set('trOn',e.target.checked);render();return}
@@ -900,7 +902,7 @@ function teacherHTML(s,a,A,B,sr){const raw=(Q&&Q[s-1].v[a-1]||'').split(' '),wor
  const all=score===100&&tips.length===1&&A&&B&&tips[0]===t('tf_tempo_ok');
  return `<div class="card tfbox"><div class="tfhead"><span class="tfav">📊</span><div><div class="small">${t('tf_from',{r:esc(rec_)})}</div><b style="font-size:18px">${esc(head)}</b>${score!=null?`<div class="pbar" style="margin-top:6px"><b style="width:${score}%"></b></div><div class="small">${t('tf_score',{n:score})}</div>`:''}</div></div>
  ${body}${tips.length?`<div class="tfcard"><b>${t('tf_tempo')}</b><ul style="margin:6px 0 0;padding-left:18px">${tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
- <div class="links"><button class="btn p" data-play="${s}:${a}">▶ ${t('tf_whole',{r:esc(rec_)})}</button><button class="btn" id="tfMine">▶ ${t('tf_mine')}</button><button class="btn" id="rec2">🎙 ${t('tf_again')}</button></div>
+ <div id="tajBox" class="tfcard"></div><div class="links"><button class="btn p" data-play="${s}:${a}">▶ ${t('tf_whole',{r:esc(rec_)})}</button><button class="btn" id="tfMine">▶ ${t('tf_mine')}</button><button class="btn" id="rec2">🎙 ${t('tf_again')}</button></div>
  ${all?`<div class="note">🌟 ${t('tf_next')}</div>`:''}<div class="note small">${t('tf_note')}</div></div>`}
 document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg)return;const d=tg.dataset;
  if(d.tw){const [s,a,w]=d.tw.split(':').map(Number);tg.classList.add('kw');if(!playWords(s,a,[w],null,()=>tg.classList.remove('kw'))){tg.classList.remove('kw');playList([[s,a]],0)}return}
@@ -927,13 +929,53 @@ async function wbwShow(s,a,wi){const tok=(Q&&Q[s-1].v[a-1]||'').split(' ');const
  wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('loading')}</div>`);
  try{const d=await wbwGet(s),m=wbwMatch(tok,d[a]||[],wi);
   if(!m){wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('wbw_none')}</div>`);return}
-  wbwPop(`<div class="ar wbar">${esc(w0)}</div>${m.tl?`<div class="wbtl">${esc(m.tl)}</div>`:''}<div class="wbm"><span class="tag">EN</span> ${esc(m.m)}</div>
-   <div class="links"><button class="btn p" data-ww2="${s}:${a}:${wi}">▶ ${t('wbw_play')}</button></div><div class="small" style="opacity:.7">${t('wbw_src')}</div>`)}
+  let gl='';try{gl=await seraj(s,a,w0)}catch(_){}
+  wbwPop(`<div class="ar wbar">${esc(w0)}</div>${m.tl?`<div class="wbtl">${esc(m.tl)}</div>`:''}<div class="wbm"><span class="tag">EN</span> ${esc(m.m)}</div>${gl?`<div class="wbm wbara" dir="rtl"><span class="tag">AR</span> ${esc(gl)}</div>`:''}
+   <div class="small" style="text-align:center"><a href="https://ru.quranacademy.org/quran/${s}:${a}" target="_blank" rel="noopener">RU · ${t('wbw_ru')} ↗</a></div>
+   <div class="links"><button class="btn p" data-ww2="${s}:${a}:${wi}">▶ ${t('wbw_play')}</button></div><div class="small" style="opacity:.7">${t('wbw_src')}${gl?' '+t('wbw_src_ar'):''}</div>`)}
  catch(e){wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('wbw_fail')}</div>`)}}
 document.addEventListener('click',e=>{if(e.target.closest('#wbwX')){const p=$('#wbwPop');if(p)p.classList.remove('on');return}
  const b=e.target.closest('[data-ww2]');if(b){const [s,a,w]=b.dataset.ww2.split(':').map(Number);if(!playWords(s,a,[w]))playList([[s,a]],0);return}
  const w=e.target.closest('.ayah .w');if(w&&wbwOn()&&!store.get('hide',false)){wbwShow(+w.dataset.s,+w.dataset.a2,+w.dataset.w)}});
 document.addEventListener('change',e=>{if(e.target.id==='wbwOn'){store.set('wbwOn',e.target.checked);const p=$('#wbwPop');if(p)p.classList.remove('on');render()}});
+
+// Арабча сўз маъноси: «ас-Сирож фи баёни ғарибил Қуръон» (QuranEnc, arabic_seraj) — қийин сўзлар изоҳи
+async function seraj(s,a,w){const d=await trGet('arabic_seraj',s),x=d[a];if(!x||!x.t)return '';const n=arNorm(w);let best='',bs=0;
+ x.t.split(/\n+/).forEach(line=>{const i=line.indexOf(':');if(i<1)return;const head=line.slice(0,i),hn=arNorm(head);if(!hn)return;
+  const hw=hn.split(/\s+/);let sc=0;head.split(/\s+/).map(arNorm).filter(Boolean).forEach(h=>{sc=Math.max(sc,wsim(h,n),(n.length>=3&&(h.includes(n)||n.includes(h)))?0.8:0)});
+  if(sc>bs){bs=sc;best=head.trim()+': '+line.slice(i+1).trim()}});return bs>=0.7?best:''}
+
+// ---------- Тажвид текшируви (HisnLabs Tajweed v2) ----------
+let TJB=null,TJS=null;
+function tajLoad(){return new Promise((res,rej)=>{if(window.TAJ)return res(window.TAJ);const sc=document.createElement('script');sc.src='tajweed.js';sc.onload=()=>res(window.TAJ);sc.onerror=rej;document.head.appendChild(sc)})}
+const MADDN={NormalMaddRule:'tjm_nat',MonfaselMaddRule:'tjm_munf',MottaselMaddRule:'tjm_mutt',MottaselMaddPauseRule:'tjm_mutt',LazemMaddRule:'tjm_lazim',AaredMaddRule:'tjm_arid',LeenMaddRule:'tjm_lin',BadalMadd:'tjm_badal',LeenHamzaMadd:'tjm_lin'};
+const VOWN={'َ':'fatha','ُ':'damma','ِ':'kasra'};
+const RULEQ={madd:'madd',NormalMaddRule:'maddt',MonfaselMaddRule:'maddm',MottaselMaddRule:'maddm',LazemMaddRule:'maddl',AaredMaddRule:'madd',ghunnah:'ghunna',idgham_ghunnah:'idgham',idgham:'idgham',ikhfa:'ikhfa',iqlab:'iqlab',qalqalah:'qalqala',shadda:'shadda',vowel:'harakat'};
+function tjMsg(n){const k=n.k||{},mn=k.rule?t(MADDN[k.rule]||'tjm_nat'):'';
+ switch(n.kind){case 'madd_short':return t('tj_madd_short',{n:mn,h:k.heard,w:k.want});case 'madd_long':return t('tj_madd_long',{n:mn,h:k.heard,w:k.want});
+  case 'madd_missing':return t('tj_madd_missing',{n:mn});case 'madd_added':return t('tj_madd_added');case 'madd_uneven':return t('tj_madd_uneven',{n:mn,l:k.lens});
+  case 'ghunnah_short':return t('tj_ghunnah_short');case 'ikhfa_izhar':return t('tj_ikhfa_izhar');case 'ikhfa_short':return t('tj_ikhfa_short');
+  case 'iqlab_missed':return t('tj_iqlab');case 'idgham_missed':return t('tj_idgham',{l:k.letter||''});case 'idgham_ghunnah_short':return t('tj_idgham_gh');
+  case 'shadda_missing':return t('tj_shadda',{l:k.letter||''});case 'qalqalah_missing':return t('tj_qalqala',{l:k.letter||''});
+  case 'letter':return t('tj_letter',{h:k.heard,w:k.want});case 'vowel':return t('tj_vowel',{h:t('tj_'+VOWN[k.heard]),w:t('tj_'+VOWN[k.want])});
+  case 'dropped':return t('tj_dropped',{w:k.want});case 'added':return t('tj_added',{h:k.heard});case 'word_missing':return t('tj_word');default:return n.rule}}
+async function tajRun(blob,s,a){TJB={blob,s,a};const box=$('#tajBox');if(!box)return;
+ let T;try{T=await tajLoad()}catch(e){box.innerHTML=`<b>🎯 ${t('tj_title')}</b><div class="small">${t('tj_fail')}</div>`;return}
+ if(!(await T.cached())&&!TJS){box.innerHTML=`<b>🎯 ${t('tj_title')}</b><p class="small">${t('tj_intro')}</p><button class="btn p" id="tjDl">⬇ ${t('tj_dl')}</button>`;return}
+ box.innerHTML=`<b>🎯 ${t('tj_title')}</b><div class="small" id="tjSt">${t('tj_wait')}</div>`;
+ try{const r=await T.check(blob,s,a,p=>{const e=$('#tjSt');if(e)e.textContent=t('tj_dl_p',{n:Math.round(p*100)})});TJS=true;tajShow(r,s,a)}
+ catch(e){const b2=$('#tajBox');if(b2)b2.innerHTML=`<b>🎯 ${t('tj_title')}</b><div class="small">${t('tj_fail')}</div>`;console.warn(e)}}
+function tajShow(r,s,a){const box=$('#tajBox');if(!box)return;const W=r.words,bad=W.filter(w=>!w.ok),our=(Q&&Q[s-1].v[a-1]||'').split(' ').filter(x=>arNorm(x));
+ const same=our.length===W.length,wi=k=>same?(Q[s-1].v[a-1].split(' ').findIndex((x,i,arr)=>arr.slice(0,i+1).filter(y=>arNorm(y)).length===k+1)):-1;
+ const madd=W.flatMap(w=>w.madd.map(m=>`${esc(w.word)} — ${t(MADDN[m.rule]||'tjm_nat')}: ${m.heard}`));
+ box.innerHTML=`<b>🎯 ${t('tj_title')}</b><div style="margin:6px 0"><b>${bad.length?esc(t('tj_found',{n:bad.length})):esc(t('tj_clean'))}</b></div>
+ <div class="ar tfay">${W.map((w,k)=>`<button class="tfw ${w.ok?'ok':'no'}" ${wi(k)>=0?`data-tw="${s}:${a}:${wi(k)}"`:''}>${esc(w.word)}</button>`).join(' ')}</div>
+ ${bad.map(w=>{const k=W.indexOf(w),i=wi(k);return `<div class="tfcard"><div class="row" style="align-items:center;gap:10px;justify-content:space-between"><span class="ar" style="font-size:calc(30px*var(--arz))">${esc(w.word)}</span>${i>=0?`<button class="btn p" data-tw="${s}:${a}:${i}">▶ ${t('tf_listen')}</button>`:`<button class="btn p" data-play="${s}:${a}">▶ ${t('tf_listen')}</button>`}</div>
+  <ul style="margin:6px 0 0;padding-left:18px">${w.notes.map(n=>{const q=RULEQ[n.k&&n.k.rule]||RULEQ[n.rule];return `<li>${n.sev==='jali'?'🔴':'🟠'} ${esc(tjMsg(n))}${q?` <a href="#qoida-${q}">${t('tj_rule')}</a>`:''}</li>`}).join('')}</ul></div>`}).join('')}
+ ${madd.length?`<details><summary class="small">${t('tj_madds')}</summary><div class="small">${madd.join('<br>')}</div></details>`:''}
+ <div class="small" style="margin-top:6px">🔴 ${t('tj_jali')} · 🟠 ${t('tj_khafi')}</div><div class="note small">${t('tj_note')}</div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('#tjDl');if(!b)return;b.disabled=true;b.textContent=t('tj_dl_p',{n:0});
+ tajLoad().then(T=>T.ready(p=>{b.textContent=t('tj_dl_p',{n:Math.round(p*100)})})).then(()=>{TJS=true;if(TJB)tajRun(TJB.blob,TJB.s,TJB.a)}).catch(err=>{b.disabled=false;b.textContent=t('tj_dl');const bx=$('#tajBox');if(bx)bx.insertAdjacentHTML('beforeend',`<div class="small">${t('tj_fail')}</div>`);console.warn(err)})});
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
