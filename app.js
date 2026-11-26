@@ -289,17 +289,17 @@ async function decode(file){if(file&&file.getChannelData)return file;const ac=ne
 
 let lastA=null,mr=null,chunks=[],recT=0,recI=null;const st=m=>{const e=$('#st');if(e)e.textContent=m};
 async function refBuffer(){const [s,a]=store.get('tref','1:1').split(':').map(Number);const res=await fetch(audioURL(prec(),s,a),{mode:'cors'});if(!res.ok)throw 0;return decode(await res.blob())}
-async function run(blob){const f1=blob||($('#f1')&&$('#f1').files[0]),f2=$('#f2')&&$('#f2').files[0];if(!f1){st(t('need_rec'));return}st(t('analyzing'));await new Promise(r=>setTimeout(r,30));
+async function run(blob,sr){const f1=blob||($('#f1')&&$('#f1').files[0]),f2=$('#f2')&&$('#f2').files[0];if(!f1){st(t('need_rec'));return}st(t('analyzing'));await new Promise(r=>setTimeout(r,30));
  let A;try{A=analyze(await decode(f1))}catch(e){st(t('bad_file'));return}let B=null,note='';const book=location.hash==='#kitob';
  if(!book){try{B=analyze(await decode(f2||await refBuffer()))}catch(e){B=null;note=t('ref_fail')}}else note=t('book_note');
- lastA=A;$('#res').innerHTML=resHTML(A,B)+(note?`<div class="note small">${esc(note)}</div>`:'');plot($('#cv1'),A);st(t('ready'));markActive()}
+ lastA=A;const [s_,a_]=store.get('tref','1:1').split(':').map(Number);$('#res').innerHTML=(book?'':teacherHTML(s_,a_,A,B,sr))+`<details class="card"${book?' open':''}><summary class="small">${t('tf_details')}</summary>`+resHTML(A,B)+'</details>'+(note?`<div class="note small">${esc(note)}</div>`:'');plot($('#cv1'),A);st(t('ready'));markActive();const tb=$('.tfbox');if(tb)tb.scrollIntoView({behavior:'smooth',block:'start'})}
 async function recToggle(){const b=$('#rec');if(mr&&mr.state==='recording'){mr.stop();return}
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){st(t('no_mic'));return}P.a.pause();stopSeg();
  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}})}catch(e){st(t('mic_denied'));return}
  const mt=['audio/mp4','audio/webm;codecs=opus','audio/webm'].find(x=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(x));mr=new MediaRecorder(stream,mt?{mimeType:mt}:undefined);chunks=[];
  mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
- mr.onstop=()=>{stream.getTracks().forEach(x=>x.stop());clearInterval(recI);b.textContent=t('rerecord');b.classList.add('p');const blob=new Blob(chunks,{type:mr.mimeType||'audio/mp4'});$('#mine').innerHTML=`<p class="small" style="margin:10px 0 4px">${t('your_rec')}:</p><audio controls src="${URL.createObjectURL(blob)}" style="width:100%"></audio>`;run(blob)};
- mr.start();recT=Date.now();b.textContent=t('stop');b.classList.remove('p');$('#res').innerHTML='';recI=setInterval(()=>{const e=$('#st');if(e)e.innerHTML=`<span class="recdot"></span>${t('recording')} ${((Date.now()-recT)/1000).toFixed(0)} s`},300)}
+ mr.onstop=async()=>{stream.getTracks().forEach(x=>x.stop());clearInterval(recI);b.textContent=t('rerecord');b.classList.add('p');const blob=new Blob(chunks,{type:mr.mimeType||'audio/mp4'});$('#mine').innerHTML=`<p class="small" style="margin:10px 0 4px">${t('your_rec')}:</p><audio controls src="${URL.createObjectURL(blob)}" style="width:100%"></audio>`;st(t('tf_listening'));const sr=await srStop();run(blob,sr)};
+ mr.start();srStart();recT=Date.now();b.textContent=t('stop');b.classList.remove('p');$('#res').innerHTML='';recI=setInterval(()=>{const e=$('#st');if(e)e.innerHTML=`<span class="recdot"></span>${t('recording')} ${((Date.now()-recT)/1000).toFixed(0)} s`},300)}
 
 // ---------- Китоб (Муаллими соний) ----------
 const idb=(()=>{let p;const db=()=>p||(p=new Promise((ok,no)=>{const r=indexedDB.open('qu',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}));
@@ -863,6 +863,49 @@ async function trFill(s){const l=trL(),key=TRK[l][0];document.querySelectorAll('
 document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='trOn'){store.set('trOn',e.target.checked);render();return}
  if(id==='trL'){store.set('trL',e.target.value);render();return}});
+
+// ---------- Ўқишни текшириш: устоз жавоби (сўзларни таниш + солиштириш) ----------
+let SR=null,SRP=null,SRON=false;
+function srStart(){const K=window.SpeechRecognition||window.webkitSpeechRecognition;SR=null;if(!K)return;
+ try{const r=new K();r.lang='ar-SA';r.continuous=true;r.interimResults=true;r.maxAlternatives=1;let fin='',intr='';r._err='';
+  SRP=new Promise(res=>{r.onresult=e=>{intr='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)fin+=' '+x[0].transcript;else intr+=' '+x[0].transcript}};
+   r.onerror=e=>{r._err=e.error||'err'};r.onend=()=>{if(SRON&&!/not-allowed|service/.test(r._err)){try{r.start();return}catch(_){}}res((fin+' '+intr).trim())}});
+  SRON=true;r.start();SR=r}catch(e){SR=null}}
+async function srStop(){SRON=false;if(!SR)return {ok:false,why:(window.SpeechRecognition||window.webkitSpeechRecognition)?'err':'none'};const r=SR;SR=null;try{r.stop()}catch(_){}
+ const txt=await Promise.race([SRP,new Promise(z=>setTimeout(()=>z(null),3000))]);if(txt===null||/not-allowed|service|network/.test(r._err))return {ok:false,why:r._err||'err'};return {ok:true,txt:txt||''}}
+const arNorm=w=>String(w).replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g,'').replace(/[ٱأإآا]/g,'').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ء/g,'').replace(/[^ء-ي]/g,'');
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+const wsim=(a,b)=>{const L=Math.max(a.length,b.length);return L?1-lev(a,b)/L:1};
+function alignAyah(words,heard){const A=words,H=heard,m=A.length,n=H.length,S=[];for(let i=0;i<=m;i++){S.push(new Array(n+1).fill(0))}
+ const ok=(i,j)=>wsim(A[i].n,H[j])>=0.67||(A[i].n.length>=4&&(H[j].includes(A[i].n)||A[i].n.includes(H[j])&&H[j].length>=3));
+ for(let i=m-1;i>=0;i--)for(let j=n-1;j>=0;j--)S[i][j]=ok(i,j)?1+S[i+1][j+1]:Math.max(S[i+1][j],S[i][j+1]);
+ const st=A.map(()=>({ok:false,heard:''}));let i=0,j=0,gapH=[];const flush=(from)=>{};
+ while(i<m&&j<n){if(ok(i,j)&&S[i][j]===1+S[i+1][j+1]){st[i].ok=true;i++;j++}else if(S[i+1][j]>=S[i][j+1]){i++}else{j++}}
+ // ўрнига эшитилган сўз: бир хил оралиқдаги мос келмаган сўз
+ i=0;j=0;const mi=[];while(i<m&&j<n){if(ok(i,j)&&S[i][j]===1+S[i+1][j+1]){mi.push([i,j]);i++;j++}else if(S[i+1][j]>=S[i][j+1])i++;else j++}
+ let pi=-1,pj=-1;mi.concat([[m,n]]).forEach(([a,b])=>{const gi=[],gj=[];for(let x=pi+1;x<a;x++)gi.push(x);for(let y=pj+1;y<b;y++)gj.push(y);gi.forEach((x,k)=>{if(gj[k]!=null)st[x].heard=H[gj[k]]});pi=a;pj=b});
+ return st}
+function teacherHTML(s,a,A,B,sr){const raw=(Q&&Q[s-1].v[a-1]||'').split(' '),words=raw.map((w,i)=>({w,i,n:arNorm(w)})).filter(x=>x.n);
+ const rec_=prec().n.split(' (')[0],tips=[];let head='',body='',score=null;
+ if(sr&&sr.ok&&sr.txt){const hw=sr.txt.split(/\s+/).map(arNorm).filter(Boolean),st=alignAyah(words,hw),bad=words.map((w,k)=>({...w,...st[k]})).filter(x=>!x.ok);score=Math.round((words.length-bad.length)/words.length*100);
+  head=bad.length===0?t('tf_all_ok'):bad.length<=2?t('tf_few',{n:bad.length}):t('tf_many',{n:bad.length,m:words.length});
+  body=`<div class="ar tfay">${raw.map((w,i)=>{const b=bad.find(x=>x.i===i),isW=words.some(x=>x.i===i);return isW?`<button class="tfw ${b?'no':'ok'}" data-tw="${s}:${a}:${i}">${esc(w)}</button>`:esc(w)}).join(' ')}</div><p class="small">${t('tf_tap')}</p>`+
+   bad.slice(0,8).map(x=>`<div class="tfcard"><div><b>${x.heard?t('tf_said',{h:esc(x.heard)}):t('tf_missed')}</b></div><div class="row" style="align-items:center;gap:10px;margin-top:6px"><span class="ar" style="font-size:calc(34px*var(--arz));line-height:1.5">${esc(x.w)}</span><button class="btn p" data-tw="${s}:${a}:${x.i}">▶ ${t('tf_listen',{r:esc(rec_)})}</button></div><div class="small">${t('tf_repeat')}</div></div>`).join('')}
+ else if(sr&&sr.ok){head=t('tf_silent')}
+ else head=t('tf_noasr');
+ if(A&&B){const r=A.rate/B.rate;if(r>1.25)tips.push(t('tf_fast',{x:Math.round((r-1)*100)}));else if(r<0.6)tips.push(t('tf_slow'));
+  const am=A.long.length?Math.max(...A.long.map(o=>o.h)):0,bm=B.long.length?Math.max(...B.long.map(o=>o.h)):0;
+  if(bm>=4&&am<bm-1.5)tips.push(t('tf_madd',{a:am,b:bm}));else if(A.long.length<B.long.length-1)tips.push(t('tf_fewlong'));
+  if(!tips.length)tips.push(t('tf_tempo_ok'))}
+ const all=score===100&&tips.length===1&&A&&B&&tips[0]===t('tf_tempo_ok');
+ return `<div class="card tfbox"><div class="tfhead"><span class="tfav">👳</span><div><div class="small">${t('tf_from',{r:esc(rec_)})}</div><b style="font-size:18px">${esc(head)}</b>${score!=null?`<div class="pbar" style="margin-top:6px"><b style="width:${score}%"></b></div><div class="small">${t('tf_score',{n:score})}</div>`:''}</div></div>
+ ${body}${tips.length?`<div class="tfcard"><b>${t('tf_tempo')}</b><ul style="margin:6px 0 0;padding-left:18px">${tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+ <div class="links"><button class="btn p" data-play="${s}:${a}">▶ ${t('tf_whole',{r:esc(rec_)})}</button><button class="btn" id="tfMine">▶ ${t('tf_mine')}</button><button class="btn" id="rec2">🎙 ${t('tf_again')}</button></div>
+ ${all?`<div class="note">🌟 ${t('tf_next')}</div>`:''}<div class="note small">${t('tf_note')}</div></div>`}
+document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg)return;const d=tg.dataset;
+ if(d.tw){const [s,a,w]=d.tw.split(':').map(Number);tg.classList.add('kw');if(!playWords(s,a,[w],null,()=>tg.classList.remove('kw'))){tg.classList.remove('kw');playList([[s,a]],0)}return}
+ if(tg.id==='tfMine'){const au=document.querySelector('#mine audio');if(au){au.currentTime=0;au.play()}return}
+ if(tg.id==='rec2'){const r=$('#rec');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.click()}return}});
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
