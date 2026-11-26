@@ -538,7 +538,8 @@ function vKutub(){const ms=Object.keys(store.get('bkdone',{})).length,tx_=Object
  ${book('namoz','🕌',t('pt_title'),nx?t('pt_next',{p:nx.n,t:nx.s}):t('pt_d'))}
  ${book('taqvim','🌙',t('hj_title'),hjStr(new Date())||t('hj_d'))}
  ${book('oyat','🖼',t('ay_title'),t('ay_d'))}
- ${book('savol','❓',t('fq_title'),t('fq_d',{n:FQA().length}))}</div>`}
+ ${book('savol','❓',t('fq_title'),t('fq_d',{n:FQA().length}))}
+ <a class="card shelf" href="${ZK}" target="_blank" rel="noopener"><span class="sic">📚</span><span style="flex:1"><b>${t('zk_title')} ↗</b><br><span class="small">${t('zk_d')}</span></span></a></div>`}
 function homeExtra(){const nx=ptNext(),hj=hjStr(new Date());
  return `<div class="card"><div class="prow"><span>🕌 ${nx?esc(t('pt_next',{p:nx.n,t:nx.s})):t('pt_title')}</span><a href="#namoz">→</a></div>
  ${hj?`<div class="prow"><span>🌙 ${esc(hj)}</span><a href="#taqvim">→</a></div>`:''}
@@ -686,7 +687,7 @@ function aySave(share){const cv=$('#aycv');if(!cv)return;const nm=`oyat-${store.
 // ---------- 6. Савол-жавоб ----------
 let FQC=null;
 function FQA(){if(FQC&&FQC.l===lang())return FQC.a;const a=[];
- C.FQ.forEach(([c,q,ans,l])=>a.push({c,q:tx(q),a:tx(ans),l}));
+ C.FQ.forEach(([c,q,ans,l])=>a.push({c,q:tx(q),a:tx(ans),l,zq:q.uz}));
  GLA.forEach(x=>a.push({c:'rule',q:t('fq_q_rule',{x:tx(x.n)}),a:strip(tx(x.s))+' '+strip(tx(x.d)),l:'qoida-'+x.k,ar:x.ar}));
  C.LT.forEach(x=>a.push({c:'letter',q:t('fq_q_letter',{x:x[0]+' ('+tx(x[2])+')'}),a:strip(tx(x[3])),l:'mahraj',ar:x[0]}));
  C.TX.forEach((x,i)=>{if(!x.map)a.push({c:'hist',q:tx(x.t)+'?',a:strip(tx(x.b)).slice(0,420)+'…',l:'kitob-tarix-'+(i+1)})});
@@ -698,11 +699,14 @@ function vSavol(){const A=FQA(),c=store.get('fqc','');
  return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>❓ ${t('fq_title')}</h2><div class="small">${t('fq_d',{n:A.length})}</div>
  <input id="fqSearch" class="inp" type="search" placeholder="${esc(t('fq_search'))}" style="width:100%;margin:8px 0">
  <div class="links fqcats">${FCAT.map(([k,l])=>`<button class="btn${k===c?' p':''}" data-fqc="${k}">${t(l)}</button>`).join('')}</div>
- <div id="fqList">${A.map((x,i)=>`<details class="card fqi" data-c="${x.c}" data-f="${esc((x.q+' '+x.a+' '+(x.ar||'')).toLowerCase())}"${c&&x.c!==c?' style="display:none"':''}><summary><b>${esc(x.q)}</b></summary><p>${esc(x.a)}</p>${x.l?`<a class="btn" href="#${x.l}">${t('fq_more')}</a>`:''}</details>`).join('')}</div>
- <div class="note hidden" id="fqNone">${t('fq_none')}</div><div class="note">${t('fq_note')}</div>`}
+ <div id="fqList">${A.map((x,i)=>`<details class="card fqi" data-c="${x.c}" data-f="${esc((x.q+' '+x.a+' '+(x.ar||'')).toLowerCase())}"${c&&x.c!==c?' style="display:none"':''}><summary><b>${esc(x.q)}</b></summary><p>${esc(x.a)}</p><div class="links">${x.l?`<a class="btn" href="#${x.l}">${t('fq_more')}</a>`:''}${['adab','quran','hifz','namoz'].includes(x.c)?`<a class="btn" target="_blank" rel="noopener" href="${esc(zkURL(x.zq||x.q))}">${t('zk_rel')}</a>`:''}</div></details>`).join('')}</div>
+ <div class="note hidden" id="fqNone">${t('fq_none')}</div>${zkCard()}<div class="note">${t('fq_note')}</div>`}
+const ZK='https://savollar.islom.uz/';
+const zkURL=q=>q&&q.trim()?ZK+'qidiruv?q='+encodeURIComponent(q.trim()):ZK;
+function zkCard(){const q=store.get('fqq','');return `<div class="card" id="zk"><b>📚 ${t('zk_title')}</b><p class="small">${t('zk_d')}</p><div class="links"><a class="btn p" id="zkGo" target="_blank" rel="noopener" href="${esc(zkURL(q))}">${esc(q.trim()?t('zk_search',{q:q.trim()}):t('zk_open'))}</a><a class="btn" target="_blank" rel="noopener" href="${ZK}">${t('zk_ask')}</a></div></div>`}
 function fqFilter(q){q=q.trim().toLowerCase();const c=store.get('fqc','');let n=0;const ws=q.split(/\s+/).filter(w=>w.length>1);
  document.querySelectorAll('.fqi').forEach(el=>{const ok=(!c||el.dataset.c===c||q)&&(!ws.length||ws.every(w=>el.dataset.f.includes(w)));el.style.display=ok?'':'none';if(ok)n++});
- const nn=$('#fqNone');if(nn)nn.classList.toggle('hidden',n>0)}
+ const nn=$('#fqNone');if(nn)nn.classList.toggle('hidden',n>0);const z=$('#zkGo');if(z){z.href=zkURL(q);z.textContent=q?t('zk_search',{q}):t('zk_open')}if(n===0&&q){const zc=$('#zk');if(zc&&nn)nn.after(zc)}}
 
 // ---------- Ҳодисалар ----------
 document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg)return;const d=tg.dataset;
