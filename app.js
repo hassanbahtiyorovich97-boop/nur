@@ -502,7 +502,7 @@ let rw=0;const ro=new ResizeObserver(()=>{const c=$('#cv1');if(c&&lastA)plot(c,l
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
 if(!prof.lang){const n=(navigator.language||'').toLowerCase();prof.lang=n.startsWith('ru')?'ru':n.startsWith('tg')?'tg':'uz'}
 applyProf();render();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){const hadC=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadC&&!window.__rl){window.__rl=1;location.reload()}})}
 const CDNQ='https://cdn.jsdelivr.net/npm/quran-json@3.1.2/dist/quran.json';
 const viaScript=()=>new Promise((ok,no)=>{if(window.QURAN_DATA)return ok(window.QURAN_DATA);const sc=document.createElement('script');sc.src='quran.js';sc.onload=()=>window.QURAN_DATA?ok(window.QURAN_DATA):no();sc.onerror=no;document.head.appendChild(sc)});
 const viaCDN=()=>fetch(CDNQ).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>d.map(x=>({n:x.id,ar:x.name,tr:x.transliteration,v:x.verses.map(v=>v.text)})));
