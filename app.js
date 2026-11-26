@@ -165,8 +165,8 @@ function vAlif(i){const l=AL[i];if(!l)return vDarslar();const d=doneA(),F=t('for
 function vMushaf(){const s=store.get('sura',1),hide=store.get('hide',false),m=memo(),cnt=store.get('cnt',{});if(!Q)return `<p class="small">${t('loading')}</p>`;const S_=Q[s-1];
  return `<h2>${t('mushaf_title')}</h2><div class="row"><select id="sura" aria-label="${t('tab_mushaf')}">${Q.map(x=>`<option value="${x.n}"${x.n===s?' selected':''}>${x.n}. ${esc(x.tr)} — ${esc(x.ar)}</option>`).join('')}</select>
  <button class="btn p" data-playsura="${s}">${t('play_sura')}</button><label class="row"><input type="checkbox" id="hide"${hide?' checked':''} style="width:22px;height:22px"> ${t('hide_mode')}</label></div>
- <p class="small">${t('mushaf_note')} ${t('karaoke')} ${t('tap_word')}</p>
- <div class="${hide?'hide':''}">${S_.v.map((tt,i)=>{const k=s+':'+(i+1),c=cnt[k]||0;return `<div class="ayah" data-a="${k}"><div class="ar" data-k="${k}">${tt.split(' ').map((w,wi)=>`<span class="w" data-w="${wi}" data-s="${s}" data-a2="${i+1}">${esc(w)}</span>`).join(' ')} <span class="mark">${i+1}</span></div><div class="links">${listen(s,i+1,1)}<button class="btn" data-c="${k}">+1 · ${c}/10</button><button class="btn${m[k]?' p':''}" data-m="${k}">${m[k]?'✓ ':''}${t('memorized')}</button></div></div>`}).join('')}</div>`}
+ <p class="small">${t('mushaf_note')} ${t('karaoke')} ${t('tap_word')}</p>${trBar()}
+ <div class="${hide?'hide':''}">${S_.v.map((tt,i)=>{const k=s+':'+(i+1),c=cnt[k]||0;return `<div class="ayah" data-a="${k}"><div class="ar" data-k="${k}">${tt.split(' ').map((w,wi)=>`<span class="w" data-w="${wi}" data-s="${s}" data-a2="${i+1}">${esc(w)}</span>`).join(' ')} <span class="mark">${i+1}</span></div>${trOn()&&!hide?`<div class="trn" data-tr="${i+1}"></div>`:''}<div class="links">${listen(s,i+1,1)}<button class="btn" data-c="${k}">+1 · ${c}/10</button><button class="btn${m[k]?' p':''}" data-m="${k}">${m[k]?'✓ ':''}${t('memorized')}</button></div></div>`}).join('')}</div>${trOn()&&!hide?trCredit():''}`}
 
 // ---------- Устозлар ----------
 function vUstozlar(){const cur=rec().id;
@@ -525,6 +525,7 @@ function route2(h){let m;
 let PTI=null;
 function after2(h){if(PTI){clearInterval(PTI);PTI=null}if(h!=='taqvim'&&store.get('hjoff',0))store.set('hjoff',0);
  if(h==='oyat')ayDraw();
+ if((h==='mushaf'||h==='hifz')&&trOn()&&!store.get('hide',false))trFill(store.get('sura',1));
  if(h==='namoz'||h==='bosh'||h==='')PTI=setInterval(ptTick,1000);
  if(h==='qibla')qbStart();else qbStop();
  if(h==='savol'){const q=store.get('fqq','');const i=$('#fqSearch');if(i&&q){i.value=q;fqFilter(q)}}}
@@ -759,23 +760,43 @@ function homeTop(){const nw=ptNow(),nx=ptNext(),p=ptPlace();
 // ---------- Қибла ----------
 const KAABA=[21.4225,39.8262];
 function qBearing(){const p=ptPlace(),r=Math.PI/180,f1=p.lat*r,f2=KAABA[0]*r,dl=(KAABA[1]-p.lon)*r;const b=Math.atan2(Math.sin(dl)*Math.cos(f2),Math.cos(f1)*Math.sin(f2)-Math.sin(f1)*Math.cos(f2)*Math.cos(dl))/r;return (b+360)%360}
-let QH=null,QON=false,QV=false;
+let QH=null,QON=false,QV=false,QA=null,QN=0,QL=0;
 function vQibla(){const b=qBearing(),p=ptPlace();
  const ticks=Array.from({length:72},(_,i)=>{const big=i%6===0;return `<line x1="150" y1="${big?22:26}" x2="150" y2="34" stroke="${big?'var(--lapis)':'#bbb'}" stroke-width="${big?4:2}" stroke-linecap="round" transform="rotate(${i*5} 150 150)"/>`}).join('');
  return `<p><a href="#bosh">← ${t('tab_home')}</a></p><h2>🧭 ${t('qb_t')}</h2>
  <div class="card" style="text-align:center"><b>${esc(p.n)}</b><div class="small">${t('qb_deg',{d:b.toFixed(1)})}</div></div>
- <div class="qwrap"><svg id="qdial" viewBox="0 0 300 300"><circle cx="150" cy="150" r="140" fill="var(--card)" stroke="var(--ink)" stroke-width="8"/>${ticks}
+ <div class="qwrap"><div id="qrot" style="transition:transform .2s linear;will-change:transform"><svg id="qdial" viewBox="0 0 300 300" style="transition:none"><circle cx="150" cy="150" r="140" fill="var(--card)" stroke="var(--ink)" stroke-width="8"/>${ticks}
  <g font-size="22" font-weight="700" fill="var(--mute)" text-anchor="middle"><text x="150" y="62">N</text><text x="245" y="158">E</text><text x="150" y="252">S</text><text x="55" y="158">W</text></g>
  <g transform="rotate(${b.toFixed(1)} 150 150)"><line x1="150" y1="150" x2="150" y2="58" stroke="var(--gold)" stroke-width="5" stroke-linecap="round"/><g transform="translate(150 44)"><rect x="-14" y="-14" width="28" height="28" rx="3" fill="#1b1b1b"/><rect x="-14" y="-6" width="28" height="4" fill="var(--gold)"/></g></g>
- <circle cx="150" cy="150" r="8" fill="var(--lapis)"/></svg><div class="qtop">▲</div></div>
- <div id="qmsg" class="note" style="text-align:center">${t('qb_static')}</div>
- <div class="links" style="justify-content:center"><button class="btn p" id="qOn">🧭 ${t('qb_on')}</button><a class="btn" href="#namoz">📍 ${t('pt_city')}</a></div>
+ <circle cx="150" cy="150" r="8" fill="var(--lapis)"/></svg></div><div class="qtop">▲</div></div>
+ <div id="qmsg" class="note" style="text-align:center">${QON?t('qb_wait'):t('qb_static')}</div><div id="qdbg" class="small" style="text-align:center;color:var(--mute)"></div>
+ <div class="links" style="justify-content:center">${QON&&QH!=null?'':`<button class="btn p" id="qOn">🧭 ${t('qb_on')}</button>`}<a class="btn" href="#namoz">📍 ${t('pt_city')}</a></div>
  <div class="note">${t('qb_note')}</div>`}
-function qbOri(e){let h=null;if(e.webkitCompassHeading!=null)h=e.webkitCompassHeading;else if(e.absolute&&e.alpha!=null)h=360-e.alpha;if(h==null)return;QH=h;const d=$('#qdial');if(!d)return;d.style.transform=`rotate(${-h}deg)`;
- const diff=((qBearing()-h+540)%360)-180,m=$('#qmsg');if(m){if(Math.abs(diff)<5){m.textContent=t('qb_ok');m.classList.add('qok');if(!QV&&navigator.vibrate){navigator.vibrate(60);QV=true}}else{m.textContent=t(diff>0?'qb_right':'qb_left',{d:Math.round(Math.abs(diff))});m.classList.remove('qok');QV=false}}}
-async function qbStart(){if(!QON)return;try{const D=window.DeviceOrientationEvent;if(D&&typeof D.requestPermission==='function'){const r=await D.requestPermission();if(r!=='granted'){$('#qmsg').textContent=t('qb_noperm');return}}
- window.addEventListener('deviceorientationabsolute',qbOri,true);window.addEventListener('deviceorientation',qbOri,true);setTimeout(()=>{if(QH==null){const m=$('#qmsg');if(m)m.textContent=t('qb_nosensor')}},2500)}catch(e){const m=$('#qmsg');if(m)m.textContent=t('qb_nosensor')}}
-function qbStop(){window.removeEventListener('deviceorientationabsolute',qbOri,true);window.removeEventListener('deviceorientation',qbOri,true);QH=null}
+const qIOS=()=>!!(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function');
+function qbOri(e){let h=null;
+ if(typeof e.webkitCompassHeading==='number'&&e.webkitCompassHeading>=0)h=e.webkitCompassHeading;
+ else if(e.type==='deviceorientationabsolute'&&e.alpha!=null)h=(360-e.alpha)%360;
+ else if(e.absolute===true&&e.alpha!=null)h=(360-e.alpha)%360;
+ if(h==null)return;
+ // экран ётиқ ҳолатда бурчакни тузатиш
+ const so=(screen.orientation&&screen.orientation.angle)||window.orientation||0;h=(h+so+360)%360;
+ QN++;QH=h;const now=Date.now();if(now-QL<60)return;QL=now;
+ const r=$('#qrot');if(!r)return;
+ const tgt=-h;if(QA==null)QA=tgt;else{let d=((tgt-QA)%360+540)%360-180;QA+=d}
+ r.style.transform=r.style.webkitTransform=`rotate(${QA.toFixed(1)}deg)`;
+ const btn=$('#qOn');if(btn)btn.remove();
+ const dbg=$('#qdbg');if(dbg)dbg.textContent=t('qb_head',{d:Math.round(h)});
+ const diff=((qBearing()-h+540)%360)-180,m=$('#qmsg');if(m){if(Math.abs(diff)<5){m.textContent=t('qb_ok');m.classList.add('qok');if(!QV){try{navigator.vibrate&&navigator.vibrate(60)}catch(_){}QV=true}}else{m.textContent=t(diff>0?'qb_right':'qb_left',{d:Math.round(Math.abs(diff))});m.classList.remove('qok');QV=false}}}
+function qbListen(){window.addEventListener('deviceorientationabsolute',qbOri,true);window.addEventListener('deviceorientation',qbOri,true);
+ const n0=QN;setTimeout(()=>{if(QN===n0&&location.hash==='#qibla'){const m=$('#qmsg');if(m)m.textContent=t(window.DeviceOrientationEvent?(qIOS()?'qb_ios_none':'qb_nosensor'):'qb_nosensor')}},3000)}
+// iPhone: рухсат фақат тугма босилганда, бевосита сўралади (await олдидан ҳеч нарса йўқ)
+function qbAsk(){QON=true;const m=$('#qmsg');
+ if(qIOS()){let p;try{p=DeviceOrientationEvent.requestPermission()}catch(e){if(m)m.textContent=t('qb_ios_deny');return}
+  if(m)m.textContent=t('qb_wait');
+  p.then(r=>{if(r==='granted')qbListen();else{const mm=$('#qmsg');if(mm)mm.textContent=t('qb_ios_deny')}}).catch(()=>{const mm=$('#qmsg');if(mm)mm.textContent=t('qb_ios_deny')});return}
+ if(m)m.textContent=t('qb_wait');qbListen()}
+function qbStart(){QA=null;if(QON||!qIOS()){QON=true;qbListen()}}
+function qbStop(){window.removeEventListener('deviceorientationabsolute',qbOri,true);window.removeEventListener('deviceorientation',qbOri,true);QH=null;QA=null}
 
 // ---------- Тасбеҳ ----------
 const DZ=[['سُبْحَانَ اللهِ',X3('Субҳаналлоҳ','Субханаллах','Субҳаналлоҳ'),X3('Аллоҳ барча нуқсонлардан покдир','Аллах свободен от всех недостатков','Аллоҳ аз ҳама нуқсон пок аст')],
@@ -817,9 +838,31 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg
  if(tg.id==='tsTap'){tsTap();return}
  if(d.tsi!==undefined){store.set('tsi',+d.tsi);render();return}if(d.tsg!==undefined){store.set('tsg',+d.tsg);render();return}
  if(tg.id==='tsReset'){const S=tsS(),i=store.get('tsi',0);S.c[i]=0;store.set('tsb',S);render();return}
- if(tg.id==='qOn'){QON=true;qbStart();tg.disabled=true;return}
+ if(tg.id==='qOn'){qbAsk();return}
  if(d.duc!==undefined){store.set('duc',+d.duc);render();return}
  if(d.ayp2){store.set('ayref',d.ayp2);location.hash='oyat';return}});
+
+// ---------- Мусҳаф таржимаси (QuranEnc.com, ўзгаришсиз, манбаси билан) ----------
+const TRK={uz:['uzbek_sadiq',{uz:'Шайх Муҳаммад Содиқ Муҳаммад Юсуф',ru:'Шейх Мухаммад Садык Мухаммад Юсуф',tg:'Шайх Муҳаммад Содиқ Муҳаммад Юсуф'}],
+ ru:['russian_kuliev',{uz:'Эльмир Кулиев',ru:'Эльмир Кулиев',tg:'Элмир Кулиев'}],
+ tg:['tajik_arifi',{uz:'Рувводут таржима маркази',ru:'Центр переводов «Руввад»',tg:'Маркази тарҷумаи «Рувод»'}]};
+const trOn=()=>!!store.get('trOn',false);
+const trL=()=>{const v=store.get('trL','');return TRK[v]?v:L3()};
+const TRM={};let TRV={};
+function trBar(){const on=trOn(),l=trL();return `<div class="row trbar"><label class="row"><input type="checkbox" id="trOn"${on?' checked':''} style="width:22px;height:22px"> 🌐 ${t('tr_on')}</label>${on?`<select id="trL" class="inp" style="width:auto">${['uz','ru','tg'].map(k=>`<option value="${k}"${k===l?' selected':''}>${t('tr_'+k)}</option>`).join('')}</select>`:''}</div>${on&&store.get('hide',false)?`<div class="small">${t('tr_hidden')}</div>`:''}`}
+function trCredit(){const l=trL(),k=TRK[l];return `<div class="note small" id="trCredit">${t('tr_credit',{a:esc(tx(k[1]))})} <a href="https://quranenc.com/${l==='ru'?'ru':l==='tg'?'tg':'uz'}/browse/${k[0]}/${store.get('sura',1)}" target="_blank" rel="noopener">QuranEnc.com</a>${TRV[k[0]]?' · '+t('tr_ver',{v:esc(TRV[k[0]])}):''}. ${t('tr_note')}</div>`}
+async function trGet(key,s){const id=key+':'+s;if(TRM[id])return TRM[id];const url=`https://quranenc.com/api/v1/translation/sura/${key}/${s}`;let j=null;
+ try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();try{if('caches' in window){const c=await caches.open('qu-audio');c.put(url,new Response(JSON.stringify(j),{headers:{'Content-Type':'application/json'}}))}}catch(_){}}}catch(e){}
+ if(!j&&'caches' in window){try{const c=await caches.open('qu-audio'),m=await c.match(url);if(m)j=await m.json()}catch(_){}}
+ if(!j||!j.result)throw new Error('tr');const out={};j.result.forEach(x=>{out[+x.aya]={t:x.translation||'',f:x.footnotes||''}});TRM[id]=out;return out}
+async function trVer(key){if(TRV[key]!==undefined)return;TRV[key]='';try{const r=await fetch('https://quranenc.com/api/v1/translations/list',{mode:'cors'});if(r.ok){const j=await r.json();const it=(j.translations||[]).find(x=>x.key===key);if(it&&it.version){TRV[key]=String(it.version);const c=$('#trCredit');if(c)c.outerHTML=trCredit()}}}catch(_){}}
+async function trFill(s){const l=trL(),key=TRK[l][0];document.querySelectorAll('.trn').forEach(e=>{e.innerHTML=`<span class="small">${t('loading')}</span>`});
+ try{const d=await trGet(key,s);if(store.get('sura',1)!==s)return;
+  document.querySelectorAll('.trn').forEach(e=>{const x=d[+e.dataset.tr];if(!x){e.innerHTML='';return}e.innerHTML=`<p>${esc(x.t)}</p>${x.f?`<details><summary class="small">${t('tr_fn')}</summary><p class="small">${esc(x.f)}</p></details>`:''}`});trVer(key)}
+ catch(e){document.querySelectorAll('.trn').forEach((el,i)=>{el.innerHTML=i===0?`<span class="small">${t('tr_fail')} <a href="https://quranenc.com/uz/browse/${key}/${s}" target="_blank" rel="noopener">QuranEnc.com</a></span>`:''})}}
+document.addEventListener('change',e=>{const id=e.target.id;
+ if(id==='trOn'){store.set('trOn',e.target.checked);render();return}
+ if(id==='trL'){store.set('trL',e.target.value);render();return}});
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
