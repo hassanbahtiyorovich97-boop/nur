@@ -118,7 +118,8 @@ function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins
  <div class="card plan"><b>${t('today_plan')}</b>
  ${nl?`<a class="btn p lg" href="#${nl.h}">${t('next_lesson')}: ${esc(nl.t)}</a>`:''}
  <a class="btn lg" href="#imtihon-review">${t('review')}</a>
- <a class="btn lg" href="#kitob">${t('book_title')} · ${store.get('bkpg',1)}/${BK?BK.length:'…'}</a></div>
+ <a class="btn lg" href="#kitob-ms">${t('book_title')} · ${store.get('bkpg',1)}/${BK?BK.length:'…'}</a></div>
+ ${homeExtra()}
  <div class="card"><b>${t('progress')}</b>
  <div class="prow"><span>${t('course_alif')}</span><span>${a}/${AL.length}</span></div>${bar_(a,AL.length)}
  <div class="prow"><span>${t('course_tajwid')}</span><span>${d}/${C.L.length}</span></div>${bar_(d,C.L.length)}
@@ -416,16 +417,18 @@ function vGlTest(){if(!GT)glStart();if(GT.i>=GT.qs.length){const pct=Math.round(
  ${q.opts.map(o=>`<button class="btn opt glo" data-v="${o.k}">${esc(lab(o))}</button>`).join('')}<div class="small qres"></div>
  <div class="links hidden" id="glMore"><a class="btn" href="#qoida-${x.k}">${esc(tx(x.n))} →</a><button class="btn p" id="glNext">${t('gl_next_q')}</button></div></div>`}
 
-function render(){applyProf();const h=(location.hash||'#bosh').slice(1);let v,tab=h;
+function render(){applyProf();const h=(location.hash||'#bosh').slice(1);let v,tab=h,r2;
  if(/^dars-\d+$/.test(h)){v=vDars(+h.split('-')[1]-1);tab='darslar'}
  else if(/^alif-\d+$/.test(h)){v=vAlif(+h.split('-')[1]-1);tab='darslar'}
  else if(/^imtihon-(alif|tajwid|review)$/.test(h)){v=vExam(h.split('-')[1]);tab=h.endsWith('review')?'bosh':'darslar'}
  else if(/^sertifikat-(alif|tajwid)$/.test(h)){v=vCert(h.split('-')[1]);tab='bosh'}
  else if(/^qoida-[a-z]+$/.test(h)){v=vQoida(h.slice(6));tab='qoidalar'}
  else if(h==='glmashq'){v=vGlTest();tab='qoidalar'}
- else v=({bosh:vBosh,darslar:vDarslar,qoidalar:vQoidalar,mushaf:vMushaf,ustozlar:vUstozlar,mahraj:vMahraj,tekshiruv:vTek,kitob:vKitob,sozlama:vSozlama}[h]||vBosh)();
+ else if(h==='kitob-ms'){v=vKitob();tab='kitob'}
+ else if((r2=route2(h))){v=r2.v;tab=r2.tab}
+ else v=({bosh:vBosh,darslar:vDarslar,qoidalar:vQoidalar,mushaf:vMushaf,ustozlar:vUstozlar,mahraj:vMahraj,tekshiruv:vTek,kitob:vKutub,sozlama:vSozlama}[h]||vBosh)();
  navi(tab);$('#view').innerHTML=v;window.scrollTo(0,0);bar();
- if(tab==='kitob')bkDlStatus();
+ if(h==='kitob-ms')bkDlStatus();after2(h);
  if(/^sertifikat-/.test(h)){const cv=$('#cert');if(cv){drawCert(cv,h.split('-')[1]);const a=$('#certSave');try{a.href=cv.toDataURL('image/png')}catch(e){}}}
  $('#ob').innerHTML=prof.onb?'':obHTML()}
 
@@ -497,6 +500,226 @@ document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='sura'){store.set('sura',+e.target.value);render();return}if(id==='hide'){store.set('hide',e.target.checked);render()}});
 window.addEventListener('hashchange',()=>{stopSeg();if(!/^#imtihon/.test(location.hash))EX=null;render()});
 let rw=0;const ro=new ResizeObserver(()=>{const c=$('#cv1');if(c&&lastA)plot(c,lastA);const w=document.body.clientWidth;if(PDF&&$('#pgcv')&&w!==rw){rw=w;drawPage().catch(()=>{})}});ro.observe(document.body);
+
+// Кутубхона, тарих, қорилар, намоз вақтлари, ҳижрий тақвим, оят расмлари, савол-жавоб.
+// app.js дан олдин юкланади: бу ерда фақат функциялар; улар app.js даги t, tx, esc, store, $, Q, R... ни чақирилганда ишлатади.
+const L3=()=>['uz','ru','tg'][li()];
+const pick=a=>a[li()];
+
+// ---------- Маршрутлар ----------
+function route2(h){let m;
+ if(h==='kitob-tarix')return {v:vTarix(),tab:'kitob'};
+ if((m=h.match(/^kitob-tarix-(\d+)$/)))return {v:vTarixCh(+m[1]),tab:'kitob'};
+ if(h==='kitob-qori')return {v:vQorilar(),tab:'kitob'};
+ if((m=h.match(/^kitob-qori-intro-(\d+)$/)))return {v:vQoriIntro(+m[1]),tab:'kitob'};
+ if((m=h.match(/^kitob-qori-([a-z-]+)$/)))return {v:vQori(m[1]),tab:'kitob'};
+ if(h==='namoz')return {v:vNamoz(),tab:'kitob'};
+ if(h==='taqvim')return {v:vTaqvim(),tab:'kitob'};
+ if(h==='oyat')return {v:vOyat(),tab:'kitob'};
+ if(h==='savol')return {v:vSavol(),tab:'kitob'};
+ return null}
+let PTI=null;
+function after2(h){if(PTI){clearInterval(PTI);PTI=null}if(h!=='taqvim'&&store.get('hjoff',0))store.set('hjoff',0);
+ if(h==='oyat')ayDraw();
+ if(h==='namoz')PTI=setInterval(ptTick,20000);
+ if(h==='savol'){const q=store.get('fqq','');const i=$('#fqSearch');if(i&&q){i.value=q;fqFilter(q)}}}
+
+// ---------- Кутубхона жавони ----------
+function vKutub(){const ms=Object.keys(store.get('bkdone',{})).length,tx_=Object.keys(store.get('txd',{})).length,MSN=(typeof bkBuild==='function'&&bkBuild())?BK.length:60;
+ const bar_=(n,tot)=>`<div class="pbar"><b style="width:${Math.round(n/tot*100)}%"></b></div>`;
+ const book=(h,ic,ti,d,n,tot)=>`<a class="card shelf" href="#${h}"><span class="sic">${ic}</span><span style="flex:1"><b>${esc(ti)}</b><br><span class="small">${esc(d)}</span>${tot?bar_(n,tot):''}</span></a>`;
+ const nx=ptNext();
+ return `<h2>${t('lib_title')}</h2><div class="note">${t('lib_note')}</div>
+ <h3>${t('lib_books')}</h3><div class="grid">
+ ${book('kitob-ms','📗',t('bk_title'),t('lib_ms_d'),ms,MSN)}
+ ${book('kitob-tarix','📜',t('tx_title'),t('tx_d'),tx_,C.TX.length)}
+ ${book('kitob-qori','🎙',t('qb_title'),t('qb_d'))}</div>
+ <h3>${t('lib_tools')}</h3><div class="grid">
+ ${book('namoz','🕌',t('pt_title'),nx?t('pt_next',{p:nx.n,t:nx.s}):t('pt_d'))}
+ ${book('taqvim','🌙',t('hj_title'),hjStr(new Date())||t('hj_d'))}
+ ${book('oyat','🖼',t('ay_title'),t('ay_d'))}
+ ${book('savol','❓',t('fq_title'),t('fq_d',{n:FQA().length}))}</div>`}
+function homeExtra(){const nx=ptNext(),hj=hjStr(new Date());
+ return `<div class="card"><div class="prow"><span>🕌 ${nx?esc(t('pt_next',{p:nx.n,t:nx.s})):t('pt_title')}</span><a href="#namoz">→</a></div>
+ ${hj?`<div class="prow"><span>🌙 ${esc(hj)}</span><a href="#taqvim">→</a></div>`:''}
+ <div class="links"><a class="btn" href="#savol">❓ ${t('fq_title')}</a><a class="btn" href="#oyat">🖼 ${t('ay_title')}</a></div></div>`}
+
+// ---------- 1. Тарих китоби ----------
+function vTarix(){const dn=store.get('txd',{});
+ return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>📜 ${t('tx_title')}</h2>
+ <div class="grid">${C.TX.map((c,i)=>`<a class="card lesson" href="#kitob-tarix-${i+1}"><span class="num${dn[i+1]?' done':''}">${dn[i+1]?'✓':i+1}</span><span><b>${esc(tx(c.t))}</b></span></a>`).join('')}</div>`}
+function vTarixCh(n){const N=C.TX.length;if(n<1||n>N)return vTarix();const c=C.TX[n-1],dn=store.get('txd',{});
+ let extra='';
+ if(c.map)extra=`<h3>${t('tx_map_l')}</h3><div class="grid">${C.L.map((l,i)=>`<a class="card lesson" href="#dars-${i+1}"><span class="num">${i+1}</span><span><b>${esc(tx(l.t))}</b><br><span class="small">${esc(tx(l.k))}</span></span></a>`).join('')}</div>
+ <h3>${t('tx_map_g')}</h3>${C.GL.map((g,gi)=>`<div class="card"><b>${esc(tx(g.g))}</b><div class="links">${GLA.filter(x=>x.g===gi).map(x=>`<a class="btn" href="#qoida-${x.k}">${esc(tx(x.n))}</a>`).join('')}</div></div>`).join('')}`;
+ return `<p><a href="#kitob-tarix">${t('tx_back')}</a></p><h2>${n}. ${esc(tx(c.t))}</h2>
+ <div class="card prose">${tx(c.b)}</div>${extra}
+ <div class="row" style="margin-top:14px;justify-content:space-between">
+ ${n>1?`<a class="btn" href="#kitob-tarix-${n-1}">${t('gl_prev')}</a>`:'<span></span>'}
+ <button class="btn${dn[n]?'':' p'}" id="txok" data-n="${n}">${dn[n]?'✓ '+t('ch_read'):t('bk_read')}</button>
+ ${n<N?`<a class="btn" href="#kitob-tarix-${n+1}">${t('gl_next')}</a>`:'<span></span>'}</div>`}
+
+// ---------- 2. Қорилар китоби ----------
+function vQorilar(){const card=q=>`<a class="card lesson" href="#kitob-qori-${q.id}"><span class="num">🎙</span><span><b>${esc(tx(q.n))}</b> <span class="small">(${esc(tx(q.y))})</span><br><span class="small">${esc(tx(q.who))}</span></span></a>`;
+ return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🎙 ${t('qb_title')}</h2>
+ <div class="grid">${C.QINTRO.map((c,i)=>`<a class="card lesson" href="#kitob-qori-intro-${i+1}"><span class="num">${i+1}</span><span><b>${esc(tx(c.t))}</b></span></a>`).join('')}</div>
+ <h3>${t('qb_old')}</h3><div class="grid">${C.QB.filter(q=>q.e==='old').map(card).join('')}</div>
+ <h3>${t('qb_new')}</h3><div class="grid">${C.QB.filter(q=>q.e==='new').map(card).join('')}</div>`}
+function vQoriIntro(n){const N=C.QINTRO.length;if(n<1||n>N)return vQorilar();const c=C.QINTRO[n-1];
+ return `<p><a href="#kitob-qori">${t('qb_back')}</a></p><h2>${esc(tx(c.t))}</h2><div class="card prose">${tx(c.b)}</div>
+ <div class="row" style="margin-top:14px;justify-content:space-between">${n>1?`<a class="btn" href="#kitob-qori-intro-${n-1}">${t('gl_prev')}</a>`:'<span></span>'}${n<N?`<a class="btn" href="#kitob-qori-intro-${n+1}">${t('gl_next')}</a>`:`<a class="btn" href="#kitob-qori">${t('qb_back')}</a>`}</div>`}
+function vQori(id){const i=C.QB.findIndex(q=>q.id===id);if(i<0)return vQorilar();const q=C.QB[i],p=C.QB[i-1],nx=C.QB[i+1],has=R.some(r=>r.id===id);
+ return `<p><a href="#kitob-qori">${t('qb_back')}</a></p>
+ <div class="card"><h2 style="margin:0 0 4px">${esc(tx(q.n))}</h2><div class="small">${esc(tx(q.y))} · ${t(q.e==='old'?'qb_old':'qb_new')}</div>
+ <p>${esc(tx(q.b))}</p><div class="note"><b>${t('qb_for')}:</b> ${esc(tx(q.who))}</div>
+ ${has?`<div class="links"><button class="btn p" data-sample="${q.id}">▶ ${t('qb_listen')}</button></div>`:''}</div>
+ <div class="row" style="margin-top:14px;justify-content:space-between">${p?`<a class="btn" href="#kitob-qori-${p.id}">${t('gl_prev')}</a>`:'<span></span>'}${nx?`<a class="btn" href="#kitob-qori-${nx.id}">${t('gl_next')}</a>`:'<span></span>'}</div>`}
+
+// ---------- 3. Намоз вақтлари ----------
+const PT=(()=>{const r=Math.PI/180,sn=d=>Math.sin(d*r),cs=d=>Math.cos(d*r),tn=d=>Math.tan(d*r),asn=x=>Math.asin(x)/r,acs=x=>Math.acos(Math.max(-1,Math.min(1,x)))/r,at2=(y,x)=>Math.atan2(y,x)/r,acot=x=>Math.atan(1/x)/r,fx=(a,b)=>{a=a-b*Math.floor(a/b);return a<0?a+b:a};
+ const jul=(y,m,d)=>{if(m<=2){y--;m+=12}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5};
+ const sun=jd=>{const D=jd-2451545,g=fx(357.529+.98560028*D,360),q=fx(280.459+.98564736*D,360),L=fx(q+1.915*sn(g)+.020*sn(2*g),360),e=23.439-.00000036*D,RA=fx(at2(cs(e)*sn(L),cs(L))/15,24);return {decl:asn(sn(e)*sn(L)),eqt:q/15-RA}};
+ return (date,lat,lon,tz)=>{const JD=jul(date.getFullYear(),date.getMonth()+1,date.getDate())-lon/(15*24);
+  const mid=t=>fx(12-sun(JD+t).eqt,24);
+  const ang=(a,t,ccw)=>{const d=sun(JD+t).decl,T=acs((-sn(a)-sn(d)*sn(lat))/(cs(d)*cs(lat)))/15;return mid(t)+(ccw?-T:T)};
+  const asr=(f,t)=>{const d=sun(JD+t).decl;return ang(-acot(f+tn(Math.abs(lat-d))),t)};
+  let T={f:5,s:6,d:12,a:13,m:18,i:18};
+  for(let k=0;k<2;k++){const p=x=>x/24;T={f:ang(18,p(T.f),1),s:ang(.833,p(T.s),1),d:mid(p(T.d)),a:asr(2,p(T.a)),m:ang(.833,p(T.m)),i:ang(17,p(T.i))}}
+  for(const k in T)T[k]=T[k]+tz-lon/15;return T}})();
+const PK=['f','s','d','a','m','i'],PN={f:'pt_fajr',s:'pt_sun',d:'pt_dhuhr',a:'pt_asr',m:'pt_maghrib',i:'pt_isha'};
+const hm=x=>{let m=Math.round(x*60);m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+function ptPlace(){const p=store.get('pcity',null);if(p&&p.lat!=null)return {n:t('pt_mine'),lat:p.lat,lon:p.lon,tz:p.tz};
+ const i=p&&p.i!=null?p.i:(prof.lang==='tg'?18:0),c=C.CITY[i]||C.CITY[0];return {i,n:lt_(pick(c.slice(0,3))),lat:c[3],lon:c[4],tz:5}}
+function ptDay(d){const p=ptPlace();return PT(d,p.lat,p.lon,p.tz)}
+function ptNext(){try{const now=new Date(),T=ptDay(now),p=ptPlace(),nm=(now.getUTCHours()+now.getUTCMinutes()/60+p.tz+24)%24;
+ for(const k of ['f','d','a','m','i']){if(T[k]>nm)return {k,n:t(PN[k]),s:hm(T[k]),left:T[k]-nm}}
+ const tm=new Date(now);tm.setDate(tm.getDate()+1);const T2=ptDay(tm);return {k:'f',n:t('pt_fajr'),s:hm(T2.f),left:T2.f+24-nm}}catch(e){return null}}
+function ptTick(){const el=$('#ptLeft');if(!el)return;const nx=ptNext();if(!nx)return;const L=Math.max(0,Math.round(nx.left*60));el.textContent=t('pt_left',{h:Math.floor(L/60),m:L%60});const b=$('#ptNx');if(b)b.textContent=t('pt_next',{p:nx.n,t:nx.s})}
+const WD={uz:['Як','Ду','Се','Чо','Па','Жу','Ша'],ru:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],tg:['Як','Ду','Се','Чо','Па','Ҷу','Ша']};
+function vNamoz(){const p=ptPlace(),now=new Date(),T=ptDay(now),nx=ptNext(),L=nx?Math.max(0,Math.round(nx.left*60)):0;
+ const opts=C.CITY.map((c,i)=>`<option value="${i}"${p.i===i?' selected':''}>${esc(lt_(pick(c.slice(0,3))))}</option>`).join('');
+ const days=[...Array(7)].map((_,k)=>{const d=new Date(now);d.setDate(d.getDate()+k);return [d,ptDay(d)]});
+ return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🕌 ${t('pt_title')}</h2>
+ <div class="row" style="gap:8px;flex-wrap:wrap"><select id="ptCity" class="inp" style="flex:1;min-width:160px">${p.i==null?`<option selected>${t('pt_mine')}</option>`:''}${opts}</select><button class="btn" id="ptGeo">${t('pt_geo')}</button></div>
+ <div class="small" id="ptMsg"></div>
+ ${nx?`<div class="card plan" style="text-align:center"><b id="ptNx" style="font-size:20px">${esc(t('pt_next',{p:nx.n,t:nx.s}))}</b><div class="small" id="ptLeft">${t('pt_left',{h:Math.floor(L/60),m:L%60})}</div></div>`:''}
+ <div class="card"><div class="small">${esc(p.n)} · ${hjStr(now)||''}</div>
+ ${PK.map(k=>`<div class="prow pt${nx&&nx.k===k?' ptn':''}"><span>${t(PN[k])}</span><b>${hm(T[k])}</b></div>`).join('')}</div>
+ <h3>${t('pt_week')}</h3><div class="card" style="overflow-x:auto"><table class="ptt"><tr><th></th>${PK.map(k=>`<th>${t(PN[k])}</th>`).join('')}</tr>
+ ${days.map(([d,X])=>`<tr><td>${WD[L3()][d.getDay()]} ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</td>${PK.map(k=>`<td>${hm(X[k])}</td>`).join('')}</tr>`).join('')}</table></div>
+ <div class="note">${t('pt_note')}</div>`}
+
+// ---------- 4. Ҳижрий тақвим ----------
+const HF=(()=>{try{return new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn',{day:'numeric',month:'numeric',year:'numeric'})}catch(e){return null}})();
+const hij=d=>{if(!HF)return null;try{const p=HF.formatToParts(d),g=k=>+((p.find(x=>x.type===k)||{}).value);const r={d:g('day'),m:g('month'),y:g('year')};return r.d&&r.m&&r.y?r:null}catch(e){return null}};
+const HM={uz:['Муҳаррам','Сафар','Рабиъул-аввал','Рабиъус-соний','Жумодул-аввал','Жумодус-соний','Ражаб','Шаъбон','Рамазон','Шаввол','Зулқаъда','Зулҳижжа'],
+ ru:['Мухаррам','Сафар','Раби аль-авваль','Раби ас-сани','Джумада аль-уля','Джумада ас-сани','Раджаб','Шабан','Рамадан','Шавваль','Зуль-када','Зуль-хиджа'],
+ tg:['Муҳаррам','Сафар','Рабеъулаввал','Рабеъуссонӣ','Ҷумодиулаввал','Ҷумодиуссонӣ','Раҷаб','Шаъбон','Рамазон','Шаввол','Зулқаъда','Зулҳиҷҷа']};
+const GM={uz:['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'],
+ ru:['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],
+ tg:['январ','феврал','март','апрел','май','июн','июл','август','сентябр','октябр','ноябр','декабр']};
+const GMN={uz:GM.uz,ru:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],tg:GM.tg};
+const lt_=s=>lang()==='uzl'?lat(s):s;
+const hjStr=d=>{const h=hij(d);return h?lt_(`${h.d} ${HM[L3()][h.m-1]} ${h.y}`+(L3()==='ru'?' г.х.':' ҳ.')):''};
+const gStr=d=>lt_(`${d.getDate()} ${GM[L3()][d.getMonth()]} ${d.getFullYear()}`);
+const HEV=[[1,1,'hj_ev_ny'],[1,10,'hj_ev_ash'],[9,1,'hj_ev_ram'],[9,26,'hj_ev_qadr'],[10,1,'hj_ev_fitr'],[12,9,'hj_ev_arafa'],[12,10,'hj_ev_adha']];
+function hjEvents(){const now=new Date();now.setHours(12,0,0,0);const out=[],seen={};
+ for(let k=0;k<400&&out.length<HEV.length;k++){const d=new Date(now);d.setDate(d.getDate()+k);const h=hij(d);if(!h)break;const e=HEV.find(x=>x[0]===h.m&&x[1]===h.d);if(e&&!seen[e[2]]){seen[e[2]]=1;out.push({d,k,e,h})}}return out}
+function vTaqvim(){const now=new Date(),h=hij(now),off=store.get('hjoff',0),base=new Date(now.getFullYear(),now.getMonth()+off,1,12);
+ if(!h)return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🌙 ${t('hj_title')}</h2><div class="note">${t('hj_note')}</div>`;
+ const first=(base.getDay()+6)%7,nd=new Date(base.getFullYear(),base.getMonth()+1,0).getDate(),evs=HEV;
+ const hs=new Set();let cells='';for(let i=0;i<first;i++)cells+='<span></span>';
+ for(let d=1;d<=nd;d++){const dt=new Date(base.getFullYear(),base.getMonth(),d,12),x=hij(dt);if(x)hs.add(HM[L3()][x.m-1]+' '+x.y);
+  const isT=dt.toDateString()===now.toDateString(),ev=x&&evs.find(e=>e[0]===x.m&&e[1]===x.d);
+  cells+=`<span class="hc${isT?' tod':''}${ev?' ev':''}"${ev?` title="${esc(t(ev[2]))}"`:''}><b>${d}</b><i>${x?x.d:''}</i></span>`}
+ const wh=(L3()==='ru'?['Пн','Вт','Ср','Чт','Пт','Сб','Вс']:L3()==='tg'?['Ду','Се','Чо','Па','Ҷу','Ша','Як']:['Ду','Се','Чо','Па','Жу','Ша','Як']).map(x=>`<span class="hw">${lt_(x)}</span>`).join('');
+ return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🌙 ${t('hj_title')}</h2>
+ <div class="card plan" style="text-align:center"><div class="small">${t('hj_today')}: ${esc(gStr(now))}</div><b style="font-size:22px">${esc(hjStr(now))}</b></div>
+ <div class="card"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:nowrap"><button class="btn" id="hjPrev">←</button><b style="text-align:center;flex:1">${lt_(GMN[L3()][base.getMonth()])} ${base.getFullYear()}<br><span class="small">${esc(lt_([...hs].join(' — ')))}</span></b><button class="btn" id="hjNext">→</button></div>
+ <div class="hcal">${wh}${cells}</div></div>
+ <h3>${t('hj_days')}</h3>${hjEvents().map(x=>`<div class="card prow"><span><b>${t(x.e[2])}</b><br><span class="small">${esc(lt_(`${x.h.d} ${HM[L3()][x.h.m-1]} ${x.h.y}`))}</span></span><span style="text-align:right">${esc(gStr(x.d))}<br><span class="small">${x.k?t('hj_in',{n:x.k}):t('hj_today')}</span></span></div>`).join('')}
+ <div class="note">${t('hj_note')}</div>`}
+
+// ---------- 5. Оят расмлари ----------
+const AYP=['1:5','2:152','2:186','2:201','2:286','3:8','3:173','13:28','17:24','20:25','20:114','25:74','29:69','39:53','65:3','94:5','94:6','112:1'];
+const AYT={lapis:['#0f2a4a','#1d4e89','#ffffff','#d4af37'],green:['#0b3d2e','#16654c','#ffffff','#d4af37'],cream:['#fbf6ea','#ecdcb4','#2a2418','#8a6d1f'],night:['#14121f','#2e2550','#ffffff','#c8a24a']};
+function vOyat(){if(!Q)return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🖼 ${t('ay_title')}</h2><p class="small">${t('loading')}</p>`;
+ const [s,a]=store.get('ayref','94:5').split(':').map(Number),th=store.get('ayth','lapis'),sz=store.get('aysz','sq'),N=Q[s-1].v.length;
+ return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>🖼 ${t('ay_title')}</h2>
+ <div class="card"><div class="row" style="gap:8px;flex-wrap:wrap">
+ <label style="flex:2;min-width:150px" class="small">${t('ay_sura')}<select id="aySura" class="inp" style="width:100%">${Q.map((q,i)=>`<option value="${i+1}"${i+1===s?' selected':''}>${i+1}. ${esc(q.tr)} ${q.ar}</option>`).join('')}</select></label>
+ <label style="flex:1;min-width:80px" class="small">${t('ay_ayah')}<select id="ayNum" class="inp" style="width:100%">${Array.from({length:N},(_,i)=>`<option${i+1===a?' selected':''}>${i+1}</option>`).join('')}</select></label></div>
+ <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px"><span class="small">${t('ay_theme')}:</span>${Object.keys(AYT).map(k=>`<button class="btn aysw${k===th?' p':''}" data-ayth="${k}" style="background:linear-gradient(135deg,${AYT[k][0]},${AYT[k][1]});color:${AYT[k][2]};min-width:44px">${k===th?'✓':'&nbsp;'}</button>`).join('')}
+ <span class="small" style="margin-left:8px">${t('ay_size')}:</span><button class="btn${sz==='sq'?' p':''}" data-aysz="sq">${t('ay_sq')}</button><button class="btn${sz==='st'?' p':''}" data-aysz="st">${t('ay_story')}</button></div></div>
+ <div class="small" id="ayMsg"></div>
+ <canvas id="aycv" style="width:100%;max-width:${sz==='st'?360:520}px;display:block;margin:8px auto;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,.18)"></canvas>
+ <div class="links" style="justify-content:center"><button class="btn p" id="ayDl">${t('ay_save')}</button><button class="btn" id="ayShare">${t('ay_share')}</button><button class="btn" data-ayk="${s}:${a}">${t('ay_listen')}</button></div>
+ <h3>${t('ay_pick')}</h3><div class="links">${AYP.map(r=>{const [x]=r.split(':');return `<button class="btn${r===s+':'+a?' p':''}" data-ayp="${r}">${esc(Q[x-1].tr)} ${r}</button>`}).join('')}</div>`}
+const arNum=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+async function ayDraw(){const cv=$('#aycv');if(!cv||!Q)return;const [s,a]=store.get('ayref','94:5').split(':').map(Number),th=AYT[store.get('ayth','lapis')]||AYT.lapis,st=store.get('aysz','sq')==='st';
+ const W=1080,H=st?1920:1080;cv.width=W;cv.height=H;const c=cv.getContext("2d");if(!c)return;
+ try{await Promise.all([document.fonts.load('60px "Amiri Quran"'),document.fonts.load('40px "Amiri"'),document.fonts.load('600 30px "Noto Sans"')])}catch(e){}
+ if(!$('#aycv'))return;
+ const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,th[0]);g.addColorStop(1,th[1]);c.fillStyle=g;c.fillRect(0,0,W,H);
+ // нақш: нозик юлдузлар
+ c.save();c.globalAlpha=.07;c.strokeStyle=th[3];c.lineWidth=2;for(let y=60;y<H;y+=120)for(let x=60+(y/120%2)*60;x<W;x+=120){c.save();c.translate(x,y);for(let r=0;r<2;r++){c.rotate(Math.PI/4*r);c.strokeRect(-18,-18,36,36)}c.restore()}c.restore();
+ // ҳошия
+ c.strokeStyle=th[3];c.lineWidth=6;c.strokeRect(40,40,W-80,H-80);c.lineWidth=2;c.strokeRect(56,56,W-112,H-112);
+ const star=(x,y,r)=>{c.save();c.translate(x,y);c.fillStyle=th[3];for(let k=0;k<2;k++){c.rotate(Math.PI/4);c.fillRect(-r,-r,2*r,2*r)}c.restore()};
+ [[56,56],[W-56,56],[56,H-56],[W-56,H-56]].forEach(([x,y])=>star(x,y,16));
+ // матн
+ const txt=Q[s-1].v[a-1].trim(),words=txt.split(/\s+/),maxW=W-220,top=st?300:170,bot=H-(st?380:250);
+ c.direction='rtl';c.textAlign='center';c.fillStyle=th[2];
+ let fs=st?120:110,lines;const wrap=()=>{lines=[];let cur='';for(const w of words){const tt=cur?cur+' '+w:w;if(c.measureText(tt).width>maxW&&cur){lines.push(cur);cur=w}else cur=tt}if(cur)lines.push(cur)};
+ for(;fs>=30;fs-=4){c.font=`${fs}px "Amiri Quran","Amiri",serif`;wrap();if(lines.length*fs*1.9<=bot-top)break}
+ const lh=fs*1.9,y0=top+(bot-top-lines.length*lh)/2+lh*.7;lines.forEach((l,i)=>c.fillText(l,W/2,y0+i*lh));
+ const msg=$('#ayMsg');if(msg)msg.textContent=lines.length*lh>bot-top+4?t('ay_long'):'';
+ // имзо
+ c.direction='ltr';c.fillStyle=th[3];c.font=`52px "Amiri",serif`;c.fillText(`${Q[s-1].ar} · ${arNum(a)}`,W/2,H-(st?250:150));
+ c.globalAlpha=.85;c.fillStyle=th[2];c.font=`600 30px "Noto Sans",sans-serif`;c.fillText(`${Q[s-1].tr} ${s}:${a}`,W/2,H-(st?190:100));
+ c.globalAlpha=.55;c.font=`24px "Noto Sans",sans-serif`;c.fillText(t('app'),W/2,H-(st?140:72));c.globalAlpha=1}
+function aySave(share){const cv=$('#aycv');if(!cv)return;const nm=`oyat-${store.get('ayref','94:5').replace(':','-')}.png`;
+ cv.toBlob(b=>{if(!b)return;const f=new File([b],nm,{type:'image/png'});
+  if(share&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:t('ay_title')}).catch(()=>{});return}
+  const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=nm;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)},'image/png')}
+
+// ---------- 6. Савол-жавоб ----------
+let FQC=null;
+function FQA(){if(FQC&&FQC.l===lang())return FQC.a;const a=[];
+ C.FQ.forEach(([c,q,ans,l])=>a.push({c,q:tx(q),a:tx(ans),l}));
+ GLA.forEach(x=>a.push({c:'rule',q:t('fq_q_rule',{x:tx(x.n)}),a:strip(tx(x.s))+' '+strip(tx(x.d)),l:'qoida-'+x.k,ar:x.ar}));
+ C.LT.forEach(x=>a.push({c:'letter',q:t('fq_q_letter',{x:x[0]+' ('+tx(x[2])+')'}),a:strip(tx(x[3])),l:'mahraj',ar:x[0]}));
+ C.TX.forEach((x,i)=>{if(!x.map)a.push({c:'hist',q:tx(x.t)+'?',a:strip(tx(x.b)).slice(0,420)+'…',l:'kitob-tarix-'+(i+1)})});
+ C.QINTRO.forEach((x,i)=>a.push({c:'ustoz',q:tx(x.t)+'?',a:strip(tx(x.b)).slice(0,420)+'…',l:'kitob-qori-intro-'+(i+1)}));
+ C.QB.forEach(x=>a.push({c:'ustoz',q:t('fq_q_who',{x:tx(x.n)}),a:tx(x.y)+'. '+tx(x.b),l:'kitob-qori-'+x.id}));
+ FQC={l:lang(),a};return a}
+const FCAT=[['','fq_all'],['app','fq_app'],['rule','fq_rule'],['letter','fq_letter'],['quran','fq_quran'],['hist','fq_hist'],['ustoz','fq_ustoz'],['adab','fq_adab'],['hifz','fq_hifz'],['namoz','fq_namoz']];
+function vSavol(){const A=FQA(),c=store.get('fqc','');
+ return `<p><a href="#kitob">${t('lib_back')}</a></p><h2>❓ ${t('fq_title')}</h2><div class="small">${t('fq_d',{n:A.length})}</div>
+ <input id="fqSearch" class="inp" type="search" placeholder="${esc(t('fq_search'))}" style="width:100%;margin:8px 0">
+ <div class="links fqcats">${FCAT.map(([k,l])=>`<button class="btn${k===c?' p':''}" data-fqc="${k}">${t(l)}</button>`).join('')}</div>
+ <div id="fqList">${A.map((x,i)=>`<details class="card fqi" data-c="${x.c}" data-f="${esc((x.q+' '+x.a+' '+(x.ar||'')).toLowerCase())}"${c&&x.c!==c?' style="display:none"':''}><summary><b>${esc(x.q)}</b></summary><p>${esc(x.a)}</p>${x.l?`<a class="btn" href="#${x.l}">${t('fq_more')}</a>`:''}</details>`).join('')}</div>
+ <div class="note hidden" id="fqNone">${t('fq_none')}</div><div class="note">${t('fq_note')}</div>`}
+function fqFilter(q){q=q.trim().toLowerCase();const c=store.get('fqc','');let n=0;const ws=q.split(/\s+/).filter(w=>w.length>1);
+ document.querySelectorAll('.fqi').forEach(el=>{const ok=(!c||el.dataset.c===c||q)&&(!ws.length||ws.every(w=>el.dataset.f.includes(w)));el.style.display=ok?'':'none';if(ok)n++});
+ const nn=$('#fqNone');if(nn)nn.classList.toggle('hidden',n>0)}
+
+// ---------- Ҳодисалар ----------
+document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg)return;const d=tg.dataset;
+ if(tg.id==='txok'){const dd=store.get('txd',{}),n=+d.n;if(dd[n])delete dd[n];else{dd[n]=1;stars(tg)}store.set('txd',dd);markActive();if(dd[n]&&n<C.TX.length)location.hash='kitob-tarix-'+(n+1);else render();return}
+ if(tg.id==='ptGeo'){const m=$('#ptMsg');if(!navigator.geolocation){m.textContent=t('pt_geo_fail');return}m.textContent=t('loading');
+  navigator.geolocation.getCurrentPosition(p=>{store.set('pcity',{lat:+p.coords.latitude.toFixed(4),lon:+p.coords.longitude.toFixed(4),tz:-new Date().getTimezoneOffset()/60});render()},()=>{const mm=$('#ptMsg');if(mm)mm.textContent=t('pt_geo_fail')},{timeout:15000,maximumAge:864e5});return}
+ if(tg.id==='hjPrev'||tg.id==='hjNext'){store.set('hjoff',store.get('hjoff',0)+(tg.id==='hjNext'?1:-1));render();return}
+ if(d.ayp){store.set('ayref',d.ayp);render();return}
+ if(d.ayth){store.set('ayth',d.ayth);render();return}
+ if(d.aysz){store.set('aysz',d.aysz);render();return}
+ if(tg.id==='ayDl'){aySave(false);return}if(tg.id==='ayShare'){aySave(true);return}
+ if(d.fqc!==undefined){store.set('fqc',d.fqc);document.querySelectorAll('[data-fqc]').forEach(b=>b.classList.toggle('p',b===tg));fqFilter(($('#fqSearch')||{}).value||'');return}});
+document.addEventListener('change',e=>{const id=e.target.id;
+ if(id==='ptCity'){store.set('pcity',{i:+e.target.value});render();return}
+ if(id==='aySura'){store.set('ayref',e.target.value+':1');render();return}
+ if(id==='ayNum'){store.set('ayref',store.get('ayref','94:5').split(':')[0]+':'+e.target.value);render();return}});
+document.addEventListener('input',e=>{if(e.target.id==='fqSearch'){store.set('fqq',e.target.value);fqFilter(e.target.value)}});
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
