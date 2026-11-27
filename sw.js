@@ -1,8 +1,8 @@
-const C='qu-v32';
-const A=['./','./index.html','./app.js','./i18n.js','./content.js','./content2.js','./tajweed.js','./fonts/UthmanicHafs1Ver18.woff2','./timings.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
-const CDN=['fonts.googleapis.com','fonts.gstatic.com','cdnjs.cloudflare.com','cdn.jsdelivr.net'];
+const C='qu-v33';
+const A=['./','./index.html','./app.js','./i18n.js','./content.js','./content2.js','./tajweed.js','./fonts/UthmanicHafs1Ver18.woff2','./timings.json','./pidx.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CDN=['fonts.googleapis.com','fonts.gstatic.com','cdnjs.cloudflare.com','cdn.jsdelivr.net','raw.githubusercontent.com'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A.map(u=>new Request(u,{cache:'reload'})))));self.skipWaiting()});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C&&x!=='qu-audio'&&x!=='qu-state').map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C&&x!=='qu-audio'&&x!=='qu-state'&&x!=='qu-qcf').map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{
   const u=new URL(e.request.url);
   if(e.request.method!=='GET')return;
@@ -15,6 +15,7 @@ self.addEventListener('fetch',e=>{
     }).catch(()=>fetch(e.request)));
     return;
   }
+  if(u.host==='raw.githubusercontent.com'){e.respondWith(caches.open('qu-qcf').then(c=>c.match(e.request).then(m=>m||fetch(e.request).then(n=>{if(n.ok)c.put(e.request,n.clone());return n}))));return}
   if(u.origin===location.origin){
     e.respondWith(fetch(e.request,{cache:'no-cache'}).then(r=>{const c=r.clone();if(r.ok)caches.open(C).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request,{ignoreSearch:true}).then(r=>r||caches.match('./index.html'))));
   } else if(CDN.includes(u.host)){

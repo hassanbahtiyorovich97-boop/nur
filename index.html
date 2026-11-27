@@ -364,6 +364,25 @@ body:has(#pl:not(.hidden)) .mtool{display:none}
 .coach{border-left:5px solid #2e9b6a}.coach.c2{border-left-color:#e0a100;background:rgba(224,161,0,.07)}.coach.c3{border-left-color:#e0301e;background:rgba(224,48,30,.07)}.coach.c4{border-left-color:#8b0000;background:rgba(139,0,0,.09);animation:shake .5s 1}
 .coachh{font-size:16px}@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .segc button small{opacity:.75;font-weight:400}
+.pgbody{direction:rtl;padding:4px 2px}.pgbody .pl{line-height:1.95}
+.pgbody.qcf .pl.txt{display:flex;justify-content:space-between;align-items:baseline;white-space:nowrap;font-size:var(--qfs,26px);border-bottom:1px solid var(--mrule);padding:.12em 0;color:var(--ink)}
+.pgbody.qcf .pl.txt.short{justify-content:center;gap:.25em}
+.pgbody.meas .pl.txt{display:inline-block!important;width:auto!important}
+.pgbody:not(.qcf) .pl.txt{display:flex;flex-wrap:wrap;justify-content:center;gap:.25em;font-family:var(--qf);font-size:calc(25px*var(--arz,1)*var(--qsz,1));line-height:2.1;border-bottom:1px solid var(--mrule)}
+.norule .pgbody .pl.txt{border-bottom-color:transparent}
+.pgbody .w{cursor:pointer;border-radius:4px}.pgbody .w:active,.pgbody .w.hl{background:var(--hl)}
+.pgbody .qm{cursor:pointer;border-radius:50%}.pgbody .qm.bm-green{background:rgba(46,155,106,.25)}.pgbody .qm.bm-gold{background:rgba(212,175,55,.3)}.pgbody .qm.bm-red{background:rgba(208,2,27,.2)}.pgbody .qm.bm-blue{background:rgba(42,120,220,.2)}
+.pl.hdr{margin:.35em 0}.shdr{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:56px;border:2px solid var(--mgold);border-radius:10px;background:linear-gradient(#fbf6e6,#efe4c6);box-shadow:inset 0 0 0 3px #fbf6e6,inset 0 0 0 4px #cdb27a;color:#4a3a14}
+.shdr:before,.shdr:after{content:"۞";position:absolute;top:50%;transform:translateY(-50%);color:var(--mgold);font-size:20px}.shdr:before{right:12px}.shdr:after{left:12px}
+.shdr .ar{font-family:"KFGQPC Hafs","Amiri",serif;font-size:26px;line-height:1.4}.shdr small{font-size:11px;opacity:.7;direction:ltr}
+:root[data-theme=dark] .shdr{background:linear-gradient(#2c271d,#231f17);box-shadow:inset 0 0 0 3px #2c271d,inset 0 0 0 4px #6d5a2c;color:#e9d9a8}
+.pl.bsm{text-align:center;font-family:"KFGQPC Hafs","Amiri",serif;font-size:calc(var(--qfs,26px)*.95);line-height:2;margin:.1em 0}
+.pgfoot{text-align:center;font-family:"KFGQPC Hafs","Amiri",serif;font-size:18px;color:var(--mgold);margin-top:6px}
+.pgload{display:flex;justify-content:center;padding:60px 0}.spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--mrule);border-top-color:var(--mgold);animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.msayat .ar.qcfa .w{font-size:1.05em}.msayat .amark.qg{border:0;background:none;min-width:0;height:auto;font-size:.95em;vertical-align:baseline;padding:0 .05em;color:inherit}
+.msayat.trg .ar.qcfa{font-size:calc(28px*var(--arz,1)*var(--qsz,1))}
+.mframe:has(#msPage){padding:5px;margin:0 -12px;border-radius:4px}.mframe:has(#msPage) .mpaper{padding:8px 6px;outline-offset:-4px}
+.pgbody.qcf .pl.txt{line-height:1.8}
 </style>
 </head>
 <body>
