@@ -1050,7 +1050,7 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg
 const wbwOn=()=>!!store.get('wbwOn',false);const WBM={};
 async function wbwGet(s){if(WBM[s])return WBM[s];const out={};let page=1,guard=0;
  const ca='caches' in window?await caches.open('qu-audio').catch(()=>null):null;
- while(page&&guard++<12){const url=`https://api.quran.com/api/v4/verses/by_chapter/${s}?words=true&language=en&word_fields=text_uthmani&per_page=50&page=${page}`;let j=null;
+ while(page&&guard++<12){const url=`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s}?words=true&language=en&word_fields=text_uthmani&per_page=50&page=${page}`;let j=null;
   try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();if(ca)ca.put(url,new Response(JSON.stringify(j),{headers:{'Content-Type':'application/json'}})).catch(()=>{})}}catch(e){}
   if(!j&&ca){const m=await ca.match(url).catch(()=>null);if(m)j=await m.json()}
   if(!j||!j.verses)throw new Error('wbw');
@@ -1117,7 +1117,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('#tjDl');if(!b)re
 // =================== МУСҲАФ (янги) ===================
 const JUZ=[[1,1],[2,142],[2,253],[3,93],[4,24],[4,148],[5,82],[6,111],[7,88],[8,41],[9,93],[11,6],[12,53],[15,1],[17,1],[18,75],[21,1],[23,1],[25,21],[27,56],[29,46],[33,31],[36,28],[39,32],[41,47],[46,1],[51,31],[58,1],[67,1],[78,1]];
 const mview=()=>store.get('mview','ayat'),mmode=()=>store.get('mmode','ar');
-let CHP=null;async function chapters(){if(CHP)return CHP;const url='https://api.quran.com/api/v4/chapters';let j=null;const ca='caches' in window?await caches.open('qu-audio').catch(()=>null):null;
+let CHP=null;async function chapters(){if(CHP)return CHP;const url='https://api.qurancdn.com/api/qdc/chapters';let j=null;const ca='caches' in window?await caches.open('qu-audio').catch(()=>null):null;
  try{const r=await fetch(url,{mode:'cors'});if(r.ok){j=await r.json();if(ca)ca.put(url,new Response(JSON.stringify(j))).catch(()=>{})}}catch(e){}
  if(!j&&ca){const m=await ca.match(url).catch(()=>null);if(m)j=await m.json()}if(!j)throw 0;CHP=j.chapters;return CHP}
 const juzOf=(s,a)=>{let j=1;JUZ.forEach((x,i)=>{if(s>x[0]||(s===x[0]&&a>=x[1]))j=i+1});return j};
@@ -1252,7 +1252,7 @@ function tjWords(words,endAyah){const W=words.map(tjTok),cls=W.map(t=>t.map(()=>
  return W.map((t,wi)=>{let h='',cur='';t.forEach((x,li)=>{const c=cls[wi][li],s=esc(x.b+x.m);if(c!==cur){if(cur)h+='</tajweed>';if(c)h+=`<tajweed class="${c}">`;cur=c}h+=s});if(cur)h+='</tajweed>';return h})}
 
 const TJV={},TJR={};const tajOn=()=>store.get('tajc',true);
-async function tajVerses(s){if(TJV[s])return TJV[s];const out={};let RB=0;let page=1,g=0;while(page&&g++<12){const j=await qcom(`https://api.quran.com/api/v4/verses/by_chapter/${s}?fields=text_uthmani_tajweed&per_page=50&page=${page}`);(j.verses||[]).forEach(v=>{out[v.verse_number]=v.text_uthmani_tajweed||'';(TJP[s]=TJP[s]||{})[v.verse_number]=v.page_number;if(v.rub_el_hizb_number&&v.rub_el_hizb_number!==RB)(TJR[s]=TJR[s]||{})[v.verse_number]=v.verse_number>1||s===1?1:0;RB=v.rub_el_hizb_number});page=j.pagination&&j.pagination.next_page}TJV[s]=out;return out}
+async function tajVerses(s){if(TJV[s])return TJV[s];const out={};let RB=0;let page=1,g=0;while(page&&g++<12){const j=await qcom(`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s}?fields=text_uthmani_tajweed&per_page=50&page=${page}`);(j.verses||[]).forEach(v=>{out[v.verse_number]=v.text_uthmani_tajweed||'';(TJP[s]=TJP[s]||{})[v.verse_number]=v.page_number;if(v.rub_el_hizb_number&&v.rub_el_hizb_number!==RB)(TJR[s]=TJR[s]||{})[v.verse_number]=v.verse_number>1||s===1?1:0;RB=v.rub_el_hizb_number});page=j.pagination&&j.pagination.next_page}TJV[s]=out;return out}
 // фақат <tajweed class> ва <span class=end> қолдирилади
 function tjSafe(h){return String(h).replace(/<span class=["']?end["']?>[^<]*<\/span>/g,'').replace(/<(\/?)([a-z]+)([^>]*)>/gi,(m,cl,tag,at)=>{if(tag.toLowerCase()!=='tajweed')return '';if(cl)return '</tajweed>';const c=(at.match(/class=["']?([a-z_]+)/i)||[])[1]||'';return `<tajweed class="${c}">`})}
 async function tajFill(s){try{const d=await tajVerses(s);if(store.get('sura',1)!==s||!tajOn())return;

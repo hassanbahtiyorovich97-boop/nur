@@ -1,4 +1,4 @@
-const C='qu-v34';
+const C='qu-v35';
 const A=['./','./index.html','./app.js','./i18n.js','./content.js','./content2.js','./tajweed.js','./fonts/UthmanicHafs1Ver18.woff2','./timings.json','./pidx.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 const CDN=['fonts.googleapis.com','fonts.gstatic.com','cdnjs.cloudflare.com','cdn.jsdelivr.net','raw.githubusercontent.com'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A.map(u=>new Request(u,{cache:'reload'})))));self.skipWaiting()});
