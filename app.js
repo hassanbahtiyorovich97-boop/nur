@@ -120,22 +120,16 @@ function navi(cur){$('#nav').innerHTML=TABS.map(([h,k])=>`<a href="#${h}" class=
 const done=()=>store.get('done',{}),doneA=()=>store.get('adone',{}),memo=()=>store.get('memo',{}),certs=()=>store.get('certs',{});
 const AL=[...C.GR.map(g=>({t:{uz:'Ҳарфлар: '+g,ru:'Буквы: '+g,tg:'Ҳарфҳо: '+g},g:g.split(' ')})),...C.HB];
 const LF=c=>C.LT.find(x=>x[0]===c);
-function nextLesson(){const a=doneA(),d=done();const na=AL.findIndex((_,i)=>!a[i]),nt=C.L.findIndex((_,i)=>!d[i]);
- if((prof.level||0)===0&&na>=0)return {h:'alif-'+(na+1),t:tx(AL[na].t)};if(nt>=0)return {h:'dars-'+(nt+1),t:tx(C.L[nt].t)};if(na>=0)return {h:'alif-'+(na+1),t:tx(AL[na].t)};return null}
 
 function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins=Math.floor((days()[today()]||0)/60),goal=prof.goal||10,pc=Math.min(100,Math.round(mins/goal*100));
  const a=Object.keys(doneA()).length,d=Object.keys(done()).length,ms=Object.keys(store.get('bkdone',{})).length,MSN=bkBuild()?BK.length:60,m=Object.keys(memo()).length,cs=certs();
  const bar_=(n,tot)=>`<div class="pbar"><b style="width:${Math.round(n/tot*100)}%"></b></div>`;
  return `${homeTop()}
+ ${pathCard()}
  ${g&&g.from?`<div class="card gift"><div class="gift-ic">🎁</div><div><b>${esc(t('gift_from',{from:g.from}))}</b><div class="small">${t('dua')}</div></div></div>`:''}
  <div class="grid3"><div class="card kpi"><div class="kv">🔥 ${st}</div><div class="small">${t('streak')}</div></div>
  <div class="card kpi"><div class="kv"><span id="todayMin">${mins}</span>/${goal} ${t('min')}</div><div class="pbar"><b style="width:${pc}%"></b></div><div class="small">${t('today')}</div></div>
  <div class="card kpi"><div class="kv">${m}</div><div class="small">${t('memorized_n')}</div></div></div>
- <div class="card plan"><b>${t('today_plan')}</b>
- ${nl?`<a class="btn p lg" href="#${nl.h}">${t('next_lesson')}: ${esc(nl.t)}</a>`:''}
- <a class="btn lg" href="#imtihon-review">${t('review')}</a>
- <a class="btn lg" href="#kitob-ms">${t('book_title')} · ${store.get('bkpg',1)}/${BK?BK.length:'…'}</a></div>
-
  <div class="card"><b>${t('progress')}</b>
  <div class="prow"><span>${t('course_alif')}</span><span>${a}/${AL.length}</span></div>${bar_(a,AL.length)}
  <div class="prow"><span>${t('course_tajwid')}</span><span>${d}/${C.L.length}</span></div>${bar_(d,C.L.length)}
@@ -143,14 +137,22 @@ function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins
  <div class="prow"><span><a href="#qoidalar">${t('gl_title')}</a></span><span>${Object.keys(glk()).length}/${GLA.length}</span></div>${bar_(Object.keys(glk()).length,GLA.length)}
  ${Object.keys(cs).length?`<div class="links">${Object.keys(cs).map(k=>`<a class="btn" href="#sertifikat-${k}">🏅 ${t('certificate')}: ${t(k==='alif'?'course_alif':'course_tajwid')}</a>`).join('')}</div>`:''}</div>`}
 
-function vDarslar(){const d=done(),da=doneA(),cs=certs();
- const card=(i,ttl,sub,ok,h)=>`<a class="card lesson" href="#${h}"><span class="num${ok?' done':''}">${ok?'✓':i+1}</span><span><b>${esc(ttl)}</b><br><span class="small">${esc(sub)}</span></span></a>`;
- return `<h2>${t('course_alif')}</h2><div class="note">${t('course_alif_note')}</div>
- <div class="grid">${AL.map((l,i)=>card(i,tx(l.t),l.g?t('letters'):t('reading_rule'),da[i],'alif-'+(i+1))).join('')}</div>
- <div class="card examc"><div><b>🏅 ${t('exam_alif')}</b><div class="small">${t('exam_note')}</div></div><a class="btn p" href="#imtihon-alif">${cs.alif?'✓ ':''}${t('start')}</a></div>
- <h2 style="margin-top:28px">${t('course_tajwid')}</h2><div class="note">${t('course_tajwid_note')}</div>
- <div class="grid">${C.L.map((l,i)=>card(i,tx(l.t),tx(l.k),d[i],'dars-'+(i+1))).join('')}</div>
- <div class="card examc"><div><b>🏅 ${t('exam_tajwid')}</b><div class="small">${t('exam_note')}</div></div><a class="btn p" href="#imtihon-tajwid">${cs.tajwid?'✓ ':''}${t('start')}</a></div>`}
+function pathCard(){const c=curStep(),L=PATH.filter(stepReq),n=L.filter(stepDone).length,due=srsDue().length,bkOK=lvl()>=1||doneA()[8];
+ return `<div class="card plan pathc"><div class="row" style="justify-content:space-between"><b>🧭 ${t('pt_way')}</b><span class="small">${n}/${L.length}</span></div><div class="pbar"><b style="width:${Math.round(n/L.length*100)}%"></b></div>
+ ${c?`<div class="small" style="margin-top:8px">${t(c.s===1?'st1':'st2')} · ${t('pt_step',{n:pathNo(c.h)})}</div><a class="btn p lg" href="#${c.h}">▶ ${esc(stepTitle(c))}</a>`:`<p>🌟 ${t('pt_all')}</p><a class="btn p lg" href="#hifz">🧠 ${t('hf2_title')}</a>`}
+ ${due?`<a class="btn lg tkbtn" href="#takror">🔁 ${t('tk_due',{n:due})}</a>`:''}
+ ${bkOK?`<a class="btn lg" href="#kitob-ms">📗 ${t('book_title')} · ${store.get('bkpg',1)}/${BK?BK.length:'…'}</a>`:''}
+ <a class="small" href="#darslar">🗺 ${t('pt_map')}</a></div>`}
+function vDarslar(){const c=curStep(),cs=certs(),srsN=Object.keys(srsSync()).length;
+ const step=(p,no)=>{const ok=stepDone(p),open=stepOpen(p.h),cur=c&&c.h===p.h,opt=!stepReq(p);const ic=p.k==='xa'||p.k==='xt'?'🏅':p.k==='m'?'👄':'';
+  return `<a class="pstep${ok?' ok':''}${cur?' cur':''}${!open?' lk':''}${opt?' opt':''}" href="#${p.h}"><span class="pn">${ok?'✓':!open?'🔒':no}</span><span class="pstx"><b>${ic?ic+' ':''}${esc(stepTitle(p))}</b>${p.k==='d'?`<span class="small">${esc(tx(C.L[p.i].k))}</span>`:p.k==='a'?`<span class="small">${AL[p.i].g?t('letters'):t('reading_rule')}</span>`:''}${cur?`<span class="pshere">${t('pt_here')}</span>`:''}</span></a>`};
+ let no=0;const st=sx=>PATH.filter(p=>p.s===sx).map(p=>step(p,stepReq(p)?++no:'·')).join('');
+ return `<h2>🗺 ${t('pt_map')}</h2><div class="note">${t('pt_intro')}</div>
+ ${c?`<a class="btn p lg" style="width:100%;margin:6px 0 14px" href="#${c.h}">▶ ${t('pt_cont')}: ${esc(stepTitle(c))}</a>`:''}
+ <div class="pstage"><h3>1. ${t('st1')}</h3><p class="small">${t('st1_d')}</p>${lvl()>=1?`<div class="small optn">${t('st1_opt')}</div>`:''}<div class="ppath">${st(1)}</div></div>
+ <div class="pstage"><h3>2. ${t('st2')}</h3><p class="small">${t('st2_d')}</p><div class="ppath">${st(2)}</div></div>
+ <div class="pstage"><h3>🔁 ${t('tk_title')}</h3><p class="small">${t('tk_note')}</p><a class="btn" href="#takror">${t('tk_open',{n:srsN})}</a></div>
+ <div class="pstage"><h3>3. ${t('st3')}</h3><p class="small">${t('st3_d')}</p><div class="links"><a class="btn" href="#kitob-ms">📗 ${t('book_title')}</a><a class="btn" href="#mushaf">📖 ${t('tab_mushaf')}</a><a class="btn" href="#hifz">🧠 ${t('hf2_title')}</a>${cs.alif?`<a class="btn" href="#sertifikat-alif">🏅 ${t('course_alif')}</a>`:''}${cs.tajwid?`<a class="btn" href="#sertifikat-tajwid">🏅 ${t('course_tajwid')}</a>`:''}</div></div>`}
 
 function quizHTML(qs){return qs.map((q,qi)=>`<div class="card" data-q="${qi}"><b>${esc(tx(q[0]))}</b>${q[1].map((o,oi)=>`<button class="btn opt" data-qi="${qi}" data-oi="${oi}">${esc(tx(o))}</button>`).join('')}<div class="small qres"></div></div>`).join('')}
 
@@ -163,7 +165,7 @@ function vDars(i){const l=C.L[i];if(!l)return vDarslar();const d=done();
  <div class="links"><button class="btn p" data-rule="${i}:${ei}">${t('play_rule')}</button><button class="btn" data-ayk="${ref}">${t('play_ayah')}</button>${rec().id!=='husary-m'?listen(+s,+a):`<button class="btn" data-cmp="${ref}">🎧 ${t('cmp_b')}</button>`}<button class="btn" data-recref="${ref}">${t('check_me')}</button></div></div>`}).join('')}
  <h3>${t('test')}</h3>${quizHTML(l.q)}
  <h3>${t('homework')}</h3><div class="note">${esc(tx(l.hw))}</div>
- <div class="row" style="margin-top:14px"><button class="btn p" id="fin">${d[i]?t('mastered_done'):t('mastered')}</button>${i<C.L.length-1?`<a class="btn" href="#dars-${i+2}">${t('next_lesson_btn')}</a>`:`<a class="btn" href="#imtihon-tajwid">🏅 ${t('exam_tajwid')}</a>`}</div>`}
+ <div class="row" style="margin-top:14px"><button class="btn p" id="fin">${d[i]?t('mastered_done'):t('mastered')}</button>${nextBtn('dars-'+(i+1))}</div>`}
 
 function vAlif(i){const l=AL[i];if(!l)return vDarslar();const d=doneA(),F=t('forms').split('|');let h=`<p><a href="#darslar">${t('all_lessons')}</a></p><h2>${i+1}. ${esc(tx(l.t))}</h2><p class="small">${t('phone_voice')}</p>`;
  if(l.g){h+=stageHTML()+l.g.map(c=>{const x=LF(c),j=x[4],fm=j?[c,c+'‍','‍'+c+'‍','‍'+c]:[c,'—','—','‍'+c],mq=C.MQ[c],lw=TM&&TM.lw[c];
@@ -175,7 +177,7 @@ function vAlif(i){const l=AL[i];if(!l)return vDarslar();const d=doneA(),F=t('for
  else{h+=`<div class="card"><p>${tx(l.r)}</p></div>`;
   if(l.syl)h+=`<p class="small">${t('spelling_note')}</p><div class="card"><div class="syl">${[...l.syl].flatMap(c=>l.h.map((m,k)=>`<button class="btn" data-say="${c+m}">${c+m}<small>${esc(tx((C.CT[c]||'')+l.ht[k]))}</small></button>`)).join('')}</div></div>`;
   h+=`<h3>${t('words')}</h3>${l.w.map(([a,b,c])=>`<div class="card"><div class="row" style="justify-content:space-between"><span class="big" style="font-size:calc(52px*var(--arz))">${a}</span><button class="btn" data-say="${a}">🔊</button></div><div><b>${esc(tx(c))}</b>${b?` · <span class="small">${esc(b)}</span>`:''}</div></div>`).join('')}`}
- h+=`<div class="row" style="margin-top:14px"><button class="btn p" id="afin">${d[i]?t('mastered_done'):t('mastered')}</button>${i<AL.length-1?`<a class="btn" href="#alif-${i+2}">${t('next_lesson_btn')}</a>`:`<a class="btn" href="#imtihon-alif">🏅 ${t('exam_alif')}</a>`}</div>`;return h}
+ h+=`<div class="row" style="margin-top:14px"><button class="btn p" id="afin">${d[i]?t('mastered_done'):t('mastered')}</button>${nextBtn('alif-'+(i+1))}</div>`;return h}
 
 // ---------- Мусҳаф ----------
 function vMushaf(){const s=store.get('sura',1),hide=store.get('hide',false),m=memo(),cnt=store.get('cnt',{});if(!Q)return `<p class="small">${t('loading')}</p>`;const S_=Q[s-1];
@@ -197,7 +199,8 @@ function cmpSheet(k){const [s,a]=k.split(':').map(Number),cur=rec().id,G=['slow'
 function vMahraj(){return `<h2>${t('mk_title')}</h2><div class="note">${t('mk_note')}</div>
  <div class="mkwrap"><div class="card stage" id="stage">${headSVG()}<div class="stg-big ar" id="stgBig"></div><div class="small" id="stgCap"></div></div>
  <div>${C.MK.map(([g,rows])=>`<div class="card"><b>${esc(tx(g))}</b>${rows.map(([a,p,d])=>`<button class="mk" data-mk="${p}" data-letters="${a}"><span class="ar">${esc(a)}</span><span>${esc(tx(d))}</span></button>`).join('')}</div>`).join('')}</div></div>
- <h3>${t('pairs')}</h3><div class="card"><div class="letters">ث–س–ص · ذ–ز–ظ · ت–ط · ح–ه · ع–ء · ق–ك · د–ض</div></div>`}
+ <h3>${t('pairs')}</h3><div class="card"><div class="letters">ث–س–ص · ذ–ز–ظ · ت–ط · ح–ه · ع–ء · ق–ك · د–ض</div></div>
+ ${stepOpen('mahraj')?`<div class="row" style="margin-top:14px"><button class="btn p" id="mkfin">${store.get('mkdone',0)?t('mastered_done'):t('mastered')}</button>${nextBtn('mahraj')}</div>`:''}`}
 
 // ---------- Имтиҳон ----------
 let EX=null;const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
@@ -241,6 +244,7 @@ function vSozlama(){const L4=[['uz','Ўзбекча'],['uzl','O‘zbekcha'],['tg
  const seg=(id,opts,cur)=>`<div class="segc">${opts.map(([v,l])=>`<button class="btn${String(cur)===String(v)?' p':''}" data-set="${id}" data-v="${v}">${l}</button>`).join('')}</div>`;
  return `<h2>${t('settings')}</h2>
  <div class="card"><b>${t('s_lang')}</b>${seg('lang',L4,lang())}</div>
+ <div class="card"><b>${t('ob_level')}</b><div class="segc" style="flex-direction:column">${[0,1,2].map(v=>`<button class="btn${(prof.level||0)===v?' p':''}" data-set="level" data-v="${v}">${t('lv'+v)}</button>`).join('')}</div></div>
  <div class="card"><b>${t('s_name')}</b><input id="sName" class="inp" value="${esc(prof.name||'')}" placeholder="${t('ob_name_ph')}"></div>
  <div class="card"><b>${t('s_font')}</b>${seg('font',[[0,'A'],[1,'A+'],[2,'A++'],[3,'A+++']],prof.font||0)}<div class="ar" style="text-align:center">بِسْمِ ٱللَّهِ</div></div>
  <div class="card"><b>${t('s_theme')}</b>${seg('theme',[['auto',t('th_auto')],['light',t('th_light')],['sepia',t('th_sepia')],['dark',t('th_dark')]],prof.theme||'auto')}</div>
@@ -407,6 +411,44 @@ const bkGo=n=>{store.set('bkpg',Math.max(1,Math.min(BK?BK.length:1,n)));render()
 // ---------- Қоидалар луғати ----------
 const GLA=C.GL.flatMap((g,gi)=>g.i.map(x=>({k:x[0],ar:x[1],n:x[2],s:x[3],d:x[4],ex:x[5],L:x[6],g:gi})));
 const glk=()=>store.get('glk',{});
+// ---------- Ўқув йўли (мажбурий кетма-кетлик) ----------
+// 1-босқич: Алифбо (ҳарф → ҳаракат → бўғин → сўз). 2-босқич: Тажвид (товушдан қоидага: махраж → сифат → тафхим/тарқиқ → нун ва мим → мадлар → вақф).
+const TJORD=[10,11,12,1,2,3,4,5,6,7,8,9,13];
+const PATH=[...AL.map((_,i)=>({s:1,h:'alif-'+(i+1),k:'a',i})),{s:1,h:'imtihon-alif',k:'xa'},{s:2,h:'mahraj',k:'m'},...TJORD.map(n=>({s:2,h:'dars-'+n,k:'d',i:n-1})),{s:2,h:'imtihon-tajwid',k:'xt'}];
+function stepDone(p){if(p.k==='a')return !!doneA()[p.i];if(p.k==='d')return !!done()[p.i];if(p.k==='m')return !!store.get('mkdone',0);if(p.k==='xa')return !!certs().alif;if(p.k==='xt')return !!certs().tajwid;return false}
+const lvl=()=>prof.level||0;
+const stepReq=p=>!(p.s===1&&lvl()>=1);
+function stepTitle(p){if(p.k==='a')return tx(AL[p.i].t);if(p.k==='d')return tx(C.L[p.i].t);if(p.k==='m')return t('mk_title');if(p.k==='xa')return t('exam_alif');return t('exam_tajwid')}
+function curStep(){return PATH.find(p=>stepReq(p)&&!stepDone(p))||null}
+function stepOpen(h){if(lvl()>=2)return true;const j=PATH.findIndex(p=>p.h===h);if(j<0)return true;for(let k=0;k<j;k++){const p=PATH[k];if(stepReq(p)&&!stepDone(p))return false}return true}
+function pathNext(h){const j=PATH.findIndex(p=>p.h===h);const n=PATH.slice(j+1).find(p=>stepReq(p))||PATH[j+1];return n||null}
+function pathNo(h){const L=PATH.filter(stepReq);return L.findIndex(p=>p.h===h)+1}
+function nextLesson(){const c=curStep();return c?{h:c.h,t:stepTitle(c)}:null}
+function vLocked(h){const c=curStep(),j=PATH.findIndex(p=>p.h===h);return `<p><a href="#darslar">${t('all_lessons')}</a></p><div class="card lockc"><div class="lockic">🔒</div><h2>${esc(stepTitle(PATH[j]))}</h2><p>${t('lk_d')}</p>
+ ${c?`<a class="btn p lg" href="#${c.h}">▶ ${t('lk_go')}: ${esc(stepTitle(c))}</a>`:''}<p class="small" style="margin-top:12px">${t('lk_why')}</p></div>`}
+function nextBtn(h){const n=pathNext(h);return n?`<a class="btn" href="#${n.h}">${t('next_lesson_btn')} → ${esc(stepTitle(n))}</a>`:''}
+// ---------- Қоидаларни ёдлаш тизими (такрорлаш карталари, Лейтнер) ----------
+const SRI=[0,1,3,7,14,30,60];
+const srs=()=>store.get('srs',{});
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+function glOpenFor(link){if(!link)return false;if(/^alif-/.test(link))return !!doneA()[+link.split('-')[1]-1]||lvl()>=1;if(/^dars-/.test(link))return !!done()[+link.split('-')[1]-1];if(link==='mahraj')return !!store.get('mkdone',0);return !!certs().alif||lvl()>=1}
+function srsSync(){const S=srs();let ch=0;GLA.forEach(x=>{if(!S[x.k]&&glOpenFor(x.L)){S[x.k]={b:0,due:today()};ch=1}});if(ch)store.set('srs',S);return S}
+function srsDue(){const S=srsSync(),td=today();return GLA.filter(x=>S[x.k]&&S[x.k].due<=td)}
+let TK=null;
+function vTakror(){const due=srsDue(),S=srs(),tot=Object.keys(S).length,mast=Object.values(S).filter(v=>v.b>=4).length;
+ if(!TK||TK.done)TK={q:due.map(x=>x.k),i:0,ok:0,re:0,show:false,done:false};
+ const k=TK.q[TK.i],x=k&&GLA.find(g=>g.k===k);
+ const head=`<p><a href="#darslar">${t('all_lessons')}</a></p><h2>🧠 ${t('tk_title')}</h2><div class="note">${t('tk_note')}</div><div class="prow"><span>${t('tk_cards',{n:tot})}</span><span>✅ ${t('tk_mast',{n:mast})}</span></div>`;
+ if(!tot)return head+`<div class="card"><p>${t('tk_none')}</p>${nextLesson()?`<a class="btn p" href="#${nextLesson().h}">▶ ${esc(nextLesson().t)}</a>`:''}</div>`;
+ if(!x){const nd=Object.values(S).map(v=>v.due).filter(d=>d>today()).sort()[0];return head+`<div class="card tkdone"><div style="font-size:42px">🌟</div><h3>${t('tk_fin')}</h3><p>${TK.q.length?t('tk_res',{n:TK.q.length,ok:TK.ok}):''} ${nd?t('tk_next',{d:nd}):''}</p>${nextLesson()?`<a class="btn p" href="#${nextLesson().h}">▶ ${t('next_lesson')}: ${esc(nextLesson().t)}</a>`:''}</div>`}
+ const b=S[k]?S[k].b:0;
+ return head+`<div class="pbar"><b style="width:${TK.i/TK.q.length*100}%"></b></div><div class="small">${TK.i+1}/${TK.q.length} · ${t('tk_box',{n:b+1})}</div>
+ <div class="card tkcard"><div class="ar tkar">${x.ar}</div><div class="tkn">${esc(tx(x.n))}</div>
+ ${TK.show?`<div class="tkans"><p><b>${esc(tx(x.s))}</b></p><p class="small">${tx(x.d)}</p>${x.ex&&x.ex.say?`<button class="btn" data-say="${esc(x.ex.say)}">🔊 ${esc(x.ex.show||x.ex.say)}</button>`:''}</div>
+ <div class="tkbtns"><button class="btn tkno" data-tk="0">❌ ${t('tk_no')}</button><button class="btn" data-tk="1">😐 ${t('tk_hard')}</button><button class="btn p" data-tk="2">✅ ${t('tk_yes')}</button></div>`
+ :`<p class="small">${t('tk_q')}</p><button class="btn p lg" id="tkShow">${t('tk_show')}</button>`}</div>`}
+function tkAns(v){const k=TK.q[TK.i],S=srs(),c=S[k]||{b:0};if(v===0){c.b=0;c.due=today();TK.q.push(k);TK.re++}else if(v===1){c.due=addDays(1)}else{c.b=Math.min(SRI.length-1,c.b+1);c.due=addDays(SRI[c.b]);TK.ok++}S[k]=c;store.set('srs',S);
+ const g=glk();if(v===2){g[k]=1;store.set('glk',g)}TK.i++;TK.show=false;render()}
 const strip=h=>String(h).replace(/<[^>]+>/g,'');
 function vQoidalar(){const kn=glk(),n=GLA.filter(x=>kn[x.k]).length;
  return `<h2>${t('gl_title')}</h2><div class="note">${t('gl_note')}</div>
@@ -437,8 +479,10 @@ function vGlTest(){if(!GT)glStart();if(GT.i>=GT.qs.length){const pct=Math.round(
  <div class="links hidden" id="glMore"><a class="btn" href="#qoida-${x.k}">${esc(tx(x.n))} →</a><button class="btn p" id="glNext">${t('gl_next_q')}</button></div></div>`}
 
 function render(){applyProf();const h=(location.hash||'#bosh').slice(1);let v,tab=h,r2;
- if(/^dars-\d+$/.test(h)){v=vDars(+h.split('-')[1]-1);tab='darslar'}
+ if(/^(dars-\d+|alif-\d+|imtihon-alif|imtihon-tajwid)$/.test(h)&&!stepOpen(h)){v=vLocked(h);tab='darslar'}
+ else if(/^dars-\d+$/.test(h)){v=vDars(+h.split('-')[1]-1);tab='darslar'}
  else if(/^alif-\d+$/.test(h)){v=vAlif(+h.split('-')[1]-1);tab='darslar'}
+ else if(h==='takror'){v=vTakror();tab='darslar'}
  else if(/^imtihon-(alif|tajwid|review)$/.test(h)){v=vExam(h.split('-')[1]);tab=h.endsWith('review')?'bosh':'darslar'}
  else if(/^sertifikat-(alif|tajwid)$/.test(h)){v=vCert(h.split('-')[1]);tab='bosh'}
  else if(/^qoida-[a-z]+$/.test(h)){v=vQoida(h.slice(6));tab='qoidalar'}
@@ -482,8 +526,11 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k]
  if(tg.id==='exNext'){EX.i++;EX.ans=false;render();return}
  if(tg.id==='exRetry'){EX=null;render();return}
  if(tg.id==='exPlay'){const q=EX.qs[EX.i];if(q.lw){const lw=TM.lw[q.lw];playWords(lw[0],lw[1],[lw[2]])}else if(q.rule){const [s,a]=q.rule.ref.split(':').map(Number);playWords(s,a,q.rule.hl)}return}
- if(tg.id==='fin'){const i=+location.hash.split('-')[1]-1,dd=done();dd[i]=1;store.set('done',dd);markActive();stars(tg);render();return}
- if(tg.id==='afin'){const i=+location.hash.split('-')[1]-1,dd=doneA();dd[i]=1;store.set('adone',dd);markActive();stars(tg);render();return}
+ if(tg.id==='tkShow'){TK.show=true;render();return}
+ if(d.tk!==undefined){tkAns(+d.tk);return}
+ if(tg.id==='mkfin'){store.set('mkdone',1);srsSync();stars(tg);location.hash=(pathNext('mahraj')||{h:'darslar'}).h;return}
+ if(tg.id==='fin'){const i=+location.hash.split('-')[1]-1,dd=done();dd[i]=1;store.set('done',dd);srsSync();markActive();stars(tg);render();return}
+ if(tg.id==='afin'){const i=+location.hash.split('-')[1]-1,dd=doneA();dd[i]=1;store.set('adone',dd);srsSync();markActive();stars(tg);render();return}
  if(d.say){if(!say(d.say)){tg.disabled=true;tg.textContent=t('no_voice')}return}
  if(d.r){store.set('rec',d.r);render();const sh=$('#msSheet.on');if(sh&&sh.dataset.k==='cmp'){const b=sh.querySelector('[data-playr]');if(b)cmpSheet(b.dataset.playr.split('|')[0])}return}
  if(d.c){const c=store.get('cnt',{});c[d.c]=(c[d.c]||0)+1;store.set('cnt',c);tg.textContent=`+1 · ${c[d.c]}/10`;markActive();return}
@@ -498,7 +545,7 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k]
  if(d.playr){const [k,id]=d.playr.split('|'),r=R.find(x=>x.id===id);if(r){P.list=[k.split(':').map(Number)];P.i=0;P.left=1;P.ov=r;startCur();document.querySelectorAll('.cmpr').forEach(e=>e.classList.toggle('pl',e.contains(tg)))}return}
  if(d.sample){const r=R.find(x=>x.id===d.sample);if(r){P.ov=r;P.list=[[1,2]];P.i=0;P.left=1;startCur()}return}
  if(d.recref){store.set('tref',d.recref);location.hash='tekshiruv';return}
- if(d.set){if(d.set==='lang')prof.lang=d.v;else if(d.set==='font')prof.font=+d.v;else if(d.set==='theme')prof.theme=d.v;else if(d.set==='goal')prof.goal=+d.v;saveProf();render();return}
+ if(d.set){if(d.set==='lang')prof.lang=d.v;else if(d.set==='font')prof.font=+d.v;else if(d.set==='theme')prof.theme=d.v;else if(d.set==='goal')prof.goal=+d.v;else if(d.set==='level')prof.level=+d.v;saveProf();render();return}
  if(tg.id==='gShare'){const u=giftLink(($('#gName').value||'').trim());if(navigator.share)navigator.share({title:t('app'),text:t('dua'),url:u}).catch(()=>{});else copy(u);return}
  if(tg.id==='gCopy'){copy(giftLink(($('#gName').value||'').trim()));return}
  if(tg.id==='rst'){$('#rstq').innerHTML=`<p>${t('reset_q')}</p><div class="links"><button class="btn p" id="rstY">${t('yes')}</button><button class="btn" id="rstN">${t('no')}</button></div>`;return}
