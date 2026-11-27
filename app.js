@@ -107,7 +107,7 @@ function stagePoints(pts){const st=$('#stage')||document;st.querySelectorAll('.p
 function ayahHTML(ref,hl){const [s,a]=ref.split(':').map(Number);if(!Q)return `<p class="small">${t('loading')}</p>`;const w=Q[s-1].v[a-1].split(' ');
  return `<div class="ar">${w.map((x,i)=>`<span class="w${hl&&hl.includes(i)?' hl':''}" data-w="${i}" data-s="${s}" data-a2="${a}">${esc(x)}</span>`).join(' ')} <span class="mark">${a}</span></div>`}
 const sname=s=>Q?Q[s-1].tr:'';
-const listen=(s,a,chk)=>{const x=prec();return `<button class="btn p" data-play="${s}:${a}">▶ ${esc(x.n.split(' (')[0])}</button>${chk?`<button class="btn" data-recref="${s}:${a}">${t('check_me')}</button>`:''}`};
+const listen=(s,a,chk)=>{const x=prec();return `<button class="btn p" data-play="${s}:${a}">▶ ${esc(x.n.split(' (')[0])}</button><button class="btn" data-cmp="${s}:${a}">🎧 ${t('cmp_b')}</button>${chk?`<button class="btn" data-recref="${s}:${a}">${t('check_me')}</button>`:''}`};
 function stars(el){if(!document.body.classList.contains('kids')||!el)return;const r=el.getBoundingClientRect();for(let i=0;i<6;i++){const s=document.createElement('span');s.className='star';s.textContent='⭐';s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+window.scrollY)+'px';s.style.setProperty('--dx',(Math.random()*160-80)+'px');s.style.setProperty('--dy',(-60-Math.random()*90)+'px');document.body.appendChild(s);setTimeout(()=>s.remove(),900)}}
 
 // ---------- Навигация ----------
@@ -160,7 +160,7 @@ function vDars(i){const l=C.L[i];if(!l)return vDarslar();const d=done();
  ${stageHTML()}
  <h3>${t('examples')}</h3><p class="small">${t('tap_word')}</p>
  ${l.ex.map(([ref,hl,n],ei)=>{const [s,a]=ref.split(':');return `<div class="card ex" data-ref="${ref}"><div class="ref">${ref} · ${esc(sname(+s))}</div>${ayahHTML(ref,hl)}<div>${esc(tx(n))}</div>
- <div class="links"><button class="btn p" data-rule="${i}:${ei}">${t('play_rule')}</button><button class="btn" data-ayk="${ref}">${t('play_ayah')}</button>${rec().id!=='husary-m'?listen(+s,+a):''}<button class="btn" data-recref="${ref}">${t('check_me')}</button></div></div>`}).join('')}
+ <div class="links"><button class="btn p" data-rule="${i}:${ei}">${t('play_rule')}</button><button class="btn" data-ayk="${ref}">${t('play_ayah')}</button>${rec().id!=='husary-m'?listen(+s,+a):`<button class="btn" data-cmp="${ref}">🎧 ${t('cmp_b')}</button>`}<button class="btn" data-recref="${ref}">${t('check_me')}</button></div></div>`}).join('')}
  <h3>${t('test')}</h3>${quizHTML(l.q)}
  <h3>${t('homework')}</h3><div class="note">${esc(tx(l.hw))}</div>
  <div class="row" style="margin-top:14px"><button class="btn p" id="fin">${d[i]?t('mastered_done'):t('mastered')}</button>${i<C.L.length-1?`<a class="btn" href="#dars-${i+2}">${t('next_lesson_btn')}</a>`:`<a class="btn" href="#imtihon-tajwid">🏅 ${t('exam_tajwid')}</a>`}</div>`}
@@ -185,10 +185,13 @@ function vMushaf(){const s=store.get('sura',1),hide=store.get('hide',false),m=me
  <div class="${hide?'hide':''}">${S_.v.map((tt,i)=>{const k=s+':'+(i+1),c=cnt[k]||0;return `<div class="ayah" data-a="${k}"><div class="ar" data-k="${k}">${tt.split(' ').map((w,wi)=>`<span class="w" data-w="${wi}" data-s="${s}" data-a2="${i+1}">${esc(w)}</span>`).join(' ')} <span class="mark">${i+1}</span></div>${trOn()&&!hide?`<div class="trn" data-tr="${i+1}"></div>`:''}<div class="links">${listen(s,i+1,1)}<button class="btn" data-c="${k}">+1 · ${c}/10</button><button class="btn${m[k]?' p':''}" data-m="${k}">${m[k]?'✓ ':''}${t('memorized')}</button></div></div>`}).join('')}</div>${trOn()&&!hide?trCredit():''}`}
 
 // ---------- Устозлар ----------
-function vUstozlar(){const cur=rec().id;
- return `<h2>${t('reciters')}</h2><div class="note">${t('rec_note')}</div>
- <div class="grid">${R.map(r=>`<div class="card"><b>${esc(r.n)}</b><div><span class="tag">${esc(tx(r.c))}</span><span class="tag">${t('sp_'+r.sp)}</span></div><p class="small">${esc(tx(r.why))}</p><p><b>${t('when')}:</b> ${esc(tx(r.use))}</p>
+function vUstozlar(){const cur=rec().id,f=store.get('rcf','all'),L=R.filter(r=>f==='all'||r.sp===f);
+ return `<h2>${t('reciters')}</h2><div class="note">${t('rec_note')}</div><p class="small">${t('rc_count',{n:R.filter(r=>r.f).length})}</p>
+ <div class="seg rcf">${['all','slow','mid','fast','mujawwad'].map(x=>`<button class="${f===x?'on':''}" data-rcf="${x}">${x==='all'?t('rc_all'):t('sp_'+x)} <small>${x==='all'?R.length:R.filter(r=>r.sp===x).length}</small></button>`).join('')}</div>
+ <div class="grid">${L.map(r=>`<div class="card"><b>${esc(r.n)}</b>${r.x?` <span class="tag new">${t('rc_new')}</span>`:''}<div><span class="tag">${esc(tx(r.c))}</span><span class="tag">${t('sp_'+r.sp)}</span></div><p class="small">${esc(tx(r.why))}</p><p><b>${t('when')}:</b> ${esc(tx(r.use))}</p>
  <div class="links">${r.f?`<button class="btn${cur===r.id?' p':''}" data-r="${r.id}">${cur===r.id?t('chosen'):t('choose')}</button><button class="btn" data-sample="${r.id}">${t('sample')}</button>`:`<span class="small">${t('no_audio')}</span>`}${r.q?`<a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent(r.q)}" target="_blank" rel="noopener">${t('videos')}</a>`:''}</div></div>`).join('')}</div>`}
+function cmpSheet(k){const [s,a]=k.split(':').map(Number),cur=rec().id,G=['slow','mid','mujawwad','fast'];
+ sheet(`<h3 style="margin-top:0">🎧 ${t('cmp_t')}</h3><p class="small">${esc(sname(s))} ${k} — ${t('cmp_d')}</p>${G.map(g=>{const L=R.filter(r=>r.f&&r.sp===g);return L.length?`<div class="small" style="margin:10px 0 4px"><b>${t('sp_'+g)}</b></div><div class="cmpl">${L.map(r=>`<div class="cmpr${cur===r.id?' on':''}"><button class="btn sm p" data-playr="${k}|${r.id}" aria-label="play">▶</button><span>${esc(r.n)}<small> · ${esc(tx(r.c))}</small></span><button class="btn sm" data-r="${r.id}">${cur===r.id?'✓':t('choose')}</button></div>`).join('')}</div>`:''}).join('')}`,'cmp')}
 
 // ---------- Махраж ----------
 function vMahraj(){return `<h2>${t('mk_title')}</h2><div class="note">${t('mk_note')}</div>
@@ -482,7 +485,7 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k]
  if(tg.id==='fin'){const i=+location.hash.split('-')[1]-1,dd=done();dd[i]=1;store.set('done',dd);markActive();stars(tg);render();return}
  if(tg.id==='afin'){const i=+location.hash.split('-')[1]-1,dd=doneA();dd[i]=1;store.set('adone',dd);markActive();stars(tg);render();return}
  if(d.say){if(!say(d.say)){tg.disabled=true;tg.textContent=t('no_voice')}return}
- if(d.r){store.set('rec',d.r);render();return}
+ if(d.r){store.set('rec',d.r);render();const sh=$('#msSheet.on');if(sh&&sh.dataset.k==='cmp'){const b=sh.querySelector('[data-playr]');if(b)cmpSheet(b.dataset.playr.split('|')[0])}return}
  if(d.c){const c=store.get('cnt',{});c[d.c]=(c[d.c]||0)+1;store.set('cnt',c);tg.textContent=`+1 · ${c[d.c]}/10`;markActive();return}
  if(d.m){const m=memo();if(m[d.m])delete m[d.m];else{m[d.m]=1;stars(tg)}store.set('memo',m);tg.classList.toggle('p',!!m[d.m]);tg.textContent=(m[d.m]?'✓ ':'')+t('memorized');return}
  if(d.k){tg.classList.toggle('show');return}
@@ -490,6 +493,9 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button,[data-k]
  if(d.play){playList([d.play.split(':').map(Number)],0);return}
  if(d.playsura){const s=+d.playsura;playList(Q[s-1].v.map((_,i)=>[s,i+1]),0);return}
  if(d.range){const [s0,f,e2]=d.range.split(':').map(Number),l=[];for(let a=f;a<=e2;a++)l.push([s0,a]);playList(l,0);return}
+ if(d.rcf){store.set('rcf',d.rcf);render();return}
+ if(d.cmp){cmpSheet(d.cmp);return}
+ if(d.playr){const [k,id]=d.playr.split('|'),r=R.find(x=>x.id===id);if(r){P.list=[k.split(':').map(Number)];P.i=0;P.left=1;P.ov=r;startCur();document.querySelectorAll('.cmpr').forEach(e=>e.classList.toggle('pl',e.contains(tg)))}return}
  if(d.sample){const r=R.find(x=>x.id===d.sample);if(r){P.ov=r;P.list=[[1,2]];P.i=0;P.left=1;startCur()}return}
  if(d.recref){store.set('tref',d.recref);location.hash='tekshiruv';return}
  if(d.set){if(d.set==='lang')prof.lang=d.v;else if(d.set==='font')prof.font=+d.v;else if(d.set==='theme')prof.theme=d.v;else if(d.set==='goal')prof.goal=+d.v;saveProf();render();return}
