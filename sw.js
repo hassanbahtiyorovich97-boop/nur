@@ -1,5 +1,5 @@
-const C='qu-v28';
-const A=['./','./index.html','./app.js','./i18n.js','./content.js','./content2.js','./tajweed.js','./fonts/UthmanicHafs1Ver18.woff2','./timings.json','./manifest.webmanifest'];
+const C='qu-v29';
+const A=['./','./index.html','./app.js','./i18n.js','./content.js','./content2.js','./tajweed.js','./fonts/UthmanicHafs1Ver18.woff2','./timings.json','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 const CDN=['fonts.googleapis.com','fonts.gstatic.com','cdnjs.cloudflare.com','cdn.jsdelivr.net'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A.map(u=>new Request(u,{cache:'reload'})))));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C&&x!=='qu-audio').map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
