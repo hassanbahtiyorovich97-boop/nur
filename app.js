@@ -1047,7 +1047,7 @@ document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg
  if(tg.id==='rec2'){const r=$('#rec');if(r){r.scrollIntoView({behavior:'smooth',block:'center'});r.click()}return}});
 
 // ---------- Сўзма-сўз маъно (Quran.com API, инглизча) ----------
-const wbwOn=()=>!!store.get('wbwOn',false);const WBM={};
+const wbwOn=()=>!!store.get('wbwOn',true);const WBM={};
 async function wbwGet(s){if(WBM[s])return WBM[s];const out={};let page=1,guard=0;
  const ca='caches' in window?await caches.open('qu-audio').catch(()=>null):null;
  while(page&&guard++<12){const url=`https://api.qurancdn.com/api/qdc/verses/by_chapter/${s}?words=true&language=en&word_fields=text_uthmani&per_page=50&page=${page}`;let j=null;
@@ -1073,7 +1073,7 @@ async function wbwShow(s,a,wi){const tok=(Q&&Q[s-1].v[a-1]||'').split(' ');const
  catch(e){wbwPop(`<div class="ar wbar">${esc(w0)}</div><div class="small">${t('wbw_fail')}</div>`)}}
 document.addEventListener('click',e=>{if(e.target.closest('#wbwX')){const p=$('#wbwPop');if(p)p.classList.remove('on');return}
  const b=e.target.closest('[data-ww2]');if(b){const [s,a,w]=b.dataset.ww2.split(':').map(Number);if(!playWords(s,a,[w]))playList([[s,a]],0);return}
- const w=e.target.closest('.ayah .w,.pline .w');if(w&&wbwOn()&&!store.get('hide',false)){wbwShow(+w.dataset.s,+w.dataset.a2,+w.dataset.w)}});
+ const w=e.target.closest('.ayah .w,.pgbody .w');if(w&&wbwOn()&&!store.get('hide',false)){wbwShow(+w.dataset.s,+w.dataset.a2,+w.dataset.w)}});
 document.addEventListener('change',e=>{if(e.target.id==='wbwOn'){store.set('wbwOn',e.target.checked);const p=$('#wbwPop');if(p)p.classList.remove('on');render()}});
 
 // Арабча сўз маъноси: «ас-Сирож фи баёни ғарибил Қуръон» (QuranEnc, arabic_seraj) — қийин сўзлар изоҳи
@@ -1169,7 +1169,7 @@ let AS=null;function asStop(){if(AS){cancelAnimationFrame(AS.r);AS=null}const p=
 function asStart(){asStop();let acc=0,lt=0;AS={r:0};const sp=()=>+store.get('asp',2);
  const step=ts=>{if(!AS)return;if(lt){acc+=(ts-lt)*sp()*0.012;const d=Math.floor(acc);if(d){window.scrollBy(0,d);acc-=d}}lt=ts;if(window.innerHeight+window.scrollY>=document.body.scrollHeight-2){asStop();return}AS.r=requestAnimationFrame(step)};AS.r=requestAnimationFrame(step);
  document.body.insertAdjacentHTML('beforeend',`<div id="asPill"><button data-asp="-1">−</button><b id="asV">${sp()}×</b><button data-asp="1">+</button><button data-asp="0">⏹</button></div>`);const b=$('#mtAuto');if(b)b.classList.add('on')}
-function firstVis(){const hh=($('.mhead')||{}).offsetHeight||100;const el=[...document.querySelectorAll('.msayat .ayah,.pline .w[data-pa]')].find(e=>e.getBoundingClientRect().bottom>hh+10);if(!el)return store.get('sura',1)+':1';return el.dataset.a||el.dataset.pa}
+function firstVis(){const hh=($('.mhead')||{}).offsetHeight||100;const el=[...document.querySelectorAll('.msayat .ayah,.pgbody .w[data-pa]')].find(e=>e.getBoundingClientRect().bottom>hh+10);if(!el)return store.get('sura',1)+':1';return el.dataset.a||el.dataset.pa}
 function openBm(){const b=bm(),ks=Object.keys(b).sort((x,y)=>{const [a1,b1]=x.split(':').map(Number),[a2,b2]=y.split(':').map(Number);return a1-a2||b1-b2}),last=store.get('lastr','');
  sheet(`<h3 style="margin-top:0">⭐ ${t('mt_bm')}</h3>${last?`<button class="btn p" data-go="${last}" style="width:100%;margin-bottom:8px">↪ ${t('ms_last')}: ${esc(Q[+last.split(':')[0]-1].tr)} ${last}</button>`:''}
  ${ks.length?`<div class="bmlist">${ks.map(k=>{const [s,a]=k.split(':').map(Number);return `<button class="bmi" data-go="${k}"><span class="bmc bm-${b[k]}"></span><b>${esc(Q[s-1].tr)} ${k}</b><span class="ar">${esc(Q[s-1].v[a-1].split(' ').slice(0,5).join(' '))}…</span></button>`}).join('')}</div>`:`<p class="small">${t('bm_empty')}</p>`}`,'bm')}
