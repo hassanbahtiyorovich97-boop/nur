@@ -1091,7 +1091,7 @@ function msTool(){const hide=store.get('hide',false),mm=mmode(),pl=typeof P!=='u
 function vMushaf2(){if(!Q)return `<p class="small">${t('loading')}</p>`;const s=store.get('sura',1),S_=Q[s-1],hide=store.get('hide',false),v=mview(),last=store.get('lastr','');
  const p0=v==='page'?+store.get('mpage',0):(TJP[s]&&TJP[s][1])||0;
  const bar2=`<div class="msbar2"><div class="seg"><button class="${v==='ayat'?'on':''}" data-mv="ayat">☰ ${t('ms_ayat')}</button><button class="${v==='page'?'on':''}" data-mv="page">📖 ${t('ms_page')}</button></div>
-  <button class="btn sm${tajOn()?' p':''}" id="msTaj" aria-label="tajweed" title="${t('ms_tajc')}">🎨</button><span class="small" id="msRd">${rdLine()}</span></div>
+  <button class="btn sm rchip" id="msRec">🎙 ${esc(rec().n.split(' (')[0].split(' ').slice(-2).join(' '))} ▾</button><button class="btn sm${tajOn()?' p':''}" id="msTaj" aria-label="tajweed" title="${t('ms_tajc')}">🎨</button><span class="small" id="msRd">${rdLine()}</span></div>
  ${tajOn()&&!hide?`<details class="tjd"><summary class="small">🎨 ${t('ms_tajc')} — ${t('tj_legend')}</summary>${tajLegend()}</details>`:''}
  ${last&&last.split(':')[0]!=String(s)?`<button class="btn mscont" data-go="${last}">↪ ${t('ms_cont',{r:esc(Q[+last.split(':')[0]-1].tr)+' '+last})}</button>`:''}`;
  const top=msHead(s,1,p0)+bar2,tool=msTool();
@@ -1141,7 +1141,7 @@ function applyQf(){const r=document.documentElement,f=qFont();if(f==='kf')delete
 applyQf();
 const QFS='قُلۡ هُوَ ٱللَّهُ أَحَدٌ';
 function msSettings(){const th=prof.theme||'auto',mm=mmode(),g=store.get('mgoal',10),cur=qfCur(),sz=+store.get('qsz',100);
- return `<div class="small" style="margin-bottom:6px">${t('qf_title')}</div>${QFT.map(([k,f,tj,n,d])=>{const w=qConvW(QFS,f),html=(k==='tj')?tjWords(w.split(' '),false).join(' '):esc(w),ff=f==='kf'?'"KFGQPC Hafs"':f==='am'?'"Amiri Quran"':'"Scheherazade New","Amiri"';
+ return `<button class="btn" style="width:100%;margin-bottom:10px" id="msRec">🎙 ${t('rc_pick')}: <b>${esc(rec().n)}</b> ▾</button><div class="small" style="margin-bottom:6px">${t('qf_title')}</div>${QFT.map(([k,f,tj,n,d])=>{const w=qConvW(QFS,f),html=(k==='tj')?tjWords(w.split(' '),false).join(' '):esc(w),ff=f==='kf'?'"KFGQPC Hafs"':f==='am'?'"Amiri Quran"':'"Scheherazade New","Amiri"';
   return `<button class="fth${cur===k?' on':''}" data-qft="${k}"><span class="pv${k==='tj'?' tajc':''}" style="font-family:${ff}">${html}</span><span><b>${t(n)}</b><small>${t(d)}</small></span><span class="ck">${cur===k?'✓':''}</span></button>`}).join('')}
  <div class="tgl"><label><input type="checkbox" id="mpgnOn"${store.get('mpgn',true)?' checked':''}>${t('qf_pgn')}</label><label><input type="checkbox" id="mruleOn"${store.get('mrule',true)?' checked':''}>${t('qf_rule')}</label><label><input type="checkbox" id="wbwOn"${wbwOn()?' checked':''}>${t('wbw_on')}</label></div>
  <div class="szr"><span class="small">${t('qf_size')} <b id="qszV">${sz}%</b></span><input type="range" id="qsz" min="60" max="180" step="5" value="${sz}"><span class="ar">سُورَةٌ</span></div>
@@ -1294,6 +1294,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('button,[data-sh
  if(el.id==='msSura'){openSuras();return}
  if(el.id==='msTaj'){store.set('tajc',!tajOn());render();return}
  if(d.qft){const x=QFT.find(q=>q[0]===d.qft);store.set('qfont',x[1]);if(x[2]!==null)store.set('tajc',!!x[2]);qConv();applyQf();render();return}
+ if(el.id==='msRec'){cmpSheet(firstVis());return}
  if(el.id==='msJuz'){openJuz();return}
  if(el.id==='msPgN'){const p=+store.get('mpage',0)||1;sheet(`<h3 style="margin-top:0">${t('ms_page')}</h3><div class="row" style="gap:8px"><input id="pgIn" class="inp" type="number" min="1" max="604" value="${p}" style="flex:1"><button class="btn p" id="pgGo">→</button></div>`,'pg');return}
  if(el.id==='pgGo'){const v=Math.max(1,Math.min(604,+($('#pgIn')||{}).value||1));shClose();store.set('mpage',v);store.set('mview','page');render();window.scrollTo(0,0);return}
