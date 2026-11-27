@@ -1484,7 +1484,7 @@ async function pageFill(){const box=$('#msPage');if(!box)return;await pidxP;let 
  catch(e){box.innerHTML=`<div class="note">${t('ms_pg_fail')}</div>`}}
 // қаторларни контейнер энига мослаш (Мадина мусҳафидагидек)
 function pgFit(b){if(!b)return;const W=b.clientWidth;if(!W)return;b.classList.add('meas');const ls=[...b.querySelectorAll('.pl.txt')];const ws=ls.map(l=>l.scrollWidth);b.classList.remove('meas');const mx=Math.max(...ws,1);
- const base=parseFloat(getComputedStyle(b).getPropertyValue('--qfs'))||26,fs=Math.min(60,Math.max(14,base*W/mx*.985));b.style.setProperty('--qfs',fs.toFixed(2)+'px');
+ const base=parseFloat(getComputedStyle(b).getPropertyValue('--qfs'))||26,fs=Math.min(W/16,Math.max(14,base*W/mx*.985));b.style.setProperty('--qfs',fs.toFixed(2)+'px');
  ls.forEach((l,i)=>l.classList.toggle('short',ws[i]<mx*.72))}
 let PGR=0;window.addEventListener('resize',()=>{clearTimeout(PGR);PGR=setTimeout(()=>{const b=$('.pgbody.qcf');if(b){b.style.setProperty('--qfs','26px');pgFit(b)}},200)});
 // Оятлар кўриниши: Ҳафс матнини QCF глифларига алмаштириш
