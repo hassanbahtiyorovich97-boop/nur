@@ -125,7 +125,7 @@ function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins
  const a=Object.keys(doneA()).length,d=Object.keys(done()).length,ms=Object.keys(store.get('bkdone',{})).length,MSN=bkBuild()?BK.length:60,m=Object.keys(memo()).length,cs=certs();
  const bar_=(n,tot)=>`<div class="pbar"><b style="width:${Math.round(n/tot*100)}%"></b></div>`;
  return `${homeTop()}
- ${pathCard()}
+ ${coachCard()}${pathCard()}
  ${g&&g.from?`<div class="card gift"><div class="gift-ic">🎁</div><div><b>${esc(t('gift_from',{from:g.from}))}</b><div class="small">${t('dua')}</div></div></div>`:''}
  <div class="grid3"><div class="card kpi"><div class="kv">🔥 ${st}</div><div class="small">${t('streak')}</div></div>
  <div class="card kpi"><div class="kv"><span id="todayMin">${mins}</span>/${goal} ${t('min')}</div><div class="pbar"><b style="width:${pc}%"></b></div><div class="small">${t('today')}</div></div>
@@ -139,7 +139,7 @@ function vBosh(){const g=store.get('gift',null),nl=nextLesson(),st=streak(),mins
 
 function pathCard(){const c=curStep(),L=PATH.filter(stepReq),n=L.filter(stepDone).length,due=srsDue().length,bkOK=lvl()>=1||doneA()[8];
  return `<div class="card plan pathc"><div class="row" style="justify-content:space-between"><b>🧭 ${t('pt_way')}</b><span class="small">${n}/${L.length}</span></div><div class="pbar"><b style="width:${Math.round(n/L.length*100)}%"></b></div>
- ${c?`<div class="small" style="margin-top:8px">${t(c.s===1?'st1':'st2')} · ${t('pt_step',{n:pathNo(c.h)})}</div><a class="btn p lg" href="#${c.h}">▶ ${esc(stepTitle(c))}</a>`:`<p>🌟 ${t('pt_all')}</p><a class="btn p lg" href="#hifz">🧠 ${t('hf2_title')}</a>`}
+ ${c?`<div class="small" style="margin-top:8px">${c.k==='r'?t('sx_ret_why'):t(c.s===1?'st1':'st2')+' · '+t('pt_step',{n:pathNo(c.h)})}</div><a class="btn p lg" href="#${c.h}">▶ ${esc(stepTitle(c))}</a>`:`<p>🌟 ${t('pt_all')}</p><a class="btn p lg" href="#hifz">🧠 ${t('hf2_title')}</a>`}
  ${due?`<a class="btn lg tkbtn" href="#takror">🔁 ${t('tk_due',{n:due})}</a>`:''}
  ${bkOK?`<a class="btn lg" href="#kitob-ms">📗 ${t('book_title')} · ${store.get('bkpg',1)}/${BK?BK.length:'…'}</a>`:''}
  <a class="small" href="#darslar">🗺 ${t('pt_map')}</a></div>`}
@@ -165,7 +165,7 @@ function vDars(i){const l=C.L[i];if(!l)return vDarslar();const d=done();
  <div class="links"><button class="btn p" data-rule="${i}:${ei}">${t('play_rule')}</button><button class="btn" data-ayk="${ref}">${t('play_ayah')}</button>${rec().id!=='husary-m'?listen(+s,+a):`<button class="btn" data-cmp="${ref}">🎧 ${t('cmp_b')}</button>`}<button class="btn" data-recref="${ref}">${t('check_me')}</button></div></div>`}).join('')}
  <h3>${t('test')}</h3>${quizHTML(l.q)}
  <h3>${t('homework')}</h3><div class="note">${esc(tx(l.hw))}</div>
- <div class="row" style="margin-top:14px"><button class="btn p" id="fin">${d[i]?t('mastered_done'):t('mastered')}</button>${nextBtn('dars-'+(i+1))}</div>`}
+ <div class="row" style="margin-top:14px">${examBtn('dars-'+(i+1))}${nextBtn('dars-'+(i+1))}</div>`}
 
 function vAlif(i){const l=AL[i];if(!l)return vDarslar();const d=doneA(),F=t('forms').split('|');let h=`<p><a href="#darslar">${t('all_lessons')}</a></p><h2>${i+1}. ${esc(tx(l.t))}</h2><p class="small">${t('phone_voice')}</p>`;
  if(l.g){h+=stageHTML()+l.g.map(c=>{const x=LF(c),j=x[4],fm=j?[c,c+'‍','‍'+c+'‍','‍'+c]:[c,'—','—','‍'+c],mq=C.MQ[c],lw=TM&&TM.lw[c];
@@ -177,7 +177,7 @@ function vAlif(i){const l=AL[i];if(!l)return vDarslar();const d=doneA(),F=t('for
  else{h+=`<div class="card"><p>${tx(l.r)}</p></div>`;
   if(l.syl)h+=`<p class="small">${t('spelling_note')}</p><div class="card"><div class="syl">${[...l.syl].flatMap(c=>l.h.map((m,k)=>`<button class="btn" data-say="${c+m}">${c+m}<small>${esc(tx((C.CT[c]||'')+l.ht[k]))}</small></button>`)).join('')}</div></div>`;
   h+=`<h3>${t('words')}</h3>${l.w.map(([a,b,c])=>`<div class="card"><div class="row" style="justify-content:space-between"><span class="big" style="font-size:calc(52px*var(--arz))">${a}</span><button class="btn" data-say="${a}">🔊</button></div><div><b>${esc(tx(c))}</b>${b?` · <span class="small">${esc(b)}</span>`:''}</div></div>`).join('')}`}
- h+=`<div class="row" style="margin-top:14px"><button class="btn p" id="afin">${d[i]?t('mastered_done'):t('mastered')}</button>${nextBtn('alif-'+(i+1))}</div>`;return h}
+ h+=`<div class="row" style="margin-top:14px">${examBtn('alif-'+(i+1))}${nextBtn('alif-'+(i+1))}</div>`;return h}
 
 // ---------- Мусҳаф ----------
 function vMushaf(){const s=store.get('sura',1),hide=store.get('hide',false),m=memo(),cnt=store.get('cnt',{});if(!Q)return `<p class="small">${t('loading')}</p>`;const S_=Q[s-1];
@@ -200,7 +200,7 @@ function vMahraj(){return `<h2>${t('mk_title')}</h2><div class="note">${t('mk_no
  <div class="mkwrap"><div class="card stage" id="stage">${headSVG()}<div class="stg-big ar" id="stgBig"></div><div class="small" id="stgCap"></div></div>
  <div>${C.MK.map(([g,rows])=>`<div class="card"><b>${esc(tx(g))}</b>${rows.map(([a,p,d])=>`<button class="mk" data-mk="${p}" data-letters="${a}"><span class="ar">${esc(a)}</span><span>${esc(tx(d))}</span></button>`).join('')}</div>`).join('')}</div></div>
  <h3>${t('pairs')}</h3><div class="card"><div class="letters">ث–س–ص · ذ–ز–ظ · ت–ط · ح–ه · ع–ء · ق–ك · د–ض</div></div>
- ${stepOpen('mahraj')?`<div class="row" style="margin-top:14px"><button class="btn p" id="mkfin">${store.get('mkdone',0)?t('mastered_done'):t('mastered')}</button>${nextBtn('mahraj')}</div>`:''}`}
+ ${stepOpen('mahraj')?`<div class="row" style="margin-top:14px">${examBtn('mahraj')}${nextBtn('mahraj')}</div>`:''}`}
 
 // ---------- Имтиҳон ----------
 let EX=null;const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
@@ -213,14 +213,14 @@ function tajQ(n,only){const pool=[],lis=[];C.L.forEach((l,i)=>{if(only&&!only[i]
  if(l.anim!=='waqf')l.ex.forEach(([ref,hl,,c])=>{if(!c)lis.push({li:i,ref,hl})})});
  const titles=[...new Set(C.L.map(l=>tx(l.t)))];const out=shuffle(pool).slice(0,Math.max(1,n-Math.floor(n/3)));
  shuffle(lis).slice(0,Math.floor(n/3)).forEach(x=>{const c=tx(C.L[x.li].t);out.push({q:t('listen_q'),rule:x,o:shuffle([c,...shuffle(titles.filter(y=>y!==c)).slice(0,3)]),a:c})});return shuffle(out).slice(0,n)}
-function startExam(kind){let qs;if(kind==='alif')qs=alifQ(12);else if(kind==='tajwid')qs=tajQ(12);else{const d=done();qs=Object.keys(d).length?tajQ(5,d):alifQ(5)}EX={kind,qs,i:0,score:0,ans:false}}
+function startExam(kind){let qs;if(kind==='alif')qs=alifQ(20);else if(kind==='tajwid')qs=tajQ(20);else{const d=done();qs=Object.keys(d).length?tajQ(5,d):alifQ(5)}EX={kind,qs,i:0,score:0,ans:false}}
 function vExam(kind){if(!EX||EX.kind!==kind)startExam(kind);const q=EX.qs[EX.i],ttl=kind==='alif'?t('exam_alif'):kind==='tajwid'?t('exam_tajwid'):t('review');
  if(!q)return vExamEnd();
  return `<p><a href="#darslar">${t('back')}</a></p><h2>${ttl}</h2><div class="prow"><span>${t('question')} ${EX.i+1} ${t('of')} ${EX.qs.length}</span><span>✓ ${EX.score}</span></div><div class="pbar"><b style="width:${EX.i/EX.qs.length*100}%"></b></div>
  <div class="card exq"><b>${esc(q.q)}</b>${q.big?`<div class="big">${esc(q.big)}</div>`:''}${q.lw||q.rule?`<div class="links"><button class="btn p lg" id="exPlay">${t('play')}</button></div>`:''}
  <div class="${q.ar?'syl':''}">${q.o.map(o=>`<button class="btn opt exo${q.ar?' ar':''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div><div class="small qres"></div>
  <div class="row" style="margin-top:10px"><button class="btn p hidden" id="exNext">${EX.i<EX.qs.length-1?t('next'):t('finish')}</button></div></div>`}
-function vExamEnd(){const pct=Math.round(EX.score/EX.qs.length*100),pass=pct>=80,k=EX.kind;
+function vExamEnd(){const pct=Math.round(EX.score/EX.qs.length*100),pass=pct>=SP().p,k=EX.kind;
  if(pass&&k!=='review'){const c=certs();if(!c[k]||c[k].score<pct){c[k]={score:pct,date:today()};store.set('certs',c)}}
  return `<h2>${t('result')}: ${pct}%</h2><div class="card"><p><b>${pass?t('passed'):t('failed')}</b></p><div class="pbar"><b style="width:${pct}%"></b></div>
  <div class="links">${pass&&k!=='review'?`<a class="btn p" href="#sertifikat-${k}">🏅 ${t('certificate')}</a>`:''}<button class="btn" id="exRetry">${t('retry')}</button><a class="btn" href="#bosh">${t('tab_home')}</a></div></div>`}
@@ -244,7 +244,7 @@ function vSozlama(){const L4=[['uz','Ўзбекча'],['uzl','O‘zbekcha'],['tg
  const seg=(id,opts,cur)=>`<div class="segc">${opts.map(([v,l])=>`<button class="btn${String(cur)===String(v)?' p':''}" data-set="${id}" data-v="${v}">${l}</button>`).join('')}</div>`;
  return `<h2>${t('settings')}</h2>
  <div class="card"><b>${t('s_lang')}</b>${seg('lang',L4,lang())}</div>
- <div class="card"><b>${t('ob_level')}</b><div class="segc" style="flex-direction:column">${[0,1,2].map(v=>`<button class="btn${(prof.level||0)===v?' p':''}" data-set="level" data-v="${v}">${t('lv'+v)}</button>`).join('')}</div></div>
+ ${remindHTML()}<div class="card"><b>${t('ob_level')}</b><div class="segc" style="flex-direction:column">${[0,1,2].map(v=>`<button class="btn${(prof.level||0)===v?' p':''}" data-set="level" data-v="${v}">${t('lv'+v)}</button>`).join('')}</div></div>
  <div class="card"><b>${t('s_name')}</b><input id="sName" class="inp" value="${esc(prof.name||'')}" placeholder="${t('ob_name_ph')}"></div>
  <div class="card"><b>${t('s_font')}</b>${seg('font',[[0,'A'],[1,'A+'],[2,'A++'],[3,'A+++']],prof.font||0)}<div class="ar" style="text-align:center">بِسْمِ ٱللَّهِ</div></div>
  <div class="card"><b>${t('s_theme')}</b>${seg('theme',[['auto',t('th_auto')],['light',t('th_light')],['sepia',t('th_sepia')],['dark',t('th_dark')]],prof.theme||'auto')}</div>
@@ -418,14 +418,15 @@ const PATH=[...AL.map((_,i)=>({s:1,h:'alif-'+(i+1),k:'a',i})),{s:1,h:'imtihon-al
 function stepDone(p){if(p.k==='a')return !!doneA()[p.i];if(p.k==='d')return !!done()[p.i];if(p.k==='m')return !!store.get('mkdone',0);if(p.k==='xa')return !!certs().alif;if(p.k==='xt')return !!certs().tajwid;return false}
 const lvl=()=>prof.level||0;
 const stepReq=p=>!(p.s===1&&lvl()>=1);
-function stepTitle(p){if(p.k==='a')return tx(AL[p.i].t);if(p.k==='d')return tx(C.L[p.i].t);if(p.k==='m')return t('mk_title');if(p.k==='xa')return t('exam_alif');return t('exam_tajwid')}
-function curStep(){return PATH.find(p=>stepReq(p)&&!stepDone(p))||null}
-function stepOpen(h){if(lvl()>=2)return true;const j=PATH.findIndex(p=>p.h===h);if(j<0)return true;for(let k=0;k<j;k++){const p=PATH[k];if(stepReq(p)&&!stepDone(p))return false}return true}
+function stepTitle(p){if(p.k==='r')return '🔁 '+t('sx_ret')+': '+stepTitle(p.base);if(p.k==='a')return tx(AL[p.i].t);if(p.k==='d')return tx(C.L[p.i].t);if(p.k==='m')return t('mk_title');if(p.k==='xa')return t('exam_alif');return t('exam_tajwid')}
+function curStep(){const r=typeof dueRet==='function'?dueRet()[0]:null;if(r)return {h:'sinov-'+r.h,k:'r',base:r,s:r.s};return PATH.find(p=>stepReq(p)&&!stepDone(p))||null}
+function stepOpen(h){const j=PATH.findIndex(p=>p.h===h);if(j<0)return true;if(stepDone(PATH[j]))return true;if(typeof dueRet==='function'&&dueRet().length)return false;if(lvl()>=2)return true;for(let k=0;k<j;k++){const p=PATH[k];if(stepReq(p)&&!stepDone(p))return false}return true}
 function pathNext(h){const j=PATH.findIndex(p=>p.h===h);const n=PATH.slice(j+1).find(p=>stepReq(p))||PATH[j+1];return n||null}
 function pathNo(h){const L=PATH.filter(stepReq);return L.findIndex(p=>p.h===h)+1}
 function nextLesson(){const c=curStep();return c?{h:c.h,t:stepTitle(c)}:null}
 function vLocked(h){const c=curStep(),j=PATH.findIndex(p=>p.h===h);return `<p><a href="#darslar">${t('all_lessons')}</a></p><div class="card lockc"><div class="lockic">🔒</div><h2>${esc(stepTitle(PATH[j]))}</h2><p>${t('lk_d')}</p>
  ${c?`<a class="btn p lg" href="#${c.h}">▶ ${t('lk_go')}: ${esc(stepTitle(c))}</a>`:''}<p class="small" style="margin-top:12px">${t('lk_why')}</p></div>`}
+function examBtn(h){const L=(typeof lx==='function'?lx():{})[h]||{};return L.p?`<a class="btn" href="#sinov-${h}">✓ ${t('sx_passed',{s:L.sc!=null?L.sc:'—'})}</a>`:`<a class="btn p" href="#sinov-${h}">📝 ${t('sx_take')}</a>`}
 function nextBtn(h){const n=pathNext(h);return n?`<a class="btn" href="#${n.h}">${t('next_lesson_btn')} → ${esc(stepTitle(n))}</a>`:''}
 // ---------- Қоидаларни ёдлаш тизими (такрорлаш карталари, Лейтнер) ----------
 const SRI=[0,1,3,7,14,30,60];
@@ -576,7 +577,7 @@ const L3=()=>['uz','ru','tg'][li()];
 const pick=a=>a[li()];
 
 // ---------- Маршрутлар ----------
-function route2(h){let m;
+function route2(h){if(/^sinov-/.test(h)){const x=h.slice(6);return {v:stepOpen(x)?vSinov(x):vLocked(x),tab:'darslar'}}let m;
  if(h==='kitob-tarix')return {v:vTarix(),tab:'kitob'};
  if((m=h.match(/^kitob-tarix-(\d+)$/)))return {v:vTarixCh(+m[1]),tab:'kitob'};
  if(h==='kitob-qori')return {v:vQorilar(),tab:'kitob'};
@@ -1457,6 +1458,151 @@ document.addEventListener('change',e=>{const id=e.target.id;
  if(id==='hfS'){hfStop(true);store.set('hfs',+e.target.value);store.set('hfa',1);store.set('hfb',0);render();return}
  if(id==='hfA'){hfStop(true);store.set('hfa',+e.target.value);if(+store.get('hfb',0)&&+store.get('hfb',0)<+e.target.value)store.set('hfb',+e.target.value);render();return}
  if(id==='hfB'){hfStop(true);store.set('hfb',+e.target.value);render();return}});
+
+// =================== ҚАТЪИЙ ИМТИҲОНЛАР, ТАКРОРИЙ СИНОВЛАР, ТАЛАБ ТИЗИМИ ===================
+const STR={soft:{p:70,o:70,tm:0,cd:0,self:1,sh:0},fair:{p:80,o:80,tm:0,cd:10,self:1,sh:0},firm:{p:85,o:85,tm:40,cd:30,self:0,sh:0},hard:{p:90,o:90,tm:25,cd:60,self:0,sh:1}};
+const strict=()=>STR[store.get('strict','fair')]?store.get('strict','fair'):'fair',SP=()=>STR[strict()];
+const RET=[3,10,30,90];
+const lx=()=>store.get('lx',{});
+function lxSet(h,o){const L=lx();L[h]=Object.assign(L[h]||{},o);store.set('lx',L)}
+// ўқиш кунлари: дарс/имтиҳон/такрорда ≥5 дақиқа ёки имтиҳон/такрор якуни
+const sdays=()=>store.get('sday',{});
+function studyAdd(sec){const S=sdays(),k=today();S[k]=(S[k]||0)+sec;store.set('sday',S)}
+function studied(k){return (sdays()[k]||0)>=300}
+setInterval(()=>{if(document.visibilityState==='visible'&&/^#(dars-|alif-|sinov-|takror|hifz|kitob-ms|mahraj|imtihon)/.test(location.hash))studyAdd(20)},20000);
+function missedDays(){const S=sdays();const ks=Object.keys(S).filter(k=>S[k]>=300).sort();const st=store.get('pstart',null);if(!st){store.set('pstart',today());return 0}
+ const last=ks.length?ks[ks.length-1]:st;if(last===today())return 0;const ms=(new Date(today())-new Date(last))/864e5;return Math.max(0,Math.round(ms)-(ks.length?1:0))}
+function escLevel(){const m=missedDays(),sh=SP().sh;if(m<=0)return 0;if(m<=1-sh)return 1;if(m<=3-sh)return 2;if(m<=6-sh)return 3;return 4}
+const passedSteps=()=>PATH.filter(p=>(p.k==='a'||p.k==='d'||p.k==='m')&&lx()[p.h]&&lx()[p.h].p);
+// чоралар: бир узилишда бир марта
+function escApply(){const lv=escLevel(),key=today()+':'+lv;if(lv<2||store.get('escK','')===key)return;store.set('escK',key);
+ const ps=passedSteps().sort((a,b)=>(lx()[b.h].d||'').localeCompare(lx()[a.h].d||''));
+ if(lv>=2&&ps[0])lxSet(ps[0].h,{rn:today()});
+ if(lv>=3&&ps[1])lxSet(ps[1].h,{rn:today()});
+ if(lv>=4&&ps[0]){unpass(ps[0].h);store.set('escRev',stepTitle(ps[0]))}}
+function unpass(h){const p=PATH.find(x=>x.h===h);if(!p)return;if(p.k==='a'){const d=doneA();delete d[p.i];store.set('adone',d)}else if(p.k==='d'){const d=done();delete d[p.i];store.set('done',d)}else if(p.k==='m')store.set('mkdone',0);lxSet(h,{p:0,rb:0,rn:null})}
+function dueRet(){const L=lx(),td=today();return PATH.filter(p=>L[p.h]&&L[p.h].p&&L[p.h].rn&&L[p.h].rn<=td)}
+// ---------- Савол генераторлари ----------
+const pickN=(a,n)=>shuffle(a).slice(0,n);
+function qTaj(i,n,ret){const l=C.L[i],out=[];
+ l.q.forEach(q=>out.push({q:tx(q[0]),o:q[1].map(tx),a:tx(q[1][q[2]])}));
+ GLA.filter(x=>x.L==='dars-'+(i+1)).forEach(x=>{const others=pickN(GLA.filter(y=>y.k!==x.k&&y.g===x.g).concat(pickN(GLA.filter(y=>y.k!==x.k),3)),3).map(y=>tx(y.s));out.push({q:t('sx_term',{x:tx(x.n)}),big:x.ar,o:shuffle([tx(x.s),...others]),a:tx(x.s)})});
+ const titles=C.L.map(z=>tx(z.t)),me=tx(l.t);
+ if(l.anim!=='waqf')pickN(l.ex.filter(e=>!e[3]),2).forEach(([ref,hl])=>out.push({q:t('sx_listen'),rule:{ref,hl},o:shuffle([me,...pickN(titles.filter(z=>z!==me),3)]),a:me}));
+ const prev=C.L.map((z,j)=>j).filter(j=>j!==i&&done()[j]);pickN(prev,ret?1:2).forEach(j=>{const q=pickN(C.L[j].q,1)[0];if(q)out.push({q:tx(q[0]),o:q[1].map(tx),a:tx(q[1][q[2]]),rv:1})});
+ return shuffle(out).slice(0,n)}
+function qLet(cs,n){const out=[];const LT=C.LT.filter(x=>x[0]!=='ء');shuffle(cs).forEach((c,k)=>{const x=LF(c);if(!x)return;const oth=pickN(LT.filter(y=>y[0]!==c),3);
+ const ty=k%3;if(ty===0)out.push({q:t('find_letter',{x:tx(x[2])}),o:shuffle([c,...oth.map(y=>y[0])]),a:c,ar:1});
+ else if(ty===1)out.push({q:t('name_of'),big:c,o:shuffle([x,...oth]).map(y=>tx(y[2])),a:tx(x[2])});
+ else if(TM&&TM.lw[c]&&c!=='ا')out.push({q:t('listen_letter'),lw:c,o:shuffle([c,...oth.map(y=>y[0])]),a:c,ar:1});
+ else out.push({q:t('find_letter',{x:tx(x[2])}),o:shuffle([c,...oth.map(y=>y[0])]),a:c,ar:1})});
+ pickN(cs.filter(c=>C.CT[c]),2).forEach(c=>{const hs=['َ','ِ','ُ'],ht=['а','и','у'],hi=Math.floor(Math.random()*3);out.push({q:t('read_syl'),big:c+hs[hi],o:shuffle([0,1,2].map(j=>tx(C.CT[c]+ht[j]))),a:tx(C.CT[c]+ht[hi])})});
+ return shuffle(out).slice(0,n)}
+function qHB(l,n){const out=[];const W=l.w||[];W.forEach(([a,,c])=>{const oth=pickN(W.filter(w=>w[2]!==c).map(w=>tx(w[2])),3);if(oth.length>=2)out.push({q:t('sx_read'),big:a,o:shuffle([tx(c),...oth]),a:tx(c)})});
+ if(l.syl&&l.h)pickN([...l.syl],3).forEach(c=>{const k=Math.floor(Math.random()*l.h.length),base=C.CT[c]||'';if(!base)return;out.push({q:t('read_syl'),big:c+l.h[k],o:shuffle(l.h.map((m,j)=>tx(base+l.ht[j]))),a:tx(base+l.ht[k])})});
+ return shuffle(out).slice(0,n)}
+function qMk(n){const G=C.MK.map(([g])=>tx(g)),out=[];C.MK.forEach(([g,rows])=>rows.forEach(([lt])=>lt.split(' ').forEach(c=>out.push({q:t('sx_mk',{x:c}),big:c,o:shuffle([tx(g),...pickN(G.filter(z=>z!==tx(g)),3)]),a:tx(g)}))));return pickN(out,n)}
+function examFor(h,ret){const p=PATH.find(x=>x.h===h);const n=ret?4:8;let qs=[],oral=[];
+ if(p.k==='d'){qs=qTaj(p.i,n,ret);const ex=C.L[p.i].ex.filter(e=>!e[3]);oral=pickN(ex,ret?1:Math.min(2,ex.length)).map(([ref,hl])=>({ref,hl}))}
+ else if(p.k==='a'){const l=AL[p.i];if(l.g){const prevG=AL.slice(0,p.i).filter(x=>x.g).flatMap(x=>x.g);qs=qLet(l.g.concat(pickN(prevG,ret?0:2)),n);oral=pickN(l.g.filter(c=>TM&&TM.lw[c]),ret?2:3).map(c=>{const w=TM.lw[c];return {lw:c,ref:w[0]+':'+w[1],hl:[w[2]]}})}
+  else{qs=qHB(l,n);oral=pickN((l.w||[]).filter(w=>w[0].length>1),ret?2:3).map(w=>({word:w[0]}))}}
+ else if(p.k==='m'){qs=qMk(n)}
+ return {h,ret:!!ret,qs,oral,i:0,sc:0,ans:false,ph:'intro',or:[],oi:0,t0:0}}
+// ---------- Имтиҳон экрани ----------
+let SX=null,SXT=null;
+function sxTarget(o){if(o.word)return [o.word];const [s,a]=o.ref.split(':').map(Number);const w=Q[s-1].v[a-1].split(' ');return o.lw?[w[o.hl[0]]]:w}
+function vSinov(h){const p=PATH.find(x=>x.h===h);if(!p)return vDarslar();const L=lx()[h]||{},ret=!!(L.p&&L.rn&&L.rn<=today());
+ if(!SX||SX.h!==h||SX.ret!==ret&&SX.ph==='intro')SX=examFor(h,ret);const P=SP(),now=Date.now();
+ const head=`<p><a href="#${h}">${t('back')}</a></p><h2>📝 ${ret?t('sx_ret'):t('sx_title')}: ${esc(stepTitle(p))}</h2>`;
+ if(SX.ph==='intro'){const cd=L.cd&&L.cd>now?L.cd:0;
+  return head+`<div class="card sxint"><p>${ret?t('sx_ret_d'):t('sx_d')}</p><ul class="sxl"><li>${t('sx_r1',{n:SX.qs.length,p:P.p})}</li>${P.tm?`<li>⏱ ${t('sx_r2',{s:P.tm})}</li>`:''}${SX.oral.length?`<li>🎙 ${t('sx_r3',{n:SX.oral.length,p:P.o})}</li>`:''}<li>${t('sx_r4',{m:P.cd})}</li></ul>
+  ${L.n?`<p class="small">${t('sx_att',{n:L.n})}${L.sc!=null?' · '+t('sx_lastsc',{s:L.sc}):''}</p>`:''}
+  ${cd?`<div class="note warnn">⏳ ${t('sx_cd',{t:new Date(cd).toLocaleTimeString().slice(0,5)})}</div><a class="btn" href="#${h}">📖 ${t('sx_restudy')}</a>`:`<button class="btn p lg" id="sxGo" style="width:100%">▶ ${t('sx_start')}</button>`}
+  <p class="small">${t('sx_tone_'+strict())}</p></div>`}
+ if(SX.ph==='q'){const q=SX.qs[SX.i];
+  return head+`<div class="prow"><span>${t('question')} ${SX.i+1}/${SX.qs.length}</span><span>✓ ${SX.sc}</span></div><div class="pbar"><b style="width:${SX.i/SX.qs.length*100}%"></b></div>
+  ${P.tm?`<div class="sxtm"><b id="sxTm" style="width:100%"></b></div>`:''}
+  <div class="card exq">${q.rv?`<span class="tag">${t('sx_rv')}</span>`:''}<b>${esc(q.q)}</b>${q.big?`<div class="big ar">${esc(q.big)}</div>`:''}${q.lw||q.rule?`<div class="links"><button class="btn p lg" id="sxPlay">▶ ${t('play')}</button></div>`:''}
+  <div class="${q.ar?'syl':''}">${q.o.map(o=>`<button class="btn opt sxo${q.ar?' ar':''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div><div class="small qres"></div>
+  <div class="row" style="margin-top:10px"><button class="btn p hidden" id="sxNext">${t('next')}</button></div></div>`}
+ if(SX.ph==='oral'){const o=SX.oral[SX.oi],tw=sxTarget(o),r=SX.or[SX.oi],K=window.SpeechRecognition||window.webkitSpeechRecognition;
+  return head+`<div class="prow"><span>🎙 ${t('sx_oral')} ${SX.oi+1}/${SX.oral.length}</span><span>${t('sx_theory')}: ${Math.round(SX.sc/SX.qs.length*100)}%</span></div>
+  <div class="card"><p class="small">${t('sx_oral_d')}</p><div class="ar sxtxt">${tw.map((w,i)=>`<span class="w${r&&r.m?(r.m[i]?' okw':' badw'):''}${o.hl&&!o.lw&&o.hl.includes(i)?' hlw':''}">${esc(w)}</span>`).join(' ')}</div>
+  <div class="links">${o.ref?`<button class="btn" id="sxRef">▶ ${t('sx_sample')}</button>`:o.word?`<button class="btn" data-say="${esc(o.word)}">🔊 ${t('sx_sample')}</button>`:''}${K?`<button class="btn p lg" id="sxRec">🎙 ${t('sx_rec')}</button>`:''}</div>
+  <div class="small" id="sxHeard">${r?`${t('sx_acc',{p:r.p})} ${r.p>=SP().o?'✅':'❌'}`:''}</div>
+  ${!K?`<div class="note warnn">${t('sx_noasr')}</div>${SP().self?`<label class="row small"><input type="checkbox" id="sxSelf"> ${t('sx_self')}</label><input id="sxWit" class="inp" placeholder="${t('sx_wit')}"><button class="btn p" id="sxSelfOk">${t('sx_selfok')}</button>`:`<p class="small">${t('sx_noself')}</p>`}`:''}
+  ${r?`<div class="links">${r.p<SP().o&&(r.k||0)<3?`<button class="btn" id="sxRec2">↺ ${t('sx_again',{n:3-(r.k||0)})}</button>`:''}<button class="btn p" id="sxONext">${SX.oi<SX.oral.length-1?t('next'):t('finish')}</button></div>`:''}</div>`}
+ // натижа
+ const tp=Math.round(SX.sc/SX.qs.length*100),op=SX.oral.length?Math.round(SX.or.reduce((a,r)=>a+(r?r.p:0),0)/SX.oral.length):100,pass=tp>=P.p&&op>=P.o,nx=pathNext(h);
+ return head+`<div class="card sxres ${pass?'ok':'bad'}"><div style="font-size:46px">${pass?'🏆':'📕'}</div><h3>${pass?t(ret?'sx_ret_ok':'sx_pass'):t(ret?'sx_ret_fail':'sx_fail')}</h3>
+ <div class="prow"><span>${t('sx_theory')}</span><b>${tp}% / ${P.p}%</b></div><div class="pbar"><b style="width:${tp}%"></b></div>
+ ${SX.oral.length?`<div class="prow"><span>${t('sx_oral')}</span><b>${op}% / ${P.o}%</b></div><div class="pbar"><b style="width:${op}%"></b></div>`:''}
+ <p>${pass?t('sx_pass_d'):t('sx_fail_d',{m:P.cd})}</p>
+ <div class="links">${pass?(nx?`<a class="btn p" href="#${(curStep()||nx).h}">▶ ${esc(stepTitle(curStep()||nx))}</a>`:''):`<a class="btn p" href="#${h}">📖 ${t('sx_restudy')}</a>`}<a class="btn" href="#darslar">🗺 ${t('pt_map')}</a></div></div>`}
+function sxTimer(){clearInterval(SXT);const P=SP();if(!P.tm||!SX||SX.ph!=='q')return;SX.t0=Date.now();SXT=setInterval(()=>{const b=$('#sxTm');if(!b||!SX||SX.ph!=='q'||SX.ans){clearInterval(SXT);return}const left=1-(Date.now()-SX.t0)/(P.tm*1000);b.style.width=Math.max(0,left*100)+'%';b.classList.toggle('low',left<.3);
+ if(left<=0){clearInterval(SXT);SX.ans=true;const q=SX.qs[SX.i];const card=$('.exq');card.querySelectorAll('.sxo').forEach(x=>{x.disabled=true;if(x.dataset.v===String(q.a))x.classList.add('ok')});card.querySelector('.qres').textContent='⏱ '+t('sx_timeout');$('#sxNext').classList.remove('hidden')}},200)}
+function sxFinish(){const P=SP(),h=SX.h,tp=Math.round(SX.sc/SX.qs.length*100),op=SX.oral.length?Math.round(SX.or.reduce((a,r)=>a+(r?r.p:0),0)/SX.oral.length):100,pass=tp>=P.p&&op>=P.o,L=lx()[h]||{},p=PATH.find(x=>x.h===h);
+ studyAdd(300);SX.ph='res';
+ if(pass){if(SX.ret){const rb=Math.min(RET.length-1,(L.rb||0)+1);lxSet(h,{rb,rn:addDays(RET[rb]),sc:tp,os:op})}
+  else{lxSet(h,{p:1,sc:tp,os:op,d:today(),n:(L.n||0)+1,rb:0,rn:addDays(RET[0]),cd:0});if(p.k==='a'){const d=doneA();d[p.i]=1;store.set('adone',d)}else if(p.k==='d'){const d=done();d[p.i]=1;store.set('done',d)}else if(p.k==='m')store.set('mkdone',1);srsSync();markActive()}}
+ else{const fails=(L.fd===today()?(L.f||0):0)+1,cd=fails>=3?new Date(addDays(1)+'T05:00').getTime():Date.now()+P.cd*60000;lxSet(h,{n:(L.n||0)+1,sc:tp,f:fails,fd:today(),cd:P.cd||fails>=3?cd:0});if(SX.ret)unpass(h)}}
+function sxOralRun(retry){const K=window.SpeechRecognition||window.webkitSpeechRecognition;if(!K)return;const o=SX.oral[SX.oi],tw=sxTarget(o),tn=tw.map(arNorm),r=new K();r.lang='ar-SA';r.continuous=true;r.interimResults=true;let heard='',stop=0;
+ const b=$('#sxRec')||$('#sxRec2');if(b){b.textContent='⏹ '+t('stop');b.classList.add('rec');b.id='sxStop'}
+ const fin=()=>{if(stop)return;stop=1;try{r.stop()}catch(e){}const hw=heard.trim().split(/\s+/).map(arNorm).filter(Boolean);
+  // LCS тенглаштириш
+  const n=tn.length,m=hw.length,D=Array.from({length:n+1},()=>Array(m+1).fill(0));for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)D[i][j]=tn[i]&&wsim(tn[i],hw[j])>=0.6?D[i+1][j+1]+1:Math.max(D[i+1][j],D[i][j+1]);
+  const M=Array(n).fill(0);let i=0,j=0;while(i<n&&j<m){if(tn[i]&&wsim(tn[i],hw[j])>=0.6&&D[i][j]===D[i+1][j+1]+1){M[i]=1;i++;j++}else if(D[i+1][j]>=D[i][j+1])i++;else j++}
+  const cnt=tn.filter(Boolean).length||1,p=Math.round(M.filter((x,k)=>x&&tn[k]).length/cnt*100),prev=SX.or[SX.oi];SX.or[SX.oi]={p:Math.max(p,prev?prev.p:0),m:p>=(prev?prev.p:0)?M:prev.m,k:(prev?prev.k||0:0)+(retry?1:0),heard};render()};
+ r.onresult=e=>{let s='';for(let i=0;i<e.results.length;i++)s+=' '+e.results[i][0].transcript;heard=s;const el=$('#sxHeard');if(el)el.textContent='🎧 '+s.trim()};
+ r.onerror=()=>fin();r.onend=()=>fin();SX._r=r;SX._fin=fin;try{r.start()}catch(e){fin()}
+ clearTimeout(SX._to);SX._to=setTimeout(fin,Math.max(8000,tw.length*2500))}
+document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg||!SX||!/^#sinov-/.test(location.hash))return;const d=tg.dataset;
+ if(tg.id==='sxGo'){SX.ph='q';render();sxTimer();return}
+ if(tg.classList.contains('sxo')){if(SX.ans)return;SX.ans=true;clearInterval(SXT);const q=SX.qs[SX.i],ok=d.v===String(q.a);if(ok)SX.sc++;answer(tg,ok,tg.closest('.card'),b=>b.dataset.v===String(q.a));$('#sxNext').classList.remove('hidden');return}
+ if(tg.id==='sxNext'){SX.i++;SX.ans=false;if(SX.i>=SX.qs.length){if(SX.oral.length)SX.ph='oral';else sxFinish()}render();sxTimer();return}
+ if(tg.id==='sxPlay'){const q=SX.qs[SX.i];if(q.lw){const lw=TM.lw[q.lw];playWords(lw[0],lw[1],[lw[2]])}else if(q.rule){const [s,a]=q.rule.ref.split(':').map(Number);playWords(s,a,q.rule.hl)}return}
+ if(tg.id==='sxRef'){const o=SX.oral[SX.oi],[s,a]=o.ref.split(':').map(Number);if(o.lw||o.hl&&TM&&TM.t[o.ref])playWords(s,a,o.hl);else playList([[s,a]],0);return}
+ if(tg.id==='sxRec'||tg.id==='sxRec2'){sxOralRun(tg.id==='sxRec2');return}
+ if(tg.id==='sxStop'){SX._fin&&SX._fin();return}
+ if(tg.id==='sxSelfOk'){const ok=$('#sxSelf')&&$('#sxSelf').checked,w=($('#sxWit')||{}).value||'';if(!ok||w.trim().length<2){const el=$('#sxHeard');if(el)el.textContent=t('sx_selfneed');return}SX.or[SX.oi]={p:SP().o,m:null,self:w.trim()};render();return}
+ if(tg.id==='sxONext'){if(SX.oi<SX.oral.length-1){SX.oi++;render()}else{sxFinish();render()}return}});
+// ---------- Мураббий (тон ва огоҳлантиришлар) ----------
+function coachCard(){escApply();const lv=escLevel(),m=missedDays(),s=strict(),rv=store.get('escRev','');if(!lv)return '';
+ const due=dueRet().length,pr=progressTxt();
+ return `<div class="card coach c${lv}"><div class="coachh">${['','🙂','⚠️','🚨','⛔'][lv]} <b>${t('co_h'+lv,{n:m})}</b></div><p>${t('co_'+s+lv,{n:m})}</p>
+ ${lv>=2&&due?`<p class="small">${t('co_forced',{n:due})}</p>`:''}${lv>=4&&rv?`<p class="small">${t('co_revoked',{x:esc(rv)})}</p>`:''}
+ <div class="links"><a class="btn p" href="#${(curStep()||{h:'darslar'}).h}">▶ ${t('co_go')}</a>${lv>=3?partnerBtns(t('co_rep',{n:m,p:pr})):''}</div></div>`}
+function progressTxt(){const L=PATH.filter(stepReq);return L.filter(stepDone).length+'/'+L.length}
+function partnerBtns(msg){const ph=(store.get('pphone','')||'').replace(/[^\d+]/g,''),nm=store.get('pname','');if(!ph)return `<a class="btn" href="#sozlama">👤 ${t('co_setp')}</a>`;
+ const body=encodeURIComponent((nm?nm+', ':'')+msg+' '+location.origin+location.pathname);
+ return `<a class="btn" href="sms:${ph}?&body=${body}">✉️ SMS: ${esc(nm||ph)}</a><a class="btn" href="https://wa.me/${ph.replace('+','')}?text=${body}" target="_blank" rel="noopener">WhatsApp</a>`}
+// ---------- Эслатмалар: календарь (ICS) ва билдиришнома ----------
+function icsBlob(){const tm=store.get('rtime','20:00').split(':'),d=new Date(),pad2=x=>String(x).padStart(2,'0'),dt=`${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}T${pad2(tm[0])}${pad2(tm[1])}00`,u=location.origin+location.pathname;
+ const s=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nurul Quron//UZ','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:nurul-quron-daily-'+Date.now()+'@nur','DTSTAMP:'+dt,'DTSTART:'+dt,'DURATION:PT20M','RRULE:FREQ=DAILY','SUMMARY:📖 Nurul Qur’on — '+t('rm_ev'),'DESCRIPTION:'+t('rm_evd')+' '+u,'URL:'+u,
+  'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+t('rm_ev'),'TRIGGER:PT0M','END:VALARM','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+t('rm_ev2'),'TRIGGER:PT2H','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+ return new Blob([s],{type:'text/calendar'})}
+async function notifOn(){if(!('Notification' in window)){alertMsg(t('rm_nonotif'));return}const p=await Notification.requestPermission();store.set('notif',p==='granted');
+ if(p==='granted'){try{const reg=await navigator.serviceWorker.ready;if(reg.periodicSync){await reg.periodicSync.register('qu-daily',{minInterval:12*3600*1000})}reg.showNotification('Nurul Qur’on',{body:t('rm_test'),icon:'icon-192.png',tag:'qu-test'})}catch(e){}}render()}
+function alertMsg(m){const el=$('#rmMsg');if(el)el.textContent=m}
+// SW учун ҳолат (охирги ўқиш куни, огоҳлантириш даражаси, матнлар)
+async function swState(){try{const c=await caches.open('qu-state');await c.put('./__state',new Response(JSON.stringify({last:Object.keys(sdays()).filter(k=>sdays()[k]>=300).sort().pop()||'',lv:escLevel(),time:store.get('rtime','20:00'),msg:[1,2,3,4].map(l=>t('co_'+strict()+l,{n:'{n}'})),title:'Nurul Qur’on'})))}catch(e){}}
+setTimeout(swState,3000);setInterval(swState,60000);
+function remindHTML(){const n=('Notification' in window)?Notification.permission:'na',ph=store.get('pphone',''),pn=store.get('pname','');
+ return `<div class="card"><b>⏰ ${t('rm_t')}</b><p class="small">${t('rm_d')}</p>
+ <div class="row" style="gap:8px;align-items:center"><span class="small">${t('rm_time')}</span><input type="time" id="rTime" class="inp" style="width:auto" value="${store.get('rtime','20:00')}"></div>
+ <div class="links" style="margin-top:8px"><button class="btn p" id="rIcs">📅 ${t('rm_cal')}</button><button class="btn" id="rNot">${n==='granted'?'🔔 '+t('rm_on'):'🔔 '+t('rm_enable')}</button></div><div class="small" id="rmMsg">${t('rm_note')}</div></div>
+ <div class="card"><b>🎚 ${t('stc_t')}</b><p class="small">${t('stc_d')}</p><div class="segc" style="flex-direction:column">${['soft','fair','firm','hard'].map(k=>`<button class="btn${strict()===k?' p':''}" data-strict="${k}"><b>${t('stc_'+k)}</b><br><small>${t('stc_'+k+'_d',STR[k])}</small></button>`).join('')}</div></div>
+ <div class="card"><b>👤 ${t('pt_partner')}</b><p class="small">${t('pt_partner_d')}</p><input id="pName" class="inp" placeholder="${t('pt_pname')}" value="${esc(pn)}"><input id="pPhone" class="inp" type="tel" placeholder="+998 90 123 45 67" value="${esc(ph)}" style="margin-top:6px">
+ ${ph?`<div class="links" style="margin-top:6px">${partnerBtns(t('co_week',{p:progressTxt(),s:streak()}))}</div>`:''}</div>`}
+document.addEventListener('click',e=>{const tg=e.target.closest('button');if(!tg)return;const d=tg.dataset;
+ if(d.strict){store.set('strict',d.strict);render();return}
+ if(tg.id==='rIcs'){const a=document.createElement('a');a.href=URL.createObjectURL(icsBlob());a.download='nurul-quron-dars.ics';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500);alertMsg(t('rm_icsok'));return}
+ if(tg.id==='rNot'){notifOn();return}});
+document.addEventListener('change',e=>{const id=e.target.id;if(id==='rTime'){store.set('rtime',e.target.value);swState()}if(id==='pName')store.set('pname',e.target.value.trim());if(id==='pPhone'){store.set('pphone',e.target.value.trim());render()}});
+
+// эски «ўзлаштирилган» дарсларни ҳам такрорий синовга қўшиш
+setTimeout(()=>{const L=lx();let ch=0;PATH.forEach(p=>{if((p.k==='a'||p.k==='d'||p.k==='m')&&stepDone(p)&&!L[p.h]){L[p.h]={p:1,d:today(),rb:0,rn:addDays(RET[0]),old:1};ch=1}});if(ch)store.set('lx',L)},1500);
+window.QU={get SX(){return SX},sxTarget:o=>sxTarget(o),curStep:()=>curStep(),lx:()=>lx(),get:(k,d)=>store.get(k,d)};
 
 // ---------- Ишга тушириш ----------
 try{const u=new URLSearchParams(location.search);if(u.get('from')){store.set('gift',{from:u.get('from').slice(0,60),to:(u.get('to')||'').slice(0,60)});history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
