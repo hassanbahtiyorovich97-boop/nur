@@ -62,17 +62,33 @@ function playAyahK(s,a){const tm=TM&&TM.t[s+':'+a];if(!tm)return false;const box
 
 // ---------- Бош кесими схемаси ва анимация ----------
 const PTS={jawf:[118,150],throat1:[187,150],throat2:[190,180],throat3:[192,210],tongueRoot:[166,132],tongueRoot2:[152,127],tongueMid:[128,124],tongueSide:[108,136],tongueTip:[86,128],tongueTip2:[76,127],tongueTip3:[70,146],tongueTip4:[64,136],lip1:[52,141],lips:[46,146],nose:[110,104]};
-function headSVG(id){return `<svg class="head" id="${id||'head'}" viewBox="20 10 260 250" role="img" aria-label="${t('scheme')}">
-<path class="skin" d="M78 26 C120 4 220 10 250 60 C272 100 262 150 236 176 L232 250 L118 250 L116 222 C96 214 74 204 68 190 C60 176 66 168 60 160 L50 158 C44 156 44 150 50 148 L48 142 C42 140 42 134 48 132 L54 128 C48 124 44 120 40 112 C34 104 40 98 50 96 C56 92 60 84 62 74 C64 50 66 36 78 26Z"/>
-<path class="cav" id="noseCav" d="M60 100 C80 92 130 92 160 98 C176 102 182 110 182 118 C160 112 120 110 64 112Z"/>
-<path class="cav" id="mouthCav" d="M62 128 C90 118 150 114 178 128 C186 150 186 178 196 200 L184 200 C176 176 168 156 150 150 C120 144 90 150 66 150Z"/>
-<path class="cav" id="throat" d="M178 128 C190 160 194 200 196 250 L214 250 C212 200 206 160 194 120Z"/>
-<path class="tongue" id="tongue" d="M66 148 C76 134 104 128 132 128 C156 128 170 136 176 156 C180 172 184 186 190 200 L172 206 C166 186 156 168 140 160 C110 152 86 154 66 152Z"/>
-<rect class="tooth" x="60" y="126" width="9" height="7" rx="2"/><rect class="tooth" x="60" y="146" width="9" height="7" rx="2"/>
-<path class="lip" id="lipU" d="M46 134 C52 130 58 130 60 134 L58 140 C54 141 48 140 46 138Z"/>
-<path class="lip" id="lipL" d="M46 152 C52 156 58 156 60 152 L58 146 C54 145 48 146 46 148Z"/>
-<circle class="glow" id="noseGlow" cx="110" cy="104" r="30"/>
-${Object.entries(PTS).map(([k,[x,y]])=>`<g class="pt" data-p="${k}"><circle cx="${x}" cy="${y}" r="9" class="ring"/><circle cx="${x}" cy="${y}" r="4.5" class="dot"/></g>`).join('')}
+const ZN=[['khay','الخيشوم',36,50,110,104],['shaf','الشفتان',34,206,48,146],['lis','اللسان',130,58,120,124],['halq','الحلق',266,116,190,170],['jawf','الجوف',262,244,150,160]];
+function headSVG(id){const u=id||'head';return `<svg class="head h2" id="${u}" viewBox="0 6 300 258" role="img" aria-label="${t('scheme')}">
+<defs>
+<linearGradient id="${u}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f2a4a"/><stop offset="1" stop-color="#173f3a"/></linearGradient>
+<linearGradient id="${u}sk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fde9d6"/><stop offset=".6" stop-color="#f2cfae"/><stop offset="1" stop-color="#d9a982"/></linearGradient>
+<radialGradient id="${u}cv" cx=".4" cy=".4" r=".8"><stop offset="0" stop-color="#ffd6dc"/><stop offset="1" stop-color="#c9606f"/></radialGradient>
+<linearGradient id="${u}tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f08a98"/><stop offset="1" stop-color="#b94459"/></linearGradient>
+<filter id="${u}gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<pattern id="${u}st" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M13 3l2.6 7.4L23 13l-7.4 2.6L13 23l-2.6-7.4L3 13l7.4-2.6z" fill="none" stroke="#d4af37" stroke-opacity=".13" stroke-width=".8"/></pattern>
+</defs>
+<rect x="0" y="6" width="300" height="258" rx="18" fill="url(#${u}bg)"/><rect x="0" y="6" width="300" height="258" rx="18" fill="url(#${u}st)"/>
+<g class="sparks">${[[40,30],[70,22],[262,40],[236,24],[30,230],[268,200],[150,18]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i%2?1:1.5}" fill="#fff" style="animation-delay:${i*.4}s"/>`).join('')}</g>
+<path class="skin" fill="url(#${u}sk)" d="M78 26 C120 4 220 10 250 60 C272 100 262 150 236 176 L232 250 L118 250 L116 222 C96 214 74 204 68 190 C60 176 66 168 60 160 L50 158 C44 156 44 150 50 148 L48 142 C42 140 42 134 48 132 L54 128 C48 124 44 120 40 112 C34 104 40 98 50 96 C56 92 60 84 62 74 C64 50 66 36 78 26Z"/>
+<path d="M88 30 C130 14 206 22 236 62" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="5" stroke-linecap="round"/>
+<path class="cav zs zs-khay" id="noseCav" fill="url(#${u}cv)" d="M60 100 C80 92 130 92 160 98 C176 102 182 110 182 118 C160 112 120 110 64 112Z"/>
+<path class="cav zs zs-lis zs-jawf" id="mouthCav" fill="url(#${u}cv)" d="M62 128 C90 118 150 114 178 128 C186 150 186 178 196 200 L184 200 C176 176 168 156 150 150 C120 144 90 150 66 150Z"/>
+<path class="cav zs zs-halq zs-jawf" id="throat" fill="url(#${u}cv)" d="M178 128 C190 160 194 200 196 250 L214 250 C212 200 206 160 194 120Z"/>
+<path class="air" d="M205 250 C202 200 196 160 184 134 C150 120 100 124 56 140"/>
+<path class="air nas" d="M184 134 C176 112 140 104 60 104"/>
+<path class="tongue" id="tongue" fill="url(#${u}tg)" d="M66 148 C76 134 104 128 132 128 C156 128 170 136 176 156 C180 172 184 186 190 200 L172 206 C166 186 156 168 140 160 C110 152 86 154 66 152Z"/>
+<path d="M80 140 C100 134 130 133 152 138" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
+<path class="tooth" d="M59 126 h10 v6 q-5 3 -10 0z"/><path class="tooth" d="M59 153 h10 v-6 q-5 -3 -10 0z"/>
+<path class="lip zs zs-shaf" id="lipU" d="M46 134 C52 130 58 130 60 134 L58 140 C54 141 48 140 46 138Z"/>
+<path class="lip zs zs-shaf" id="lipL" d="M46 152 C52 156 58 156 60 152 L58 146 C54 145 48 146 46 148Z"/>
+<circle class="glow" id="noseGlow" cx="110" cy="104" r="30" filter="url(#${u}gl)"/>
+${ZN.map(([z,ar,lx,ly,px,py])=>`<g class="zl zl-${z}"><path d="M${lx} ${ly+(ly<px?4:-4)} Q${(lx+px)/2} ${(ly+py)/2-10} ${px} ${py}" class="lead"/><rect x="${lx-26}" y="${ly-10}" width="52" height="18" rx="9"/><text x="${lx}" y="${ly+3.5}" text-anchor="middle">${ar}</text></g>`).join('')}
+${Object.entries(PTS).map(([k,[x,y]])=>`<g class="pt" data-p="${k}"><circle cx="${x}" cy="${y}" r="9" class="wave"/><circle cx="${x}" cy="${y}" r="9" class="wave w2"/><circle cx="${x}" cy="${y}" r="8" class="ring"/><circle cx="${x}" cy="${y}" r="4" class="dot"/></g>`).join('')}
 <g class="stop" transform="translate(222,34)"><polygon points="-14,-34 14,-34 34,-14 34,14 14,34 -14,34 -34,14 -34,-14"/><text y="6" text-anchor="middle">STOP</text></g>
 </svg>`}
 function stageHTML(){return `<div class="card stage" id="stage"><div class="row" style="justify-content:space-between"><b>${t('stage_title')}</b><span class="small">${t('scheme')}</span></div>

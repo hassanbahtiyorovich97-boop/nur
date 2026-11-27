@@ -312,6 +312,33 @@ body:has(#pl:not(.hidden)) .mtool{display:none}
 .hftext .amark{font-size:.5em;min-width:2em;height:2em;vertical-align:.35em;line-height:1}.hfa.done .amark{background:#2e9b6a;color:#fff;border-color:#2e9b6a}.hfa.bad .amark{background:#d0021b;border-color:#d0021b}
 .hfsum{margin-top:12px;border:2px solid #2e9b6a}
 .hflive{font-family:"Noto Sans",var(--qf)}
+
+.head.h2 .skin{stroke:#d4af37;stroke-width:1.6;stroke-opacity:.8}
+.head.h2 .cav{opacity:.9;transition:filter .3s,opacity .3s}.head.h2 .tongue{stroke:#8f2f40;stroke-width:.6}
+.head.h2 .tooth{fill:#fffdf6;stroke:#d8cbb0;stroke-width:.8}.head.h2 .lip{fill:#d45d6e;stroke:#a83c4d;stroke-width:.6}
+.head.h2 .air{fill:none;stroke:#bfe9ff;stroke-width:1.6;stroke-dasharray:3 6;stroke-linecap:round;opacity:.45;animation:air 1.6s linear infinite}
+.head.h2 .air.nas{opacity:0}@keyframes air{to{stroke-dashoffset:-18}}
+.stage.on.k-ghunna .head .air.nas,.stage.on.k-ikhfa .head .air.nas,.stage.on.k-iqlab .head .air.nas,.stage.on.k-idgham .head .air.nas,.head:has(.pt.hot[data-p=nose]) .air.nas{opacity:.9;stroke:#7ff5d9}
+.head.h2 .glow{fill:#4fe3c1}
+.head.h2 .sparks circle{animation:tw 2.4s ease-in-out infinite alternate}@keyframes tw{from{opacity:.15}to{opacity:.9}}
+.head.h2 .zl rect{fill:rgba(255,255,255,.1);stroke:rgba(212,175,55,.55);stroke-width:.8;transition:all .3s}
+.head.h2 .zl text{fill:#f3e3b3;font:12px "Amiri",serif;transition:fill .3s}
+.head.h2 .zl .lead{fill:none;stroke:rgba(212,175,55,.35);stroke-width:.8;stroke-dasharray:2 3;transition:all .3s}
+.head.h2 .pt .ring{fill:none;stroke:#d4af37;stroke-width:1.5;opacity:0}.head.h2 .pt .dot{fill:#f3d98a;opacity:.55}
+.head.h2 .pt .wave{fill:none;stroke:#4fe3c1;stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center}
+.head.h2 .pt.hot .dot{fill:#4fe3c1;opacity:1;filter:drop-shadow(0 0 3px #4fe3c1)}.head.h2 .pt.hot .ring{opacity:1;stroke:#fff;stroke-width:2}
+.head.h2 .pt.hot .wave{animation:wv 1.6s ease-out infinite}.head.h2 .pt.hot .wave.w2{animation-delay:.8s}
+@keyframes wv{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(3.4)}}
+.head:has(.pt.hot[data-p=nose]) .zl-khay rect,.head:has(.pt.hot[data-p^=lip]) .zl-shaf rect,.head:has(.pt.hot[data-p^=tongue]) .zl-lis rect,.head:has(.pt.hot[data-p^=throat]) .zl-halq rect,.head:has(.pt.hot[data-p=jawf]) .zl-jawf rect{fill:#4fe3c1;stroke:#fff}
+.head:has(.pt.hot[data-p=nose]) .zl-khay text,.head:has(.pt.hot[data-p^=lip]) .zl-shaf text,.head:has(.pt.hot[data-p^=tongue]) .zl-lis text,.head:has(.pt.hot[data-p^=throat]) .zl-halq text,.head:has(.pt.hot[data-p=jawf]) .zl-jawf text{fill:#06302a;font-weight:700}
+.head:has(.pt.hot[data-p=nose]) .zl-khay .lead,.head:has(.pt.hot[data-p^=lip]) .zl-shaf .lead,.head:has(.pt.hot[data-p^=tongue]) .zl-lis .lead,.head:has(.pt.hot[data-p^=throat]) .zl-halq .lead,.head:has(.pt.hot[data-p=jawf]) .zl-jawf .lead{stroke:#4fe3c1;stroke-dasharray:none;stroke-width:1.2}
+.head:has(.pt.hot[data-p=nose]) .zs-khay,.head:has(.pt.hot[data-p^=tongue]) .zs-lis,.head:has(.pt.hot[data-p^=throat]) .zs-halq,.head:has(.pt.hot[data-p=jawf]) .zs-jawf{filter:drop-shadow(0 0 6px #4fe3c1) brightness(1.08)}
+.head:has(.pt.hot[data-p^=lip]) .zs-shaf{filter:drop-shadow(0 0 5px #4fe3c1)}
+.head:has(.pt.hot[data-p=jawf]) .air{opacity:.95;stroke:#7ff5d9}
+.head:has(.pt.hot[data-p=nose]) .glow{opacity:.45}
+.mkwrap .stage,.stage:has(.head.h2){background:linear-gradient(180deg,var(--card),var(--card))}
+.head.h2{border-radius:16px;box-shadow:0 8px 24px rgba(15,42,74,.25)}
+.head.h2{background:linear-gradient(135deg,#0f2a4a,#173f3a)}
 </style>
 </head>
 <body>
